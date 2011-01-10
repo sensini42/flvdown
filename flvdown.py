@@ -7,7 +7,8 @@ tvshow = sys.argv[1]
 season = str(int(sys.argv[2]))
 episode = str(int(sys.argv[3]))
 interact = 0
-
+zfirst = 0
+verbose = 0
 
 if len(episode) == 1:
     filename = tvshow + season + "0" + episode 
@@ -26,10 +27,12 @@ if (len(sys.argv)>4):
     if (sys.argv[4]=="i"):
         interact = 1
         verbose = 2
+    elif (sys.argv[4]=="z"):
+        #zshare first
+        zfirst = 1
     else:
         verbose = int(sys.argv[4])
-else:
-    verbose = 0
+
 
 if verbose:
     print tvshow, "season", season, "episode", episode
@@ -51,7 +54,7 @@ for i in src:
     if ('loombo' in i) and ( ('episode '+episode + '<') in i):
         liste += [i.split('"')[1]]
 
-if (liste != []):
+if (liste != []) and (zfirst != 1):
     if verbose:
         print 'possible links'
         for i, j in enumerate(liste):
@@ -98,6 +101,7 @@ if (liste != []):
         print '\033[1;31mfile not found\033[0m (url loombo:' + loombolink + ')'
         exit(1)
 else:
+    liste = []
     if verbose:
         print 'no loombo link, trying zshare'
     #zshare
@@ -131,7 +135,7 @@ else:
                 zsharelink = i.split("'")[3]
 
         if not zsharelink:
-            print '\033[1;31mzshare link not found\033[0m (url zshare:' + link + ')'
+            print '\033[1;31mzshare link not found\033[0m (url zshare:' + zsharelink + ')'
             exit(1)
 
         if verbose :    
