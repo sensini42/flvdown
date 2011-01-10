@@ -15,7 +15,7 @@ if len(episode) == 1:
 else:
     filename = tvshow + season + episode 
 
-ret = os.system("ls " + filename + "*")
+ret = os.system("ls " + filename + "* 2> /dev/null")
 
 if not ret :
     print 'there is a file name ' + filename + '...\n'
@@ -24,16 +24,15 @@ if not ret :
         exit(0)
 
 if (len(sys.argv)>4):
-    if (sys.argv[4]=="i"):
+    if ("i" in sys.argv[4]):
         interact = 1
         verbose = 2
-    elif (sys.argv[4]=="z"):
+    if ("z" in sys.argv[4]):
         #zshare first
         zfirst = 1
-    else:
-        verbose = int(sys.argv[4])
-
-
+    if ("v" in sys.argv[4]):
+        verbose = 1
+    
 if verbose:
     print tvshow, "season", season, "episode", episode
 
@@ -102,7 +101,7 @@ if (liste != []) and (zfirst != 1):
         exit(1)
 else:
     liste = []
-    if verbose:
+    if verbose and not zfirst:
         print 'no loombo link, trying zshare'
     #zshare
     for i in src:
