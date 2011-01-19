@@ -85,7 +85,7 @@ def getzshare():
 
 
     ##zshare page
-    src = getpage(zsharelink)
+    src = getpage(zsharelink.replace(" ","%20"))
     zshareform = ''
     for i in src:
         if ('.net/download' in i):
@@ -164,6 +164,7 @@ def getnovamov():
 
 ##Some var
 from urllib2 import urlopen
+from urllib import urlencode
 import sys
 import os
 import random
