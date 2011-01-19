@@ -4,20 +4,135 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import SLOT
+import cookielib
+
+
+
+###take care of cookies
+
+COOKIEFILE = 'cookies-next.lwp'
+import os.path
+cj = None
+ClientCookie = None
+cookielib = None
+try:                      
+    import cookielib            
+except ImportError:
+    pass
+else:
+    import urllib2    
+    urlopen = urllib2.urlopen
+    cj = cookielib.LWPCookieJar()
+    Request = urllib2.Request
+if not cookielib:                
+    try:                                            
+        import ClientCookie 
+    except ImportError:
+        import urllib2
+        urlopen = urllib2.urlopen
+        Request = urllib2.Request
+    else:
+        urlopen = ClientCookie.urlopen
+        cj = ClientCookie.LWPCookieJar()
+        Request = ClientCookie.Request
+if cj != None:
+    if os.path.isfile(COOKIEFILE):
+        cj.load(COOKIEFILE)
+    if cookielib:
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+        urllib2.install_opener(opener)
+    else:
+        opener = ClientCookie.build_opener(ClientCookie.HTTPCookieProcessor(cj))
+        ClientCookie.install_opener(opener)
+##end of cookie
+
+
+
+
+def getpage(urlp,  txdatap, txheadersp):
+    """ return the source of urlp"""
+    try:
+        reqp = Request(urlp, txdatap, txheadersp)
+        handlep = urlopen(reqp)
+    except IOError, erp:
+        print 'We failed to open "%s".' % urlp
+        if hasattr(erp, 'code'):
+            print 'We failed with error code - %s.' % erp.code
+    else:
+        pass
+    return handlep
+
 
 def getListEpisode():
     """ return the list of episode from next-episode """
+    
+    try:                                
+        fileconf = open("flv.conf", "rb", 0)
+        try:
+            conffile = fileconf.read().split()
+            login = conffile[0]
+            password = conffile[1]
+        except Exception:
+            print "bad format:"
+            print 'echo -n "login\npassword" >flv.conf'
+            exit(1)
+        finally:
+            fileconf.close()              
+    except IOError:
+        print "conf file not found"
+        print 'echo -n "login\npassword" >flv.conf'
+        return []
+
+
+    theurl = "http://next-episode.net/"
+    import urllib
+    txdata = urllib.urlencode ({"username" : login, "password" : password})
+    txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
+
+    try:
+        req = Request(theurl, txdata, txheaders)
+        handle = urlopen(req)
+    except IOError, e:
+        print "could not login", e
+        return []
+
+    if cj == None:
+        print "We don't have a cookie library available - sorry."
+        print "I can't show you any cookies."
+    else:
+        #print 'These are the cookies we have received so far :'
+        for index, cookie in enumerate(cj):
+            pass #print index, cookie
+        cj.save(COOKIEFILE)
+    
+    url = theurl + "track/"
+    handle = getpage(url,  txdata, txheaders)
+    src = handle.read().split('showName">')
     listep = []
-    listep.append(("toto", "4", ["03", "04", "05"]))
-    listep.append(("tata", "1", ["13", "14", "15"]))
+    for i in src[1:]:
+        lines = i.split('\n')
+        item_tv = lines[0][:-4]
+        if lines[0].endswith("</a>"):
+            #else: show not tracked
+            item_ep = []
+            for i in lines:
+                if "removeEpisode" in i:
+                    item_se = i.split()[9][1:-2]
+                    item_ep.append(i.split()[10][1:-2])
+            listep.append((item_tv, item_se, item_ep))
+
     return listep
 
+
+
+            
 class Flvgui(QtGui.QWidget):
     """ Gui for flvdown"""
     
     def __init__(self):
         """ nothing special here"""
         super(Flvgui, self).__init__()
+
 
         grid = QtGui.QGridLayout()
 
@@ -93,7 +208,7 @@ class Flvgui(QtGui.QWidget):
             tvshow = str(data[0].text())
             season = str(data[1].text())
             episode = str(data[2].text())
-        tvshow = "_".join(tvshow.split(' '))
+        tvshow = "_".join(tvshow.split(' ')).lower()
         print tvshow, season, episode
         import os
         #test here if file exists ?
