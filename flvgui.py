@@ -4,122 +4,75 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import SLOT
-import cookielib
-
 
 
 ###take care of cookies
-
-COOKIEFILE = 'cookies-next.lwp'
-import os.path
+cookieFile = 'cookies-next.lwp'
+from os import path as ospath
+from os import system as ossystem
 cj = None
-ClientCookie = None
 cookielib = None
-try:                      
-    import cookielib            
-except ImportError:
-    pass
-else:
-    import urllib2    
-    urlopen = urllib2.urlopen
-    cj = cookielib.LWPCookieJar()
-    Request = urllib2.Request
-if not cookielib:                
-    try:                                            
-        import ClientCookie 
-    except ImportError:
-        import urllib2
-        urlopen = urllib2.urlopen
-        Request = urllib2.Request
-    else:
-        urlopen = ClientCookie.urlopen
-        cj = ClientCookie.LWPCookieJar()
-        Request = ClientCookie.Request
-if cj != None:
-    if os.path.isfile(COOKIEFILE):
-        cj.load(COOKIEFILE)
-    if cookielib:
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-        urllib2.install_opener(opener)
-    else:
-        opener = ClientCookie.build_opener(ClientCookie.HTTPCookieProcessor(cj))
-        ClientCookie.install_opener(opener)
-##end of cookie
 
+import cookielib            
+import urllib2    
+urlopen = urllib2.urlopen
+cj = cookielib.LWPCookieJar()
+request = urllib2.Request
 
-
-
-def getpage(urlp,  txdatap, txheadersp):
-    """ return the source of urlp"""
-    try:
-        reqp = Request(urlp, txdatap, txheadersp)
-        handlep = urlopen(reqp)
-    except IOError, erp:
-        print 'We failed to open "%s".' % urlp
-        if hasattr(erp, 'code'):
-            print 'We failed with error code - %s.' % erp.code
-    else:
-        pass
-    return handlep
-
+if ospath.isfile(cookieFile):
+    cj.load(cookieFile)
+if cookielib:
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    urllib2.install_opener(opener)
+##end of cookies
 
 def getListEpisode():
-    """ return the list of episode from next-episode """
-    
+    """ return the list of episode from next-episode """    
     try:                                
-        fileconf = open("flv.conf", "rb", 0)
+        fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", \
+                         "rb", 0)
         try:
             conffile = fileconf.read().split()
             login = conffile[0]
             password = conffile[1]
-        except Exception:
+        except IndexError:
             print "bad format:"
-            print 'echo -n "login\npassword" >flv.conf'
+            print 'echo -n "login\npassword" > ~/.config/flvdown/flv.conf'
             exit(1)
         finally:
             fileconf.close()              
     except IOError:
         print "conf file not found"
-        print 'echo -n "login\npassword" >flv.conf'
+        print "mkdir ~/.config/flvdown"
+        print 'echo -n "login\npassword" > ~/.config/flvdown/flv.conf'
         return []
 
-
-    theurl = "http://next-episode.net/"
     import urllib
     txdata = urllib.urlencode ({"username" : login, "password" : password})
-    txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
+    txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Win NT)'}
 
     try:
-        req = Request(theurl, txdata, txheaders)
-        handle = urlopen(req)
-    except IOError, e:
-        print "could not login", e
+        req = request("http://next-episode.net/", txdata, txheaders)
+        urlopen(req)
+    except IOError:
+        print "could not login"
         return []
 
-    if cj == None:
-        print "We don't have a cookie library available - sorry."
-        print "I can't show you any cookies."
-    else:
-        #print 'These are the cookies we have received so far :'
-        for index, cookie in enumerate(cj):
-            pass #print index, cookie
-        cj.save(COOKIEFILE)
+    cj.save(cookieFile)
     
-    url = theurl + "track/"
-    handle = getpage(url,  txdata, txheaders)
-    src = handle.read().split('showName">')
+    req = request("http://next-episode.net/track/", txdata, txheaders)
+    src = urlopen(req).read().split('showName">')
     listep = []
     for i in src[1:]:
         lines = i.split('\n')
-        item_tv = lines[0][:-4]
         if lines[0].endswith("</a>"):
-            #else: show not tracked
+            #else: tvshow not tracked
             item_ep = []
             for i in lines:
                 if "removeEpisode" in i:
                     item_se = i.split()[9][1:-2]
                     item_ep.append(i.split()[10][1:-2])
-            listep.append((item_tv, item_se, item_ep))
+            listep.append((lines[0][:-4], item_se, item_ep))
 
     return listep
 
@@ -142,7 +95,7 @@ class Flvgui(QtGui.QWidget):
         grid.addWidget(QtGui.QLabel('Episode'), 0, 2)
 
         edit_tv = QtGui.QLineEdit()
-        edit_se = QtGui.QLineEdit("n")
+        edit_se = QtGui.QLineEdit()
         edit_ep = QtGui.QLineEdit()
         self.button_edit = QtGui.QPushButton("Down")
         self.btn_edit_callback = (lambda data = (edit_tv, \
@@ -163,7 +116,9 @@ class Flvgui(QtGui.QWidget):
 
         self.combo = []
         self.button_down = []
+        self.button_downAll = []
         self.btn_callback = []
+        self.btn_callbackAll = []
         i = 0
         for (i,(tvshow, season, num_list)) in enumerate(list_ep):
             grid.addWidget(QtGui.QLabel(tvshow), 2 + i, 0)
@@ -179,8 +134,13 @@ class Flvgui(QtGui.QWidget):
                  self.combo[i]): self.downClicked(data))
             self.connect(self.button_down[i], \
                          SIGNAL("clicked()"), self.btn_callback[i]) 
-#            self.connect(self.button_down[i], \
-#                         SIGNAL("pressed()"), self.btn_callback[i]) 
+            self.button_downAll.append(QtGui.QPushButton("All episodes"))
+            grid.addWidget(self.button_downAll[i], 2 + i, 4)
+            self.btn_callbackAll.append(lambda data = (tvshow, season, \
+                 self.combo[i]): self.downAllClicked(data))
+            self.connect(self.button_downAll[i], \
+                         SIGNAL("clicked()"), self.btn_callbackAll[i]) 
+
   
 
         empty_label = QtGui.QLabel("")
@@ -209,11 +169,20 @@ class Flvgui(QtGui.QWidget):
             season = str(data[1].text())
             episode = str(data[2].text())
         tvshow = "_".join(tvshow.split(' ')).lower()
-        print tvshow, season, episode
-        import os
-        #test here if file exists ?
-        os.system("flvdown.py " + tvshow + " " + \
+        ossystem("flvdown.py " + tvshow + " " + \
                   season + " " + episode )#+ " &")
+
+
+    @classmethod
+    def downAllClicked(cls, data):
+        """ when a buttonAll is clicked """
+        #data from combo
+        tvshow = str(data[0])
+        season = str(data[1])
+        tvshow = "_".join(tvshow.split(' ')).lower()
+        for i in range(data[2].count()):
+            ossystem("flvdown.py " + tvshow + " " + \
+                  season + " " + str(data[2].itemText(i)))
 
 def main():
     """ main """
