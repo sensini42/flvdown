@@ -94,7 +94,7 @@ class Flvgui(QtGui.QWidget):
         super(Flvgui, self).__init__()
 
         Flvgui.msgAlert = QtGui.QSystemTrayIcon(self)
-        cls.msgAlert.show()
+        Flvgui.msgAlert.show()
         grid = QtGui.QGridLayout()
 
         ##titles
