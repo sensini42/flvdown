@@ -13,7 +13,7 @@ def getepisodelink(liste):
         print 'possible links'
         for number, name in enumerate(liste):
             print number, '-', name
-
+    
     choice_ep = 0
     if interact:
         choice_ep = int(raw_input('enter your choice\n'))
@@ -81,11 +81,11 @@ def getzshare():
         exit(1)
         
     if verbose :    
-        print '\ndownloading ' + zsharelink
+        print '\ndownloading ' + urlencode(zsharelink)
 
 
     ##zshare page
-    src = getpage(zsharelink.replace(" ","%20"))
+    src = getpage(zsharelink)
     zshareform = ''
     for i in src:
         if ('.net/download' in i):
