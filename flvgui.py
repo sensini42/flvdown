@@ -94,9 +94,9 @@ class Flvgui(QtGui.QWidget):
         super(Flvgui, self).__init__()
 
         Flvgui.msgAlert = QtGui.QSystemTrayIcon(self)
+        cls.msgAlert.show()
         grid = QtGui.QGridLayout()
 
-        Flvgui.msgAlert = QtGui.QSystemTrayIcon(self)
         ##titles
         empty_label = QtGui.QLabel("")
         grid.addWidget(QtGui.QLabel('Tv show'), 0, 0)
@@ -245,10 +245,10 @@ class Flvgui(QtGui.QWidget):
         ret = ossystem("flvdown.py " + tvshow + " " + \
                   season + " " + episode + " " +option)#+ " &")
         if not ret:
-            cls.msgAlert.show()
+
             #cls.msgAlert.setIcon(QtGui.QIcon(''))
             cls.msgAlert.showMessage("flvgui", tvshow + season + episode + "Done")
-            cls.msgAlert.hide()
+        
 
 
     @classmethod
