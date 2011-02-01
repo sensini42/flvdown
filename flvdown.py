@@ -3,9 +3,14 @@
 
 def getpage(link):
     """ return the lines list of the page link """
-    response = urlopen(link)
-    the_page = response.read()
-    return the_page.split('\n')
+    try:
+        response = urlopen(link)
+    except IOError, e:
+        print '\033[1;31mlink not found\033[0m (url:' + link + ')'
+        exit(1)
+    else:
+        the_page = response.read()
+        return the_page.split('\n')
 
 def getepisodelink(liste):
     """ return the link of the episode page"""
