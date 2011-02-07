@@ -170,5 +170,6 @@ for name in zfile.namelist():
         ##subfile.write(zfile.read(name).replace('\15',''))
         subfile.close()
 
-
+from os import remove
+remove(filename)
 
