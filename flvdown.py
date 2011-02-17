@@ -18,7 +18,7 @@ def getepisodelink(liste):
         print 'possible links'
         for number, name in enumerate(liste):
             print number, '-', name
-    
+
     choice_ep = 0
     if interact:
         choice_ep = int(raw_input('enter your choice\n'))
@@ -60,7 +60,7 @@ def getloombo():
     urlfile = ''
     for i in src:
         if ('file' in i):
-            urlfile = i.split("'")[3][5:]
+            urlfile = i.split("'")[3][7:]
 
     if urlfile == '':
         print '\033[1;31mfile not found\033[0m (url loombo:' + loombolink + ')'
@@ -86,11 +86,11 @@ def getzshare():
         exit(1)
         
     if verbose :    
-        print '\ndownloading ' + urlencode(zsharelink)
+        print '\ndownloading ' + zsharelink
 
 
     ##zshare page
-    src = getpage(zsharelink)
+    src = getpage(zsharelink.replace(" ","%20"))
     zshareform = ''
     for i in src:
         if ('.net/download' in i):
@@ -107,6 +107,7 @@ def getzshare():
 
     ##zshare form
     ascii = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    global tmpfile
     tmpfile = '/tmp/' + ''.join([random.choice(ascii) for _ in range(10)])
 
     os.system("wget " + zshareform + " --post-data='download=1&referer2=\"" +\
@@ -116,7 +117,7 @@ def getzshare():
     the_page = open(tmpfile + ".html","r")
     src = the_page.read().split('\n')
     the_page.close()
-
+    
     urlfile = ''
     for i in src:
         if ('link_enc' in i):
@@ -125,7 +126,8 @@ def getzshare():
     waiting(50)
 
     if urlfile == '':
-        print '\033[1;31mfile not found\033[0m (url loombo:' + zsharelink + ')'
+        print '\033[1;31mfile not found\033[0m (urls zshare:' +\
+              zshareform + ' and ' + zsharelink+ ')'
         exit(1)
 
     urlfile = " --load-cookies=" + tmpfile + ".cook --save-cookies=" +\
@@ -174,7 +176,8 @@ import sys
 import os
 import random
 
-
+global tmpfile
+tmpfile = ''
 tvshow = sys.argv[1]
 season = str(int(sys.argv[2]))
 episode = str(int(sys.argv[3]))
@@ -234,10 +237,10 @@ for line in src_urltv:
 
 
 ##get the url of the file
-if (listeloombo != []) and (not zonly) and (not nonly):
-    final_url = getloombo()
-elif (listezshare != []) and (not lonly) and (not nonly):
+if (listezshare != []) and (not lonly) and (not nonly):
     final_url = getzshare()
+elif (listeloombo != []) and (not zonly) and (not nonly):
+    final_url = getloombo()
 elif (listenovamov != []) and (not lonly) and (not zonly):
     final_url = getnovamov()
 else:
@@ -246,7 +249,14 @@ else:
     exit(1)
 
 
+if (not os.path.isdir(tvshow)):
+    os.mkdir(tvshow)
+    
 print '\ndownloading file', final_url
 ext = "." + final_url.split('.')[-1]
 
-os.system("wget -c " + final_url + " -O " + filename + ext)
+os.system("wget -c " + final_url + " -O " + tvshow + "/" + filename + ext)
+
+if (len(tmpfile)>0):
+    os.remove(tmpfile + ".html")
+    os.remove(tmpfile + ".cook")
