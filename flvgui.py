@@ -4,6 +4,7 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import SLOT
+from PyQt4.QtCore import QRegExp
 
 ######################################################################
 ###take care of cookies
@@ -188,19 +189,64 @@ class Flvgui(QtGui.QWidget):
 
         Flvgui.msgAlert = QtGui.QSystemTrayIcon(self)
         Flvgui.msgAlert.show()
-        grid = QtGui.QGridLayout()
+        
+        self.tab_widget = QtGui.QTabWidget()
+        
+        self.tab1 = QtGui.QWidget()
+        self.tab2 = QtGui.QWidget()
 
+        self.tab_widget.addTab(self.tab1, "Playing")
+        self.tab_widget.addTab(self.tab2, "Downloading")
+
+        
+        mainLayout = QtGui.QVBoxLayout()
+        mainLayout.addWidget(self.tab_widget)
+
+        self.populate()
+        
+        button_sub = QtGui.QPushButton("Subtitles")
+        mainLayout.addWidget(button_sub)
+        self.connect(button_sub, SIGNAL("clicked()"), self.downsub)
+                
+        button_refresh = QtGui.QPushButton("Refresh")
+        mainLayout.addWidget(button_refresh)
+        self.connect(button_refresh, SIGNAL("clicked()"), self.populate)
+                
+        button_close = QtGui.QPushButton("Close")
+        mainLayout.addWidget(button_close)
+        self.connect(button_close, SIGNAL("clicked()"), self, SLOT("close()"))
+
+        self.setLayout(mainLayout)
+        self.setWindowTitle('flvgui')
+
+
+    def populate(self):
+        self.tab_widget.removeTab(1)
+        self.tab_widget.removeTab(0)
+        del(self.tab1)
+        del(self.tab2)
+        
+        self.tab1 = QtGui.QWidget()
+        self.tab2 = QtGui.QWidget()
+        
+        self.grid1 = QtGui.QGridLayout(self.tab1)
+        self.grid2 = QtGui.QGridLayout(self.tab2)
+        
+        self.tab_widget.addTab(self.tab1, "Playing")
+        self.tab_widget.addTab(self.tab2, "Downloading")
+
+        
         ##titles
         empty_label = QtGui.QLabel("")
         second = 6
-        grid.addWidget(QtGui.QLabel('Tv show'), 0, 0 + second)
-        grid.addWidget(QtGui.QLabel('Season'), 0, 1 + second)
-        grid.addWidget(QtGui.QLabel('Episode'), 0, 2 + second)
-        grid.addWidget(empty_label, 0, 3 + second)
-        grid.addWidget(empty_label, 0, 4 + second)
-        grid.addWidget(QtGui.QLabel('Only from'), 0, 5 + second)
-        grid.addWidget(QtGui.QLabel('Interactive'), 0, 6 + second)
-        
+        self.grid2.addWidget(QtGui.QLabel('Tv show'), 0, 0 + second)
+        self.grid2.addWidget(QtGui.QLabel('Season'), 0, 1 + second)
+        self.grid2.addWidget(QtGui.QLabel('Episode'), 0, 2 + second)
+        self.grid2.addWidget(empty_label, 0, 3 + second)
+        self.grid2.addWidget(empty_label, 0, 4 + second)
+        self.grid2.addWidget(QtGui.QLabel('Only from'), 0, 5 + second)
+        self.grid2.addWidget(QtGui.QLabel('Interactive'), 0, 6 + second)
+
         #first line
         edit_tv = QtGui.QLineEdit()
         edit_se = QtGui.QLineEdit()
@@ -210,19 +256,17 @@ class Flvgui(QtGui.QWidget):
         ed_radio2 = QtGui.QRadioButton("z")
         ed_radio3 = QtGui.QRadioButton("l")
         ed_radio4 = QtGui.QRadioButton("n")
-        ed_layoutRadio = QtGui.QHBoxLayout(self)
         ed_radio1.setChecked(1)
-
+        ed_widg = QtGui.QWidget()
+        ed_layoutRadio = QtGui.QHBoxLayout(ed_widg)
         ed_layoutRadio.addWidget(ed_radio1)
         ed_layoutRadio.addWidget(ed_radio2)
         ed_layoutRadio.addWidget(ed_radio3)
         ed_layoutRadio.addWidget(ed_radio4)
-        ed_widg = QtGui.QWidget()
         ed_widg.setLayout(ed_layoutRadio)
-        grid.addWidget(ed_widg, 1, 5 + second)
-
+        self.grid2.addWidget(ed_widg, 1, 5 + second)
         ed_checkbox = QtGui.QCheckBox(self)
-        grid.addWidget(ed_checkbox, 1, 6 + second)
+        self.grid2.addWidget(ed_checkbox, 1, 6 + second)
             
         button_edit = QtGui.QPushButton("Down")
         btn_edit_callback = (lambda data = (edit_tv, \
@@ -238,11 +282,11 @@ class Flvgui(QtGui.QWidget):
              SIGNAL("clicked()"), btn_edit_callbackAll) 
 #        self.connect(button_edit, \
 #             SIGNAL("pressed()"), btn_edit_callback) 
-        grid.addWidget(edit_tv, 1, 0 + second)
-        grid.addWidget(edit_se, 1, 1 + second)
-        grid.addWidget(edit_ep, 1, 2 + second)
-        grid.addWidget(button_edit, 1, 3 + second)
-        grid.addWidget(button_all_edit, 1, 4 + second)
+        self.grid2.addWidget(edit_tv, 1, 0 + second)
+        self.grid2.addWidget(edit_se, 1, 1 + second)
+        self.grid2.addWidget(edit_ep, 1, 2 + second)
+        self.grid2.addWidget(button_edit, 1, 3 + second)
+        self.grid2.addWidget(button_all_edit, 1, 4 + second)
         
         
         #lines from next-episode
@@ -273,29 +317,29 @@ class Flvgui(QtGui.QWidget):
 
         for (i,(tvshow, season, ondisk, notondisk)) in enumerate(list_ep):
             if(ondisk != []):
-                grid.addWidget(QtGui.QLabel(tvshow), 2 + i, 0)
-                grid.addWidget(QtGui.QLabel(season), 2 + i, 1)
+                self.grid1.addWidget(QtGui.QLabel(tvshow), 2 + i, 0)
+                self.grid1.addWidget(QtGui.QLabel(season), 2 + i, 1)
                 combo_ondisk.append(QtGui.QComboBox(self))
                 for (_movieId, _userId, _seasonId, episodeId) in ondisk:
                     combo_ondisk[i].addItem(str(episodeId))
-                grid.addWidget(combo_ondisk[i], 2 + i, 2)
+                self.grid1.addWidget(combo_ondisk[i], 2 + i, 2)
                 ##play
                 button_play.append(QtGui.QPushButton("Play"))
-                grid.addWidget(button_play[i], 2 + i, 3)
+                self.grid1.addWidget(button_play[i], 2 + i, 3)
                 btn_callbackPlay.append(lambda data = (tvshow, season, \
                     combo_ondisk[i]): self.playClicked(data))
                 self.connect(button_play[i], \
                     SIGNAL("clicked()"), btn_callbackPlay[i]) 
                 ##mark
                 button_mark.append(QtGui.QPushButton("Mark as read"))
-                grid.addWidget(button_mark[i], 2 + i, 4)
+                self.grid1.addWidget(button_mark[i], 2 + i, 4)
                 btn_callbackMark.append(lambda data = (combo_ondisk[i], \
                     ondisk): self.markClicked(data))
                 self.connect(button_mark[i], \
                     SIGNAL("clicked()"), btn_callbackMark[i])
                 ##delete
                 button_delete.append(QtGui.QPushButton("Delete"))
-                grid.addWidget(button_delete[i], 2 + i, 5)
+                self.grid1.addWidget(button_delete[i], 2 + i, 5)
                 btn_callbackDelete.append(lambda data = (tvshow, season, \
                     combo_ondisk[i]): self.deleteClicked(data))
                 self.connect(button_delete[i], \
@@ -308,18 +352,18 @@ class Flvgui(QtGui.QWidget):
                 btn_callbackPlay.append([])
                 btn_callbackDelete.append([])
                 btn_callbackMark.append([])
-#                grid.addWidget(QtGui.QLabel("Nothing to watch"), 2 + i, 0)
+#                self.grid1.addWidget(QtGui.QLabel("Nothing to watch"), 2 + i, 0)
                 
             if(notondisk != []):
-                grid.addWidget(QtGui.QLabel(tvshow), 2 + i, 0 + second)
-                grid.addWidget(QtGui.QLabel(season), 2 + i, 1 + second)
+                self.grid2.addWidget(QtGui.QLabel(tvshow), 2 + i, 0 + second)
+                self.grid2.addWidget(QtGui.QLabel(season), 2 + i, 1 + second)
                 combo_notondisk.append(QtGui.QComboBox(self))
                 for num in notondisk:
                     combo_notondisk[i].addItem(num)
-                grid.addWidget(combo_notondisk[i], 2 + i, 2 + second)
+                self.grid2.addWidget(combo_notondisk[i], 2 + i, 2 + second)
                 ##down
                 button_down.append(QtGui.QPushButton("Down"))
-                grid.addWidget(button_down[i], 2 + i, 3 + second)
+                self.grid2.addWidget(button_down[i], 2 + i, 3 + second)
                 btn_callback.append(lambda data = (tvshow, season, \
                     combo_notondisk[i], ed_layoutRadio, \
                     ed_checkbox): self.downClicked(data))
@@ -327,7 +371,7 @@ class Flvgui(QtGui.QWidget):
                     SIGNAL("clicked()"), btn_callback[i])
                 ##downAll
                 button_downAll.append(QtGui.QPushButton("All"))
-                grid.addWidget(button_downAll[i], 2 + i, 4 + second)
+                self.grid2.addWidget(button_downAll[i], 2 + i, 4 + second)
                 btn_callbackAll.append(lambda data = (tvshow, season, \
                     combo_notondisk[i], ed_layoutRadio, \
                     ed_checkbox): self.downAllClicked(data))
@@ -339,14 +383,8 @@ class Flvgui(QtGui.QWidget):
                 button_downAll.append([])
                 btn_callback.append([])
                 btn_callbackAll.append([])
-# grid.addWidget(QtGui.QLabel("Nothing to download"), 2 + i, 0 + second)
-        grid.addWidget(empty_label, 3 + i, 3 + second)
-        
-        button_close = QtGui.QPushButton("Close")
-        grid.addWidget(button_close, 4 + i, 2 + second)
-        self.connect(button_close, SIGNAL("clicked()"), self, SLOT("close()"))
-        self.setLayout(grid)
-        self.setWindowTitle('flvgui')
+# self.grid2.addWidget(QtGui.QLabel("Nothing to download"), 2 + i, 0 + second)
+        self.grid2.addWidget(empty_label, 3 + i, 3 + second)
 
     @classmethod
     def downClicked(cls, data):
@@ -411,6 +449,14 @@ class Flvgui(QtGui.QWidget):
             for i in list_ep:
                 ossystem("flvdown.py " + tvshow + " " + \
                     season + " " + str(i))
+
+
+    @classmethod
+    def downsub(cls):
+        """ when a button_sub is clicked """
+        #data from combo
+        ossystem("downsub.sh")
+        cls.msgAlert.showMessage("flvgui", "Subtitles, done")
 
 
     @classmethod
