@@ -7,7 +7,7 @@ def getpage(link):
         response = urlopen(link)
     except IOError, e:
         print '\033[1;31mlink not found\033[0m (url:' + link + ')'
-        exit(1)
+        return -1
     else:
         the_page = response.read()
         return the_page.split('\n')
@@ -16,16 +16,16 @@ def getepisodelink(liste):
     """ return the link of the episode page"""
     if verbose:
         print 'possible links'
-        for number, name in enumerate(liste):
-            print number, '-', name
+        for number, (name, znl) in enumerate(liste):
+            print number, '-', znl, '-', name
 
     choice_ep = 0
     if interact:
         choice_ep = int(raw_input('enter your choice\n'))
-    link = liste[choice_ep]
+    (link, znl) = liste[choice_ep]
     if verbose :    
-        print '\ndownloading ' + link
-    return link
+        print '\ndownloading ', link, znl
+    return (link, znl)
 
 def waiting(sec):
     """ wait sec seconds """
@@ -37,9 +37,8 @@ def waiting(sec):
             print (sec - i)
 
 
-def getloombo():
+def getloombo(link):
     """ return the url of the file from loombo"""
-    link = getepisodelink(listeloombo)
     
     ##episode page
     src = getpage(link)
@@ -49,8 +48,9 @@ def getloombo():
             loombolink = i.split("'")[5]
 
     if not loombolink:
-        print '\033[1;31mloombo link not found\033[0m (url loombo:' + link + ')'
-        exit(1)
+        if verbose:			
+            print '\033[1;31mloombo link not found\033[0m (url loombo:' + link + ')'
+        return -1
 
     if verbose :    
         print '\ndownloading ' + loombolink
@@ -63,15 +63,15 @@ def getloombo():
             urlfile = i.split("'")[3][7:]
 
     if urlfile == '':
-        print '\033[1;31mfile not found\033[0m (url loombo:' + loombolink + ')'
-        exit(1)
+        if verbose:			
+            print '\033[1;31mfile not found\033[0m (url loombo:' + loombolink + ')'
+        return -1
     else:
         return urlfile
 
 
-def getzshare():
+def getzshare(link):
     """ return the url of the file from zshare"""
-    link = getepisodelink(listezshare)
 
     ##episode page
     src = getpage(link)
@@ -81,9 +81,10 @@ def getzshare():
             zsharelink = i.split("'")[3]
 
     if not zsharelink:
-        print '\033[1;31mzshare link not found\033[0m (url zshare:' +\
+        if verbose:			
+            print '\033[1;31mzshare link not found\033[0m (url zshare:' +\
               link + ')'
-        exit(1)
+        return -1
         
     if verbose :    
         print '\ndownloading ' + zsharelink
@@ -98,9 +99,10 @@ def getzshare():
 
     if zshareform == '':
         ##zsharelink may be a good url...
-        print '\033[1;31mform not found\033[0m (url zshare:' +\
+        if verbose:			
+            print '\033[1;31mform not found\033[0m (url zshare:' +\
               zsharelink + ')'
-        exit(1)
+        return -1
 
     if verbose :    
         print '\ndownloading ' + zshareform
@@ -126,18 +128,18 @@ def getzshare():
     waiting(50)
 
     if urlfile == '':
-        print '\033[1;31mfile not found\033[0m (urls zshare:' +\
+        if verbose:			
+            print '\033[1;31mfile not found\033[0m (urls zshare:' +\
               zshareform + ' and ' + zsharelink+ ')'
-        exit(1)
+        return -1
 
     urlfile = " --load-cookies=" + tmpfile + ".cook --save-cookies=" +\
               tmpfile + ".cook --keep-session-cookies " + urlfile
     return urlfile
 
 
-def getnovamov():
+def getnovamov(link):
     """ return the url of the file from novamov"""
-    link = getepisodelink(listenovamov)
     
     ##episode page
     src = getpage(link)
@@ -147,8 +149,9 @@ def getnovamov():
             novamovlink = i.split("'")[13]
 
     if not novamovlink:
-        print '\033[1;31mnovamov link not found\033[0m (url: ' + link + ')'
-        exit(1)
+        if verbose:			
+            print '\033[1;31mnovamov link not found\033[0m (url: ' + link + ')'
+        return -1
 
     if verbose :    
         print '\ndownloading ' + novamovlink
@@ -161,8 +164,9 @@ def getnovamov():
             urlfile = i.split('"')[1]
 
     if urlfile == '':
-        print '\033[1;31mfile not found\033[0m (url: ' + novamovlink + ')'
-        exit(1)
+        if verbose:			
+            print '\033[1;31mfile not found\033[0m (url: ' + novamovlink + ')'
+        return -1
     else:
         return urlfile
 
@@ -224,35 +228,55 @@ urltv = urlbase + tvshow + '/season_' + season + '.html'
 src_urltv = getpage(urltv)
 
 ##lists of possible links
-listeloombo = []
-listezshare = []
-listenovamov = []
+possible_links = []
 for line in src_urltv:
-    if ('loombo' in line) and ( ('Episode '+episode + '<') in line):
-        listeloombo += [line.split('"')[1]]
-    elif ('zshare' in line) and ( ('Episode '+episode + '<') in line):
-        listezshare += [line.split('"')[1]]
-    elif ('novamov' in line) and ( ('Episode '+episode + '<') in line):
-        listenovamov += [line.split('"')[1]]
+    if ('loombo' in line) and ( ('Episode '+episode + '<') in line) and (not zonly) and (not nonly):
+        possible_links.append([line.split('"')[1],'l'])
+    elif ('zshare' in line) and ( ('Episode '+episode + '<') in line) and (not lonly) and (not nonly):
+        possible_links.append([line.split('"')[1],'z'])
+    elif ('novamov' in line) and ( ('Episode '+episode + '<') in line) and (not lonly) and (not zonly):
+        possible_links.append([line.split('"')[1],'n'])
 
-
-##get the url of the file
-if (listezshare != []) and (not lonly) and (not nonly):
-    final_url = getzshare()
-elif (listeloombo != []) and (not zonly) and (not nonly):
-    final_url = getloombo()
-elif (listenovamov != []) and (not lonly) and (not zonly):
-    final_url = getnovamov()
-else:
+if possible_links == []:
     print '\033[1;31mno loombo/zshare/novamov link found\033[0m \
 (url tv show:' + urltv + ')'
     exit(1)
 
 
+priority = {'z':0, 'l':1, 'n':2}
+def cmp(x,y):
+    if priority[x[1]] > priority[y[1]]:
+        return 1
+    elif priority[x[1]] == priority[y[1]]:
+        return 0
+    else:
+        return -1
+possible_links.sort(cmp)
+
+
+url_found = False
+while not url_found :
+    (link, znl) = getepisodelink(possible_links)
+    if znl == 'z':
+        final_url = getzshare(link)
+    elif znl == 'l':
+        final_url = getloombo(link)
+    else:
+        final_url = getnovamov(link)
+    if final_url != -1:
+        url_found = True
+    else:
+        possible_links.remove([link, znl])
+        if possible_links == []:
+            print '\033[1;31mno more loombo/zshare/novamov link\033[0m \
+                (url tv show:' + urltv + ')'
+            exit(1)
+
+print '\ndownloading file', final_url
+
 if (not os.path.isdir(tvshow)):
     os.mkdir(tvshow)
     
-print '\ndownloading file', final_url
 ext = "." + final_url.split('.')[-1]
 
 os.system("wget -c " + final_url + " -O " + tvshow + "/" + filename + ext)
@@ -260,3 +284,4 @@ os.system("wget -c " + final_url + " -O " + tvshow + "/" + filename + ext)
 if (len(tmpfile)>0):
     os.remove(tmpfile + ".html")
     os.remove(tmpfile + ".cook")
+
