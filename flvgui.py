@@ -238,6 +238,8 @@ class Flvgui(QtGui.QWidget):
             self.grid3.addWidget(QtGui.QLabel(key), i, 0)
             list_edit.append([key, QtGui.QLineEdit()])
             self.grid3.addWidget(list_edit[i][1], i, 1) 
+            if key == 'password':
+              list_edit[i][1].setEchoMode(2)
             list_edit[i][1].setText(conf[key])
             i += 1
         button_save = QtGui.QPushButton("Save config file")
