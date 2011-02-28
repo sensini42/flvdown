@@ -6,6 +6,8 @@ from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import SLOT
 from PyQt4.QtCore import QRegExp
 
+import os
+
 ######################################################################
 ###take care of cookies
 ######################################################################
@@ -17,6 +19,7 @@ cookieFile = cookieFile + 'cookies-next.lwp'
 from os import path as ospath
 from os import remove as osremove
 from os import system as ossystem
+from os import chdir as oschdir
 cj = None
 cookielib = None
 
@@ -34,7 +37,19 @@ if cookielib:
 ##end of cookies
 ######################################################################
 
+conf = {'login':'login', 'password':'password', 'player':'mplayer', 'base_directory':'/tmp'}
 
+def checkConfigFile():
+    """ read config file """
+    try:
+        fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", \
+                         "rb", 0)
+        for line in fileconf.read().split():
+            tmp = line.split("=")
+            conf[tmp[0]] = tmp[1].replace('"','')
+        fileconf.close()
+    except IOError:
+        print "check config"
 
 
 def existFile(tvshow, season, episode):
@@ -48,25 +63,9 @@ def existFile(tvshow, season, episode):
 
 def removeFromNextEpisode(movieId, userId, seasonId, episodeId):
     """ return the source page from next-episode """
-    try:                                
-        fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", \
-                         "rb", 0)
-        try:
-            conf = fileconf.read().split()
-        except IndexError:
-            print "bad format:"
-            print 'echo -n "login\npassword" > ~/.config/flvdown/flv.conf'
-            exit(1)
-        finally:
-            fileconf.close()
-    except IOError:
-        print "conf file not found"
-        print "mkdir ~/.config/flvdown"
-        print 'echo -n "login\npassword" > ~/.config/flvdown/flv.conf'
-        return ""
 
     import urllib
-    txdata = urllib.urlencode ({"username" : conf[0], "password" : conf[1]})
+    txdata = urllib.urlencode ({"username" : conf['login'], "password" : conf['password']})
     txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Win NT)'}
     urlbase = "http://next-episode.net/"
     try:
@@ -93,25 +92,9 @@ def removeFromNextEpisode(movieId, userId, seasonId, episodeId):
 
 def getSrcPageNextEpisode():
     """ return the source page from next-episode """
-    try:                                
-        fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", \
-                         "rb", 0)
-        try:
-            conf = fileconf.read().split()
-        except IndexError:
-            print "bad format:"
-            print 'echo -n "login\npassword" > ~/.config/flvdown/flv.conf'
-            exit(1)
-        finally:
-            fileconf.close()
-    except IOError:
-        print "conf file not found"
-        print "mkdir ~/.config/flvdown"
-        print 'echo -n "login\npassword" > ~/.config/flvdown/flv.conf'
-        return ""
 
     import urllib
-    txdata = urllib.urlencode ({"username" : conf[0], "password" : conf[1]})
+    txdata = urllib.urlencode ({"username" : conf['login'], "password" : conf['password']})
     txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Win NT)'}
 
     try:
@@ -187,6 +170,8 @@ class Flvgui(QtGui.QWidget):
         """ nothing special here"""
         super(Flvgui, self).__init__()
 
+        checkConfigFile()
+
         Flvgui.msgAlert = QtGui.QSystemTrayIcon(self)
         Flvgui.msgAlert.show()
         
@@ -194,9 +179,11 @@ class Flvgui(QtGui.QWidget):
         
         self.tab1 = QtGui.QWidget()
         self.tab2 = QtGui.QWidget()
+        self.tab3 = QtGui.QWidget()
 
         self.tab_widget.addTab(self.tab1, "Playing")
         self.tab_widget.addTab(self.tab2, "Downloading")
+        self.tab_widget.addTab(self.tab3, "Options")
 
         
         mainLayout = QtGui.QVBoxLayout()
@@ -221,20 +208,43 @@ class Flvgui(QtGui.QWidget):
 
 
     def populate(self):
+
+        oschdir(conf['base_directory'])
+
+        self.tab_widget.removeTab(2)
         self.tab_widget.removeTab(1)
         self.tab_widget.removeTab(0)
         del(self.tab1)
         del(self.tab2)
+        del(self.tab3)
         
         self.tab1 = QtGui.QWidget()
         self.tab2 = QtGui.QWidget()
+        self.tab3 = QtGui.QWidget()
         
         self.grid1 = QtGui.QGridLayout(self.tab1)
         self.grid2 = QtGui.QGridLayout(self.tab2)
+        self.grid3 = QtGui.QGridLayout(self.tab3)
         
         self.tab_widget.addTab(self.tab1, "Playing")
         self.tab_widget.addTab(self.tab2, "Downloading")
+        self.tab_widget.addTab(self.tab3, "Options")
 
+
+        ##option
+        i = 0
+        list_edit = []
+        for key in conf.keys():
+            self.grid3.addWidget(QtGui.QLabel(key), i, 0)
+            list_edit.append([key, QtGui.QLineEdit()])
+            self.grid3.addWidget(list_edit[i][1], i, 1) 
+            list_edit[i][1].setText(conf[key])
+            i += 1
+        button_save = QtGui.QPushButton("Save config file")
+        btn_save_callback = (lambda data = (list_edit) : \
+             self.saveClicked(data))
+        self.connect(button_save, SIGNAL("clicked()"), btn_save_callback)
+        self.grid3.addWidget(button_save, 5, 0)
         
         ##titles
         empty_label = QtGui.QLabel("")
@@ -387,6 +397,18 @@ class Flvgui(QtGui.QWidget):
         self.grid2.addWidget(empty_label, 3 + i, 3 + second)
 
     @classmethod
+    def saveClicked(cls, data):
+        """ when a button is clicked """
+        # data = [ [key, QLineEdit] , ... ]
+        if (not os.path.exists(ospath.expanduser('~') + "/.config/flvdown/")):
+            os.mkdir(ospath.expanduser('~') + "/.config/flvdown/")
+        fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", "w", 0)
+        for [key, line] in data:
+            fileconf.write(key + "=\"" + str(line.text()) + "\"\n")
+            conf[key] = str(line.text())
+        fileconf.close()
+
+    @classmethod
     def downClicked(cls, data):
         """ when a button is clicked """
         # data = [tv, season, numepisode, fromsite, interactif]
@@ -469,7 +491,7 @@ class Flvgui(QtGui.QWidget):
         episode = str(data[2].currentText())
         if (len(episode)==1):
             episode = "0" + episode
-        ossystem("mplayer " + tvshow + "/" + tvshow + season + episode + "*")
+        ossystem(conf['player']+ " " + tvshow + "/" + tvshow + season + episode + "*")
 
     @classmethod
     def markClicked(cls, data):
@@ -508,3 +530,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
