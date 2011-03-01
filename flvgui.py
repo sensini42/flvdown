@@ -48,8 +48,10 @@ def checkConfigFile():
             tmp = line.split("=")
             conf[tmp[0]] = tmp[1].replace('"','')
         fileconf.close()
+        return 1
     except IOError:
         print "check config"
+        return -1
 
 
 def existFile(tvshow, season, episode):
@@ -170,7 +172,8 @@ class Flvgui(QtGui.QWidget):
         """ nothing special here"""
         super(Flvgui, self).__init__()
 
-        checkConfigFile()
+        if (checkConfigFile()==-1):
+            QtGui.QMessageBox.warning(self,'Config File','Please check config',QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
 
         Flvgui.msgAlert = QtGui.QSystemTrayIcon(self)
         Flvgui.msgAlert.show()
@@ -350,10 +353,10 @@ class Flvgui(QtGui.QWidget):
                 self.connect(button_mark[i], \
                     SIGNAL("clicked()"), btn_callbackMark[i])
                 ##delete
-                button_delete.append(QtGui.QPushButton("Delete"))
+                button_delete.append(QtGui.QPushButton("Mark and Delete"))
                 self.grid1.addWidget(button_delete[i], 2 + i, 5)
                 btn_callbackDelete.append(lambda data = (tvshow, season, \
-                    combo_ondisk[i]): self.deleteClicked(data))
+                    combo_ondisk[i], ondisk): self.deleteClicked(data))
                 self.connect(button_delete[i], \
                     SIGNAL("clicked()"), btn_callbackDelete[i]) 
             else:
@@ -395,8 +398,14 @@ class Flvgui(QtGui.QWidget):
                 button_downAll.append([])
                 btn_callback.append([])
                 btn_callbackAll.append([])
-# self.grid2.addWidget(QtGui.QLabel("Nothing to download"), 2 + i, 0 + second)
-        self.grid2.addWidget(empty_label, 3 + i, 3 + second)
+        #self.grid2.addWidget(QtGui.QLabel("Nothing to download"), 2 + i, 0 + second)
+        #self.grid2.addWidget(empty_label, 3 + i, 3 + second)
+        button_downAllES = QtGui.QPushButton("Down All")
+        self.grid2.addWidget(button_downAllES, 3 + i, 3 + second, 1, 2)
+        btn_callbackAllES = lambda data = (list_ep): \
+            self.downAllESClicked(data)
+        self.connect(button_downAllES, SIGNAL("clicked()"), btn_callbackAllES)
+
 
     @classmethod
     def saveClicked(cls, data):
@@ -476,6 +485,15 @@ class Flvgui(QtGui.QWidget):
 
 
     @classmethod
+    def downAllESClicked(cls, data):
+        for (i,(tvshow, season, ondisk, notondisk)) in enumerate(data):
+            tvshow = "_".join(tvshow.split(' ')).lower()
+            for ep in notondisk:
+                ossystem("flvdown.py " + tvshow + " " + \
+								    str(season) + " " + str(ep))
+
+
+    @classmethod
     def downsub(cls):
         """ when a button_sub is clicked """
         #data from combo
@@ -510,6 +528,8 @@ class Flvgui(QtGui.QWidget):
         season = str(data[1])
         tvshow = "_".join(tvshow.split(' ')).lower()
         episode = str(data[2].currentText())
+        (movieId, userId, seasonId, episodeId) = data[3][data[2].currentIndex()]
+        removeFromNextEpisode(movieId, userId, seasonId, episodeId)
         if (len(episode)==1):
             episode = "0" + episode
 #parent = ?
