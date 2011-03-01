@@ -88,7 +88,7 @@ for i in src:
                 urlsub = urlbase + j.split('"')[1]
 
 if not urlsub:
-    print '\033[1;31msub not found\033[0m (url tv show:'+urltv+')'
+    print '\033[1;31m('+subname+') sub not found\033[0m (url tv show:'+urltv+')'
     exit(1)
 if verbose > 1:
     print "url subtitle:", urlsub

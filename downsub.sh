@@ -1,22 +1,24 @@
 #!/bin/sh
 
-for dossier in $(find ./ -type d)
-do 
- echo "going to $dossier"
- cd $dossier
-
- for fic in $(ls *.flv *.avi *.mp4)
- do
+for fic in $(find . -name "*.flv" -o -name "*.avi" -o -name "*.mp4")
+do
+	fic=${fic#./*}
+	if [ $1 ]
+	then
     echo $fic
-    sub=${fic%.*}".srt"
-    if [ -e $sub ]
-    then
-	echo "sous-titres deja present"
-    else
-	echo "telechargement"
-	subdown.py $fic $* #1 verbeux, 2 pour encore plus, i pour interactif
-    fi
- done
- echo "going back"
- cd -
+	fi
+  sub=${fic%.*}".srt"
+  if [ -e $sub ]
+	then
+		if [ $1 ]
+		then
+			echo "sous-titres deja present"
+		fi
+  else
+		if [ $1 ]
+		then
+			echo "telechargement"
+		fi
+		subdown.py $fic $* #1 verbeux, 2 pour encore plus, i pour interactif
+  fi
 done
