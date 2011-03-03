@@ -4,7 +4,6 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import SLOT
-from PyQt4.QtCore import QRegExp
 
 import os
 
@@ -39,6 +38,31 @@ if cookielib:
 
 conf = {'login':'login', 'password':'password', \
     'player':'mplayer', 'base_directory':'/tmp'}
+
+import threading
+
+class MyThread(threading.Thread):
+    def __init__(self, cls, tvshow, season, episode, option):
+        self.cls = cls
+        self.tvshow = tvshow
+        self.season = season
+        self.episode = episode
+        self.option = option
+        threading.Thread.__init__(self)
+        
+    def run(self):
+        print "downloading" + self.tvshow + " " + \
+            self.season + " " + self.episode + " " +self.option
+        ret = ossystem("flvdown.py " + self.tvshow + " " + \
+            self.season + " " + self.episode + " " +self.option)#+ " &")
+        if not ret:
+            self.cls.msgAlert.showMessage("flvgui", self.tvshow + self.season +\
+                                     self.episode + "Done")
+
+
+
+
+
 
 def checkConfigFile():
     """ read config file """
@@ -457,15 +481,7 @@ class Flvgui(QtGui.QWidget):
         if (data[4].isChecked()):
             option += "i"
         tvshow = "_".join(tvshow.split(' ')).lower()
-        ret = ossystem("flvdown.py " + tvshow + " " + \
-                  season + " " + episode + " " +option)#+ " &")
-        if not ret:
-
-            #cls.msgAlert.setIcon(QtGui.QIcon(''))
-            cls.msgAlert.showMessage("flvgui", tvshow + season +\
-                                     episode + "Done")
-        
-
+        MyThread(cls, tvshow, season, episode, option).start()
 
     @classmethod
     def downAllClicked(cls, data):
