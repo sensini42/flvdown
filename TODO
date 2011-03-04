@@ -1,0 +1,8 @@
+intégrer les ss-titres comme module
+revoir flvdown2
+mettre une icone (pour le systray que j'ai viré…)
+fonction downFinished qui affiche la notification (avec pykde ?)
+prendre en compte les options pour TOUS les boutons down... (cf "" pour argument 'option' dans les threads)
+
+ajouter dicobug à l'interface
+ajouter une série à regarder
