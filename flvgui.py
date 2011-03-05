@@ -487,7 +487,7 @@ class Flvgui(QtGui.QWidget):
         if (data[4].ischecked()):
             option += "i"
         tvshow = "_".join(tvshow.split(' ')).lower()
-        dth = downthread(tvshow, season, episode, option, self)
+        dth = DownThread(tvshow, season, episode, option, self)
         self.connect(dth, signal("downfinished( qstring ) "), self.downfinished)
         dth.start() 
 
@@ -500,7 +500,7 @@ class Flvgui(QtGui.QWidget):
             season = str(data[1])
             tvshow = "_".join(tvshow.split(' ')).lower()
             for i in range(data[2].count()):
-                dth = downthread(tvshow, season, str(data[2].itemtext(i)),\
+                dth = DownThread(tvshow, season, str(data[2].itemtext(i)),\
                                  "", self)
                 self.connect(dth, signal("downfinished( qstring ) "),\
                              self.downfinished)
@@ -521,7 +521,7 @@ class Flvgui(QtGui.QWidget):
             list_ep = list(set_ep)
             list_ep.sort()
             for i in list_ep:
-                dth = downthread(tvshow, season, str(i), "",\
+                dth = DownThread(tvshow, season, str(i), "",\
                                  self)
                 self.connect(dth, signal("downfinished( qstring ) "),\
                              self.downfinished)
@@ -536,7 +536,7 @@ class Flvgui(QtGui.QWidget):
         for (tvshow, season, _ondisk, notondisk) in data:
             tvshow = "_".join(tvshow.split(' ')).lower()
             for epi in notondisk:
-                dth = downthread(tvshow, str(season), str(epi), "", self)
+                dth = DownThread(tvshow, str(season), str(epi), "", self)
                 self.connect(dth, signal("downfinished( qstring ) "), self.downfinished)
                 dth.start()
 
