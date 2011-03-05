@@ -470,7 +470,7 @@ class Flvgui(QtGui.QWidget):
             #data from combo
             tvshow = str(data[0])
             season = str(data[1])
-            episode = str(data[2].currenttext())
+            episode = str(data[2].currentText())
         else:
             #data from first line
             tvshow = str(data[0].text())
@@ -478,13 +478,13 @@ class Flvgui(QtGui.QWidget):
             episode = str(data[2].text())
 
         option = ""
-        if (data[3].itemat(1).widget().ischecked()):
+        if (data[3].itemAt(1).widget().isChecked()):
             option += "z"
-        elif (data[3].itemat(2).widget().ischecked()):
+        elif (data[3].itemAt(2).widget().isChecked()):
             option += "l"
-        elif (data[3].itemat(3).widget().ischecked()):
+        elif (data[3].itemAt(3).widget().isChecked()):
             option += "n"
-        if (data[4].ischecked()):
+        if (data[4].isChecked()):
             option += "i"
         tvshow = "_".join(tvshow.split(' ')).lower()
         dth = DownThread(tvshow, season, episode, option, self)
@@ -500,7 +500,7 @@ class Flvgui(QtGui.QWidget):
             season = str(data[1])
             tvshow = "_".join(tvshow.split(' ')).lower()
             for i in range(data[2].count()):
-                dth = DownThread(tvshow, season, str(data[2].itemtext(i)),\
+                dth = DownThread(tvshow, season, str(data[2].itemText(i)),\
                                  "", self)
                 self.connect(dth, SIGNAL("downFinished( QString ) "),\
                              self.downFinished)
