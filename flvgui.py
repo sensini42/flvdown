@@ -192,7 +192,8 @@ def getListEpisode():
                         item_ep_notondisk.append(num_ep)
                     else:
                         item_ep_ondisk.append(epilist)
-            listep.append((tv_name, item_se, item_ep_ondisk, item_ep_notondisk))
+            if(item_ep_ondisk or item_ep_notondisk):
+                listep.append((tv_name, item_se, item_ep_ondisk, item_ep_notondisk))
     osremove(cookieFile)
     return listep
 
@@ -462,7 +463,7 @@ class Flvgui(QtGui.QWidget):
         print "Download finished", message
 
 #    @classmethod
-    def downclicked(self, data):
+    def downClicked(self, data):
         """ when a button is clicked """
         # data = [tv, season, numepisode, fromsite, interactif]
         if type(data[0]) == type(""):
@@ -491,7 +492,7 @@ class Flvgui(QtGui.QWidget):
         dth.start() 
 
     #@classmethod
-    def downallclicked(self, data):
+    def downAllClicked(self, data):
         """ when a buttonall is clicked """
         if type(data[0]) == type(""):
             #data from combo
@@ -530,7 +531,7 @@ class Flvgui(QtGui.QWidget):
 
 
 #    @classmethod
-    def downallesclicked(self, data):
+    def downAllESClicked(self, data):
         """ when the buttondownalles is clicked """
         for (tvshow, season, _ondisk, notondisk) in data:
             tvshow = "_".join(tvshow.split(' ')).lower()
