@@ -1,6 +1,29 @@
-intégrer les ss-titres comme module
-revoir flvdown2
-mettre une icone (pour le systray que j'ai viré…)
-fonction downFinished qui affiche la notification (avec pykde ?)
+* TODO Code propre 
+** DONE variables globales à supprimer
+** TODO faire des passes pylint
+** TODO Autre
 
-ajouter dicobug à l'interface
+* TODO Modules
+** DONE passer les sites en tant que module
+** TODO revoir test.py et le mettre a la place de flvdown2
+** TODO debugguer test.py (les variables globales ont normalement disparues)
+** TODO Sites à ajouter
+*** TODO integrer divxden
+    cf testdivxden
+*** TODO integrer sidereel
+** TODO tri des sites
+   dans l'interface, une liste avec une ligne par site/module
+   que l'utilisateur peut modifier
+   -> passer cette liste dans la fonction principale de flvdown2/test
+
+
+* TODO Icone dans le systray
+** TODO mettre une icone 
+** TODO fonction downFinished qui affiche la notification (avec pykde ?)
+
+
+* TODO ajouter dicobug à l'interface
+  dans les options ou un nouvel onglet
+
+
+
