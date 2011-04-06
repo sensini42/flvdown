@@ -1,4 +1,4 @@
-import sys
+"""module for free-tv-video-online.me, testing different modules"""
 import free2_mod
 from . import getPage
 

@@ -1,11 +1,11 @@
-from urllib2 import urlopen
+""" looks for links with submodules """
 import os
 import aggregators
 import sys 
 
 
 def getEpisodeLink(liste, verbose, interact):
-    """ return the link of the episode page"""
+    """ return the first link of the list or the user choice"""
     if verbose:
         print 'possible links'
         for number, (name, znl) in enumerate(liste):
@@ -35,7 +35,7 @@ def cmpPrio(plx, ply):
 
 def flvdown(tvshow, season, episode, options):
     """ search episode through modules """
-    
+
     ##add a trailing 0 if num episode < 10
     if len(episode) == 1:
         filename = tvshow + season + "0" + episode 
@@ -56,15 +56,15 @@ def flvdown(tvshow, season, episode, options):
         if ("i" in options):
             interact = 1
             verbose = 2
-        if ("l" in options):
-            #from loombo only
-            lonly = 1
-        if ("n" in options):
-            #from novamov only
-            nonly = 1
-        if ("z" in options):
-            #from zshare only
-            zonly = 1
+        ## if ("l" in options):
+        ##     #from loombo only
+        ##     lonly = 1
+        ## if ("n" in options):
+        ##     #from novamov only
+        ##     nonly = 1
+        ## if ("z" in options):
+        ##     #from zshare only
+        ##     zonly = 1
         if ("v" in options):
             verbose = 1
     
@@ -75,21 +75,22 @@ def flvdown(tvshow, season, episode, options):
             season, episode)
 
     ##Sort possible_links
-
+    
     url_found = False
     while not url_found:
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
         __import__("aggregators." + znl)
-        final = sys.modules["aggregators." + znl].getFlv(link, verbose, interact)
+        final = sys.modules["aggregators." + znl].getFlv(link, verbose)
         if final != -1:
             url_found = True
         else:
             possible_links.remove([link, znl])
             if possible_links == []:
-                print '\033[1;31mno link\033[0m \
-                    (url tv show:' + urltv + ')'
+                print '\033[1;31mno link\033[0m found'
                 exit(1)
     final_url = final[0]
+    ##  print final_url
+    ##  return 
     if verbose:
         print '\ndownloading file', final_url
 

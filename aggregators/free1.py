@@ -1,4 +1,4 @@
-import sys
+"""module for free-tv-video-onine.me"""
 import free1_mod
 from . import getPage
 

@@ -1,5 +1,7 @@
+""" get novamov links from free-tv-..."""
+
 from .. import getPage
-def getFlv(link, verbose, interact):
+def getFlv(link, verbose):
     """ return the url of the file from novamov"""
     
     ##episode page

@@ -2,13 +2,13 @@
 ** DONE variables globales à supprimer
 ** TODO faire des passes pylint
 ** TODO Autre
-
+   
 * TODO Modules
 ** DONE passer les sites en tant que module
-** TODO revoir test.py et le mettre a la place de flvdown2
+** DONE revoir test.py et le mettre a la place de flvdown2
 ** TODO debugguer test.py (les variables globales ont normalement disparues)
 ** TODO Sites à ajouter
-*** TODO integrer divxden
+*** DONE integrer divxden
     cf testdivxden
 *** TODO integrer sidereel
 ** TODO tri des sites
@@ -24,6 +24,6 @@
 
 * TODO ajouter dicobug à l'interface
   dans les options ou un nouvel onglet
-
+  et donc dans le fichier de config
 
 

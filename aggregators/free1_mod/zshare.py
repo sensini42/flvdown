@@ -1,8 +1,9 @@
+""" get zshare links from free-tv-..."""
 from .. import getPage
 from .. import waiting
 import random
 import os
-def getFlv(link, verbose, interact):
+def getFlv(link, verbose):
     """ return the url of the file from zshare"""
 
     ##episode page

@@ -7,7 +7,7 @@ from PyQt4.QtCore import SLOT
 from PyQt4.QtCore import QThread
 
 import os
-import flvdown2
+import links
 ######################################################################
 ###take care of cookies
 ######################################################################
@@ -51,7 +51,7 @@ class DownThread(QThread):
         
     def run(self):
         "download ep, sub, emit signal"
-        flvdown2.flvdown(self.tvshow, self.season, self.episode, self.option)
+        links.flvdown(self.tvshow, self.season, self.episode, self.option)
         ossystem("downsub.sh")
         self.emit(SIGNAL("downFinished( QString )"), \
                   self.tvshow + " " + self.season + " " + self.episode)

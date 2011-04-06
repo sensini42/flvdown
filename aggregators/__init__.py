@@ -4,7 +4,7 @@ def getPage(link):
     """ return the lines list of the page link """
     try:
         response = urlopen(link)
-    except IOError, e:
+    except IOError:
         print '\033[1;31mlink not found\033[0m (url:' + link + ')'
         return -1
     else:

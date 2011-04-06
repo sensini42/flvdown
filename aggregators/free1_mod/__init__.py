@@ -1,1 +1,1 @@
-__all__ = ["zshare", "novamov"]
+__all__ = ["zshare", "novamov", "divxden"]
