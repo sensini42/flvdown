@@ -107,3 +107,10 @@ def flvdown(tvshow, season, episode, options):
 
 #find . \( -name "*pyc" -o -name "*~" \) -exec \rm -f {} \;
 
+
+
+if _name_ == "__main__":
+    """ executed if called from command line"""
+    #flvdown("fringe", "3" , "1", "vi")
+    flvdown(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+

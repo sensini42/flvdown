@@ -9,13 +9,14 @@
 ** TODO debugguer test.py (les variables globales ont normalement disparues)
 ** TODO Sites à ajouter
 *** DONE integrer divxden
-    cf testdivxden
-*** TODO integrer sidereel
+*** DONE integrer sidereel
+    cherche parmi les pages de résultats
+**** TODO mettre des modules
 ** TODO tri des sites
    dans l'interface, une liste avec une ligne par site/module
    que l'utilisateur peut modifier
    -> passer cette liste dans la fonction principale de flvdown2/test
-
+   
 
 * TODO Icone dans le systray
 ** TODO mettre une icone 
