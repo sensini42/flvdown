@@ -109,7 +109,7 @@ def flvdown(tvshow, season, episode, options):
 
 
 
-if _name_ == "__main__":
+if __name__ == "__main__":
     """ executed if called from command line"""
     #flvdown("fringe", "3" , "1", "vi")
     flvdown(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

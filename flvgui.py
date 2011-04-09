@@ -168,17 +168,6 @@ def getListEpisode():
         return []
     
     src = source.split('showName">')
-    ## for i in src[1:]:
-    ##     lines = i.split('\n')
-    ##     if lines[0].endswith("</a>"):
-    ##         #else: tvshow not tracked
-    ##         item_ep = []
-    ##         for i in lines:
-    ##             if "removeEpisode" in i:
-    ##                 strlist = i.split("removeEpisode(")[1].split(')')[0]
-    ##                 k=[int(x[1:-1]) for x in strlist.split(', ')[:-1]]
-    ##                 print "«««", lines[0][:-4], "___",k,"»»»"
-    ##                 print
 
     dict_bug = {'The Office (US)' : 'The Office'}
     listep = []
@@ -227,10 +216,12 @@ class Flvgui(QtGui.QWidget):
         self.tab1 = QtGui.QWidget()
         self.tab2 = QtGui.QWidget()
         self.tab3 = QtGui.QWidget()
+        self.tab4 = QtGui.QWidget()
 
         self.tab_widget.addTab(self.tab1, "Playing")
         self.tab_widget.addTab(self.tab2, "Downloading")
         self.tab_widget.addTab(self.tab3, "Options")
+        self.tab_widget.addTab(self.tab4, "Site order")
         self.tab_widget.setCurrentIndex(1)
         mainLayout = QtGui.QGridLayout(self)
         mainLayout.addWidget(self.tab_widget, 0, 0, 1, 3)
@@ -257,26 +248,46 @@ class Flvgui(QtGui.QWidget):
         "populate the tab_widget"
         oschdir(conf['base_directory'])
         focusingOn = self.tab_widget.currentIndex()
+        self.tab_widget.removeTab(3)
         self.tab_widget.removeTab(2)
         self.tab_widget.removeTab(1)
         self.tab_widget.removeTab(0)
         del(self.tab1)
         del(self.tab2)
         del(self.tab3)
+        del(self.tab4)
 
         self.tab1 = QtGui.QWidget()
         self.tab2 = QtGui.QWidget()
         self.tab3 = QtGui.QWidget()
+        self.tab4 = QtGui.QWidget()
         
         grid1 = QtGui.QGridLayout(self.tab1)
         grid2 = QtGui.QGridLayout(self.tab2)
         grid3 = QtGui.QGridLayout(self.tab3)
+        grid4 = QtGui.QGridLayout(self.tab4)
         
         self.tab_widget.addTab(self.tab1, "Playing")
         self.tab_widget.addTab(self.tab2, "Downloading")
         self.tab_widget.addTab(self.tab3, "Options")
+        self.tab_widget.addTab(self.tab4, "Site order")
         
         self.tab_widget.setCurrentIndex(focusingOn)
+
+        self.list_site = QtGui.QListWidget()
+        self.getSites()
+        self.orderSites()
+        
+        button_up = QtGui.QPushButton("Up")
+        button_down = QtGui.QPushButton("Down")
+        self.connect(button_up, SIGNAL("clicked()"), self.moveUp)
+        self.connect(button_down, SIGNAL("clicked()"), self.moveDown)
+        
+        grid4.addWidget(self.list_site, 0, 1, 2, 1)
+        grid4.addWidget(button_up, 0, 2)
+        grid4.addWidget(button_down, 1, 2)
+
+
 
         ##tab options
         ed_radio1 = QtGui.QRadioButton("*")
@@ -311,6 +322,13 @@ class Flvgui(QtGui.QWidget):
              self.saveClicked(data))
         self.connect(button_save, SIGNAL("clicked()"), btn_save_callback)
         grid3.addWidget(button_save, 5, 0)
+
+        ##ouch
+        button_saveb = QtGui.QPushButton("Save config file")
+        btn_save_callbackb = (lambda data = (list_edit) : \
+             self.saveClicked(data))
+        self.connect(button_saveb, SIGNAL("clicked()"), btn_save_callbackb)
+        grid4.addWidget(button_saveb, 2, 1)
         
         ##tab downloading
         empty_label = QtGui.QLabel("")
@@ -621,6 +639,42 @@ class Flvgui(QtGui.QWidget):
 #        if reply:
         ossystem("rm " + tvshow + "/" + tvshow + season + episode + "*")
 
+    def getSites(self):
+        """ check modules to populate list_site"""
+        import sys
+        import aggregators
+        for i in aggregators.__all__:
+            site = "aggregators." + i + "_mod"
+            __import__(site)
+            for j in sys.modules[site].__all__:
+                subsite = i + " : " + j
+                item = QtGui.QListWidgetItem(subsite)
+                self.list_site.addItem(item)
+        self.list_site.setCurrentRow(0)
+        
+    def orderSites(self):
+        """
+        order list_site wrt config files
+        unknown (new) modules go at the end
+        """
+        pass
+    
+    def moveUp(self):
+        """ up is clicked """
+        cur_row = self.list_site.currentRow()
+        nxt_row = max(cur_row - 1, 0)
+        item = self.list_site.takeItem(cur_row)
+        self.list_site.insertItem(nxt_row, item)
+        self.list_site.setCurrentRow(nxt_row)
+        
+    def moveDown(self):
+        """ down is clicked """
+        cur_row = self.list_site.currentRow()
+        nxt_row = min(cur_row + 1, self.list_site.count() -1)
+        item = self.list_site.takeItem(cur_row)
+        self.list_site.insertItem(nxt_row, item)
+        self.list_site.setCurrentRow(nxt_row)
+        
 
 
 
