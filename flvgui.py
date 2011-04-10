@@ -650,14 +650,20 @@ class Flvgui(QtGui.QWidget):
                 subsite = i + " : " + j
                 item = QtGui.QListWidgetItem(subsite)
                 self.list_site.addItem(item)
-        self.list_site.setCurrentRow(0)
         
     def orderSites(self):
         """
         order list_site wrt config files
         unknown (new) modules go at the end
         """
-        pass
+        test_order = ["free1.zshare", "free1.divxden", "free2.loombo"]
+        for i in test_order[::-1]:
+            site = ' : '.join(i.split('.'))
+            for j in range(self.list_site.count()):
+                if (self.list_site.item(j).text()==site):
+                    item = self.list_site.takeItem(j)
+                    self.list_site.insertItem(0, item)
+        self.list_site.setCurrentRow(0)
     
     def moveUp(self):
         """ up is clicked """

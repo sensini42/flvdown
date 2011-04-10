@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 """ looks for links with submodules """
 import os
 import aggregators
@@ -112,5 +114,7 @@ def flvdown(tvshow, season, episode, options):
 if __name__ == "__main__":
     """ executed if called from command line"""
     #flvdown("fringe", "3" , "1", "vi")
-    flvdown(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    if (len(sys.argv)>4):
+        option = sys.argv[4] 
+    flvdown(sys.argv[1], sys.argv[2], sys.argv[3], option)
 
