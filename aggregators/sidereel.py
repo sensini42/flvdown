@@ -5,7 +5,7 @@ from . import getPage
 def getTvShowUrl(tvshow, season, episode, numPage):
     """get url for tvshow"""
     tv2 = "_".join([i.capitalize() for i in tvshow.split('_')])
-    epi2=str(int(episode)) #get ride of trailing 0
+    epi2 = str(int(episode)) #get ride of trailing 0
     urlbase = 'http://www.sidereel.com/'
     urltv = urlbase + tv2 + '/season-' + season + \
             '/episode-' + epi2 + '/search?page=' + str(numPage)
@@ -19,7 +19,10 @@ def getLinks(tvshow, season, episode):
     while(doNext):
         urltv = getTvShowUrl(tvshow, season, episode, numPage)
         src_urltv = getPage(urltv)
+        npage = False
         for line in src_urltv:
+            if ("next_page" in line):
+                npage = True
             if ("disabled next_page" in line):
                 doNext = False
             for nameModule in sidereel_mod.__all__:
@@ -27,6 +30,8 @@ def getLinks(tvshow, season, episode):
                     possible_links.append([line.split('"')[5], \
                                            "sidereel_mod." + nameModule])
         numPage += 1
+        if (npage == False):
+            doNext = False
     return possible_links
     
         

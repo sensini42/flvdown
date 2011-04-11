@@ -5,18 +5,16 @@
    
 * TODO Modules
 ** DONE passer les sites en tant que module
-** DONE revoir test.py et le mettre a la place de flvdown2
-** TODO debugguer test.py (les variables globales ont normalement disparues)
+** DONE revoir links.py et le mettre a la place de flvdown2
+** DONE debugguer links.py (les variables globales ont normalement disparues)
 ** TODO Sites à ajouter
 *** DONE integrer divxden
+*** TODO putlocker
 *** DONE integrer sidereel
     cherche parmi les pages de résultats
 **** TODO mettre des modules
-** TODO tri des sites
-   dans l'interface, une liste avec une ligne par site/module
-   que l'utilisateur peut modifier
-   -> passer cette liste dans la fonction principale de flvdown2/test
-   
+** DONE tri des sites
+    mais peut mieux faire   
 
 * TODO Icone dans le systray
 ** TODO mettre une icone 
@@ -27,4 +25,5 @@
   dans les options ou un nouvel onglet
   et donc dans le fichier de config
 
-
+* TODO Bugs
+** TODO bug thread si pas de lien

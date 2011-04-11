@@ -21,21 +21,8 @@ def getEpisodeLink(liste, verbose, interact):
         print '\ndownloading ', link, znl
     return (link, znl)
 
-def cmpPrio(plx, ply):
-    "compare function to sort possible links"
-    priority = {'z':0, 'l':1, 'n':2}
-    if priority[plx[1]] > priority[ply[1]]:
-        return 1
-    elif priority[plx[1]] == priority[ply[1]]:
-        return 0
-    else:
-        return -1
 
-
-
-
-
-def flvdown(tvshow, season, episode, options):
+def flvdown(tvshow, season, episode, options, list_site = None):
     """ search episode through modules """
 
     ##add a trailing 0 if num episode < 10
@@ -69,16 +56,22 @@ def flvdown(tvshow, season, episode, options):
         ##     zonly = 1
         if ("v" in options):
             verbose = 1
-    
     possible_links = []
     for i in aggregators.__all__:
         __import__("aggregators." + i)
         possible_links += sys.modules["aggregators."+i].getLinks(tvshow, \
             season, episode)
-
-    ##Sort possible_links
     
+    ##Sort possible_links
+    prio = dict(zip(['_mod.'.join(i.split(' : ')) \
+                     for i in list_site], range(len(list_site))))
+   
+    possible_links = sorted(possible_links, key=lambda i: prio[i[1]])
     url_found = False
+    if possible_links == []:
+        print '\033[1;31mno link\033[0m found'
+        exit(1)
+    
     while not url_found:
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
         __import__("aggregators." + znl)
@@ -112,8 +105,8 @@ def flvdown(tvshow, season, episode, options):
 
 
 if __name__ == "__main__":
-    """ executed if called from command line"""
     #flvdown("fringe", "3" , "1", "vi")
+    option = ""
     if (len(sys.argv)>4):
         option = sys.argv[4] 
     flvdown(sys.argv[1], sys.argv[2], sys.argv[3], option)

@@ -37,21 +37,25 @@ if cookielib:
 ##end of cookies
 ######################################################################
 
-conf = {'login':'login', 'password':'password', \
-    'player':'mplayer', 'base_directory':'/tmp'}
+conf = {'login':'login', 'password':'password', 'player':'mplayer', \
+        'base_directory':'/tmp'}
 
 class DownThread(QThread):
     """download an episode in a thread"""
-    def __init__(self, tvshow, season, episode, option, parent = None):
+    def __init__(self, tvshow, season, episode, option, list_site, \
+                 parent = None):
         self.tvshow = tvshow
         self.season = season
         self.episode = episode
         self.option = option
+        self.list_site = [str(list_site.item(i).text()) \
+                          for i in range(list_site.count())]
         QThread.__init__(self, parent)
         
     def run(self):
         "download ep, sub, emit signal"
-        links.flvdown(self.tvshow, self.season, self.episode, self.option)
+        ret = links.flvdown(self.tvshow, self.season, self.episode, self.option, \
+                      self.list_site)
         ossystem("downsub.sh")
         self.emit(SIGNAL("downFinished( QString )"), \
                   self.tvshow + " " + self.season + " " + self.episode)
@@ -77,9 +81,10 @@ def checkConfigFile():
     try:
         fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", \
                          "rb", 0)
-        for line in fileconf.read().split():
+        for line in fileconf:
             tmp = line.split("=")
-            conf[tmp[0]] = tmp[1].replace('"','')
+            if (tmp[0] != 'order'):
+                conf[tmp[0]] = tmp[1].replace('"','')[:-1]
         fileconf.close()
         return 1
     except IOError:
@@ -211,6 +216,7 @@ class Flvgui(QtGui.QWidget):
                 'Please check config', \
                 QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
 
+        self.list_site = QtGui.QListWidget()
         self.tab_widget = QtGui.QTabWidget()
         
         self.tab1 = QtGui.QWidget()
@@ -274,7 +280,6 @@ class Flvgui(QtGui.QWidget):
         
         self.tab_widget.setCurrentIndex(focusingOn)
 
-        self.list_site = QtGui.QListWidget()
         self.getSites()
         self.orderSites()
         
@@ -479,17 +484,21 @@ class Flvgui(QtGui.QWidget):
         """ when we want to add a tvshow """
         addToNextEpisode(str(data.text()))
     
-    @classmethod
-    def saveClicked(cls, data):
-        """ when save button is clicked """
-        # data = [ [key, QLineEdit] , ... ]
+    def saveClicked(self, data):
+        """ when save button is clicked"""
+        # data = [ [key, QLineEdit] , ... ] 
         if (not os.path.exists(ospath.expanduser('~') + "/.config/flvdown/")):
             os.mkdir(ospath.expanduser('~') + "/.config/flvdown/")
         fileconf = open(ospath.expanduser('~') + \
             "/.config/flvdown/flv.conf", "w", 0)
         for [key, line] in data:
-            fileconf.write(key + "=\"" + str(line.text()) + "\"\n")
+            fileconf.write(key + '="' + str(line.text()) + '\"\n')
             conf[key] = str(line.text())
+        fileconf.write('order="')
+        for row_item in range(self.list_site.count()):
+            fileconf.write(self.list_site.item(row_item).text() + ', ')
+        fileconf.write('"\n')
+        
         fileconf.close()
 
     @classmethod
@@ -522,7 +531,7 @@ class Flvgui(QtGui.QWidget):
         if (data[4].isChecked()):
             option += "i"
         tvshow = "_".join(tvshow.split(' ')).lower()
-        dth = DownThread(tvshow, season, episode, option, self)
+        dth = DownThread(tvshow, season, episode, option, self.list_site, self)
         self.connect(dth, SIGNAL("downFinished( QString ) "), self.downFinished)
         dth.start() 
 
@@ -545,7 +554,7 @@ class Flvgui(QtGui.QWidget):
             tvshow = "_".join(tvshow.split(' ')).lower()
             for i in range(data[2].count()):
                 dth = DownThread(tvshow, season, str(data[2].itemText(i)), \
-                                 option , self)
+                                 option , self.list_site, self)
                 self.connect(dth, SIGNAL("downFinished( QString ) "), \
                              self.downFinished)
                 dth.start() 
@@ -565,7 +574,8 @@ class Flvgui(QtGui.QWidget):
             list_ep = list(set_ep)
             list_ep.sort()
             for i in list_ep:
-                dth = DownThread(tvshow, season, str(i), option, self)
+                dth = DownThread(tvshow, season, str(i), option, \
+                                 self.list_site, self)
                 self.connect(dth, SIGNAL("downFinished( QString ) "), \
                              self.downFinished)
                 dth.start()
@@ -611,7 +621,7 @@ class Flvgui(QtGui.QWidget):
         if (len(episode)==1):
             episode = "0" + episode
         VideoThread((conf['player']+ " " + tvshow + "/" + tvshow + \
-            season + episode + "*"), self).start()
+            season + episode + "!(.srt)"), self).start()
 
     @classmethod
     def markClicked(cls, data):
@@ -656,9 +666,18 @@ class Flvgui(QtGui.QWidget):
         order list_site wrt config files
         unknown (new) modules go at the end
         """
-        test_order = ["free1.zshare", "free1.divxden", "free2.loombo"]
-        for i in test_order[::-1]:
-            site = ' : '.join(i.split('.'))
+        list_order = []
+        try:
+            fileconf = open(ospath.expanduser('~') + \
+                            "/.config/flvdown/flv.conf", "rb", 0)
+            for line in fileconf:
+                tmp = line.split("=")
+                if (tmp[0] == 'order'):
+                    list_order = tmp[1].replace(' : ', '.').split(',')[:-1]
+        except IOError:
+            print "check config"
+        for i in list_order[::-1]:
+            site = ' : '.join(i[1:].split('.'))
             for j in range(self.list_site.count()):
                 if (self.list_site.item(j).text()==site):
                     item = self.list_site.takeItem(j)

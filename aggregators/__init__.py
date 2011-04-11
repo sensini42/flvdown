@@ -1,4 +1,4 @@
-__all__ = ["free1", "free2", "sidereel"]
+__all__ = ["freetvvideoonline", "sidereel"]
 from urllib2 import urlopen
 def getPage(link):
     """ return the lines list of the page link """

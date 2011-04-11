@@ -1,5 +1,5 @@
-"""module for free-tv-video-online.me, testing different modules"""
-import free2_mod
+"""module for free-tv-video-online.me"""
+import freetvvideoonline_mod
 from . import getPage
 
 def getTvShowUrl(tvshow, season):
@@ -14,18 +14,9 @@ def getLinks(tvshow, season, episode):
     src_urltv = getPage(urltv)
     possible_links = []
     for line in src_urltv:
-        for nameModule in free2_mod.__all__:
+        for nameModule in freetvvideoonline_mod.__all__:
             if ((nameModule in line) and (('Episode '+episode + '<') in line)):
                 possible_links.append([line.split('"')[1], \
-                    "free2_mod." + nameModule])
+                    "freetvvideoonline_mod." + nameModule])
     return possible_links
     
-        
-    
-
-    ## liste=[]
-    ## for i in free1_mod.__all__:
-    ##     __import__("aggregators.free1_mod." + i)
-    ##     liste += sys.modules["aggregators.free1_mod."+i].getFlv(a)
-    ## return liste
-
