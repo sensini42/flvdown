@@ -58,10 +58,13 @@ def flvdown(tvshow, season, episode, options, list_site = None):
             verbose = 1
     possible_links = []
     for i in aggregators.__all__:
+        #        if verbose:
+        print "checking", i
         __import__("aggregators." + i)
         possible_links += sys.modules["aggregators."+i].getLinks(tvshow, \
             season, episode)
-    
+    #    if verbose:
+    print "done"
     ##Sort possible_links
     prio = dict(zip(['_mod.'.join(i.split(' : ')) \
                      for i in list_site], range(len(list_site))))

@@ -1,0 +1,37 @@
+""" get putlocker links from free-tv-..."""
+
+from .. import getPage
+from .. import waiting
+def getFlv(link, verbose):
+    """ return the url of the file from novamov"""
+    
+    ##episode page
+    src = getPage(link)
+    putlockerlink = ''
+    for i in src:
+        if ('src="http://www.putlocker.com/embed' in i):
+            putlockerlink = "http://www.putlocker.com/get_file.php?embed_stream=" + i.split("\"")[1].split("/")[-1]
+
+    if not putlockerlink:
+        if verbose:			
+            print '\033[1;31mputlocker link not found\033[0m (url: ' + link + ')'
+        return -1
+
+    if verbose :    
+        print '\ndownloading ' + putlockerlink
+
+    ##novamov page
+    src = getPage(putlockerlink)
+    print src
+    urlfile = ''
+    for i in src:
+        if ('media:content' in i):
+            urlfile = i.split('"')[5]
+
+    if urlfile == '':
+        if verbose:			
+            print '\033[1;31mfile not found\033[0m (url: ' + putlockerlink + ')'
+        return -1
+    else:
+        return (urlfile, None)
+	
