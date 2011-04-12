@@ -37,7 +37,7 @@ def flvdown(tvshow, season, episode, options, list_site = None):
         print 'there is a file name ' + filename + '...\n'
         choice = raw_input('continue ? (y/n)\n')
         if choice not in 'yYoO':
-            exit(0)
+            return -1
     interact = 0
     verbose = 0
     ##process arguments
@@ -73,7 +73,7 @@ def flvdown(tvshow, season, episode, options, list_site = None):
     url_found = False
     if possible_links == []:
         print '\033[1;31mno link\033[0m found'
-        exit(1)
+        return -1
     
     while not url_found:
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
@@ -85,7 +85,7 @@ def flvdown(tvshow, season, episode, options, list_site = None):
             possible_links.remove([link, znl])
             if possible_links == []:
                 print '\033[1;31mno link\033[0m found'
-                exit(1)
+                return -1
     final_url = final[0]
     ##  print final_url
     ##  return 
@@ -102,6 +102,8 @@ def flvdown(tvshow, season, episode, options, list_site = None):
     if (tmpfile):
         os.remove(tmpfile + ".html")
         os.remove(tmpfile + ".cook")
+
+    return 0
 
 #find . \( -name "*pyc" -o -name "*~" \) -exec \rm -f {} \;
 
