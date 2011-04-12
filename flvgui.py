@@ -690,10 +690,20 @@ class Flvgui(QtGui.QWidget):
 
 
 def main():
-    """ main """
     app = QtGui.QApplication([])
+    trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'),app)
+    trayIcon.show()
     flv = Flvgui()
     flv.show()
+
+    def toggle():
+        if flv.isVisible(): 
+            flv.hide()
+        else: 
+            flv.show()
+
+    """ main """
+    app.connect(trayIcon, SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), toggle)
     app.exec_()    
 
 
