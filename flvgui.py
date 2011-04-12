@@ -639,6 +639,7 @@ class Flvgui(QtGui.QWidget):
         """ check modules to populate list_site"""
         import sys
         import aggregators
+        self.list_site.clear()
         for i in aggregators.__all__:
             site = "aggregators." + i + "_mod"
             __import__(site)
