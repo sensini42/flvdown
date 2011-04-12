@@ -3,6 +3,8 @@ from .. import getPage
 from .. import waiting
 import random
 import os
+from tempfile import NamedTemporaryFile
+
 def getFlv(link, verbose):
     """ return the url of the file from zshare"""
 
@@ -14,7 +16,7 @@ def getFlv(link, verbose):
             zsharelink = i.split("'")[3]
 
     if not zsharelink:
-        if verbose:			
+        if verbose:      
             print '\033[1;31mzshare link not found\033[0m (url zshare:' +\
               link + ')'
         return -1
@@ -32,7 +34,7 @@ def getFlv(link, verbose):
 
     if zshareform == '':
         ##zsharelink may be a good url...
-        if verbose:			
+        if verbose:      
             print '\033[1;31mform not found\033[0m (url zshare:' +\
               zsharelink + ')'
         return -1
@@ -41,14 +43,20 @@ def getFlv(link, verbose):
         print '\ndownloading ' + zshareform
 
     ##zshare form
-    ascii = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    tmpfile = '/tmp/' + ''.join([random.choice(ascii) for _ in range(10)])
+    #ascii = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    #tmpfile = '/tmp/' + ''.join([random.choice(ascii) for _ in range(10)])
+    cooktmpfile = NamedTemporaryFile(suffix='.cook').name
+    htmltmpfile = NamedTemporaryFile(suffix='.html').name
 
+    #os.system("wget " + zshareform + " --post-data='download=1&referer2=\"" +\
+    #          zsharelink + "\"'  --save-cookies=" + tmpfile + ".cook -O " +\
+    #          tmpfile + ".html -nv")
     os.system("wget " + zshareform + " --post-data='download=1&referer2=\"" +\
-              zsharelink + "\"'  --save-cookies=" + tmpfile + ".cook -O " +\
-              tmpfile + ".html -nv")
+              zsharelink + "\"'  --save-cookies=" + cooktmpfile + " -O " +\
+              htmltmpfile + " -nv")
     
-    the_page = open(tmpfile + ".html","r")
+    #the_page = open(tmpfile + ".html","r")
+    the_page = open(htmltmpfile, "r")
     src = the_page.read().split('\n')
     the_page.close()
     
@@ -60,12 +68,15 @@ def getFlv(link, verbose):
     waiting(50, verbose)
 
     if urlfile == '':
-        if verbose:			
+        if verbose:      
             print '\033[1;31mfile not found\033[0m (urls zshare:' +\
               zshareform + ' and ' + zsharelink+ ')'
         return -1
 
-    urlfile = " --load-cookies=" + tmpfile + ".cook --save-cookies=" +\
-              tmpfile + ".cook --keep-session-cookies " + urlfile
-    return (urlfile, tmpfile)
+    #urlfile = " --load-cookies=" + tmpfile + ".cook --save-cookies=" +\
+    #          tmpfile + ".cook --keep-session-cookies " + urlfile
+    urlfile = " --load-cookies=" + cooktmpfile + " --save-cookies=" +\
+              cooktmpfile + " --keep-session-cookies " + urlfile
+    #return (urlfile, tmpfile)
+    return (urlfile, None)
 

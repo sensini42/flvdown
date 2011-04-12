@@ -12,11 +12,9 @@ import subdown
 ######################################################################
 ###take care of cookies
 ######################################################################
-import random
-ascii = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-cookieFile = '/tmp/' + ''.join([random.choice(ascii) for _ in range(10)])
+from tempfile import NamedTemporaryFile
+cookieFile = NamedTemporaryFile(suffix='.cookies-next.lwp').name
 
-cookieFile = cookieFile + 'cookies-next.lwp'
 from os import path as ospath
 from os import remove as osremove
 from os import system as ossystem
@@ -30,8 +28,6 @@ urlopen = urllib2.urlopen
 cj = cookielib.LWPCookieJar()
 request = urllib2.Request
 
-if ospath.isfile(cookieFile):
-    cj.load(cookieFile)
 if cookielib:
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
     urllib2.install_opener(opener)
@@ -201,7 +197,6 @@ def getListEpisode():
             if(item_ep_ondisk or item_ep_notondisk):
                 listep.append((tv_name, item_se, item_ep_ondisk, \
                                item_ep_notondisk))
-    osremove(cookieFile)
     return listep
 
 
@@ -313,14 +308,14 @@ class Flvgui(QtGui.QWidget):
         #ed_widg.setLayout(ed_layoutRadio)
         #grid3.addWidget(ed_widg, 0, 1)
         ed_checkbox = QtGui.QCheckBox('Interactive', self)
-        grid3.addWidget(ed_checkbox, 0, 2)
+        grid3.addWidget(ed_checkbox, 0, 0)
             
         i = 0
         list_edit = []
         for key in conf.keys():
             grid3.addWidget(QtGui.QLabel(key), i+1, 0)
             list_edit.append([key, QtGui.QLineEdit()])
-            grid3.addWidget(list_edit[i][1], i+1, 1, 1, 2) 
+            grid3.addWidget(list_edit[i][1], i+1, 1, 1, 1) 
             if key == 'password':
                 list_edit[i][1].setEchoMode(2)
             list_edit[i][1].setText(conf[key])
