@@ -65,16 +65,18 @@ def flvdown(tvshow, season, episode, options, list_site = None):
             season, episode)
     #    if verbose:
     print "done"
-    ##Sort possible_links
-    prio = dict(zip(['_mod.'.join(i.split(' : ')) \
-                     for i in list_site], range(len(list_site))))
-   
-    possible_links = sorted(possible_links, key=lambda i: prio[i[1]])
-    url_found = False
     if possible_links == []:
         print '\033[1;31mno link\033[0m found'
         return -1
     
+    ##Sort possible_links
+    if list_site != None :
+        prio = dict(zip(['_mod.'.join(i.split(' : ')) \
+                     for i in list_site], range(len(list_site))))
+   
+        possible_links = sorted(possible_links, key=lambda i: prio[i[1]])
+
+    url_found = False
     while not url_found:
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
         __import__("aggregators." + znl)
