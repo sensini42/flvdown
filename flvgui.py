@@ -46,13 +46,13 @@ class DownThread(QThread):
         self.option = option
         self.list_site = [str(list_site.item(i).text()) \
                           for i in range(list_site.count())]
+        self.parent = parent
         QThread.__init__(self, parent)
         
     def run(self):
         "download ep, sub, emit signal"
         ret = links.flvdown(self.tvshow, self.season, self.episode, \
                 self.option, self.list_site)
-        #ossystem("downsub.sh")
         if ret == 0:
             subdown.downSub(self.tvshow, self.tvshow, self.season, \
                      self.episode, self.option)
@@ -61,6 +61,7 @@ class DownThread(QThread):
 
         ## ret = ossystem("flvdown.py " + self.tvshow + " " + \
         ##     self.season + " " + self.episode + " " +self.option)
+        ##ossystem("downsub.sh")
 
 
 class VideoThread(QThread):
@@ -205,7 +206,7 @@ def getListEpisode():
 class Flvgui(QtGui.QWidget):
     """ Gui for flvdown"""
         
-    def __init__(self):
+    def __init__(self, parent=None):
         """ nothing special here"""
         super(Flvgui, self).__init__()
 
@@ -213,6 +214,10 @@ class Flvgui(QtGui.QWidget):
             QtGui.QMessageBox.warning(self, 'Config File', \
                 'Please check config', \
                 QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
+
+        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), self)
+        self.trayIcon.activated.connect(self.toggle)
+        self.trayIcon.show()
 
         self.list_site = QtGui.QListWidget()
         self.tab_widget = QtGui.QTabWidget()
@@ -242,10 +247,18 @@ class Flvgui(QtGui.QWidget):
                 
         button_close = QtGui.QPushButton("Close")
         mainLayout.addWidget(button_close, 1, 2)
-        self.connect(button_close, SIGNAL("clicked()"), self, SLOT("close()"))
+        #self.connect(button_close, SIGNAL("clicked()"), self, SLOT("close()"))
+        button_close.clicked.connect(self.close)
 
         self.setLayout(mainLayout)
         self.setWindowTitle('flvgui')
+
+    def toggle(self):
+        """ toggle main frame """
+        if self.isVisible(): 
+            self.hide()
+        else: 
+            self.show()
 
 
     def populate(self):
@@ -495,10 +508,11 @@ class Flvgui(QtGui.QWidget):
         
         fileconf.close()
 
-    @classmethod
-    def downFinished(cls, message):
+#    @classmethod
+    def downFinished(self, message):
         """ when a download is finished """
         print "Download finished", message
+        self.trayIcon.showMessage('flvgui', "Download finished " + message)
 
 #    @classmethod
     def downClicked(self, data):
@@ -695,20 +709,8 @@ class Flvgui(QtGui.QWidget):
 def main():
     """ main """
     app = QtGui.QApplication([])
-    trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), app)
-    trayIcon.show()
     flv = Flvgui()
     flv.show()
-
-    def toggle():
-        """ toggle main frame """
-        if flv.isVisible(): 
-            flv.hide()
-        else: 
-            flv.show()
-
-    app.connect(trayIcon, \
-        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), toggle)
     app.exec_()    
 
 
