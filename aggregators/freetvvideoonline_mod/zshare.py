@@ -1,7 +1,6 @@
 """ get zshare links from free-tv-..."""
 from .. import getPage
 from .. import waiting
-import random
 import os
 from tempfile import NamedTemporaryFile
 

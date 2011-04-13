@@ -1,7 +1,6 @@
 """ get divxden links from free-tv-..."""
 from .. import getPage
 import re
-import string
 
 def trad(pjs, ajs, cjs, kjs):
     """js function from divxden """
@@ -18,7 +17,7 @@ def trad(pjs, ajs, cjs, kjs):
 def convDecToBase(num, base, ddd=False):
     """ convert int in some base"""
     if not ddd:
-        ddd = dict(zip(range(36), list(string.digits + string.ascii_lowercase)))
+        ddd = dict(zip(range(36), '0123456789abcdefghijklmnopqrstuvwxyz'))
     if num == 0:
         return ''
     num, rem = divmod(num, base)

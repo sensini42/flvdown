@@ -16,7 +16,6 @@ from tempfile import NamedTemporaryFile
 cookieFile = NamedTemporaryFile(suffix='.cookies-next.lwp').name
 
 from os import path as ospath
-from os import remove as osremove
 from os import system as ossystem
 from os import chdir as oschdir
 cj = None
@@ -51,11 +50,12 @@ class DownThread(QThread):
         
     def run(self):
         "download ep, sub, emit signal"
-        ret = links.flvdown(self.tvshow, self.season, self.episode, self.option, \
-                      self.list_site)
+        ret = links.flvdown(self.tvshow, self.season, self.episode, \
+                self.option, self.list_site)
         #ossystem("downsub.sh")
         if ret == 0:
-            subdown.downSub(self.tvshow, self.tvshow, self.season, self.episode, self.option)
+            subdown.downSub(self.tvshow, self.tvshow, self.season, \
+                     self.episode, self.option)
         self.emit(SIGNAL("downFinished( QString )"), \
                   self.tvshow + " " + self.season + " " + self.episode)
 
@@ -459,7 +459,8 @@ class Flvgui(QtGui.QWidget):
         ##download tab, download all tvshows
         button_downAllES = QtGui.QPushButton("Down All")
         grid2.addWidget(button_downAllES, 3 + i_notondisk, 3, 1, 2)
-        btn_callbackAllES = lambda data = (list_ep, ed_checkbox): self.downAllESClicked(data)
+        btn_callbackAllES = lambda data = (list_ep, ed_checkbox): \
+               self.downAllESClicked(data)
         self.connect(button_downAllES, SIGNAL("clicked()"), btn_callbackAllES)
 
         ##download tab, add tvshows
@@ -602,12 +603,13 @@ class Flvgui(QtGui.QWidget):
         if (len(episode)==1):
             episode = "0" + episode
         files = os.listdir(tvshow)
-        for file in files :
-            if file.startswith(tvshow + season + episode) and \
-              not file.endswith('srt'):
-                file = tvshow + "/" + file
+        _file = ""
+        for _file in files :
+            if _file.startswith(tvshow + season + episode) and \
+              not _file.endswith('srt'):
+                _file = tvshow + "/" + _file
                 break
-        VideoThread((conf['player']+ " " + file), self).start()
+        VideoThread((conf['player']+ " " + _file), self).start()
 
     @classmethod
     def markClicked(cls, data):
@@ -691,20 +693,22 @@ class Flvgui(QtGui.QWidget):
 
 
 def main():
+    """ main """
     app = QtGui.QApplication([])
-    trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'),app)
+    trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), app)
     trayIcon.show()
     flv = Flvgui()
     flv.show()
 
     def toggle():
+        """ toggle main frame """
         if flv.isVisible(): 
             flv.hide()
         else: 
             flv.show()
 
-    """ main """
-    app.connect(trayIcon, SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), toggle)
+    app.connect(trayIcon, \
+        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), toggle)
     app.exec_()    
 
 
