@@ -142,7 +142,6 @@ def removeFromNextEpisode(movieId, userId, seasonId, episodeId):
 
 def getSrcPageNextEpisode(url):
     """ return the source page from next-episode """
-
     import urllib
     txdata = urllib.urlencode ({"username" : conf['login'], \
         "password" : conf['password']})
@@ -156,6 +155,7 @@ def getSrcPageNextEpisode(url):
         return ""
 
     cj.save(cookieFile)
+    txdata = None
     req = request("http://next-episode.net/" + url, txdata, txheaders)
     src = urlopen(req).read()
     return src
@@ -168,7 +168,7 @@ def getListEpisode():
     listepisode contains for each episode
     (movieId, userId, seasonId, episodeId)
     """
-    source = getSrcPageNextEpisode("track/")
+    source = getSrcPageNextEpisode("track")
     if (source == ""):
         return []
     
