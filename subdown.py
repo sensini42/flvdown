@@ -42,9 +42,8 @@ def downSub(rep, tvshow, season, episode, options):
     the_page = response.read().lower()
 
     src = the_page.split('\n')
-
     for i in src:
-        if tvshow in i:
+        if (tvshow + " (") in i:
             alink = i.split('<div')
             possible = [ j.split('<')[1] for j in alink if tvshow in j ]
 
@@ -65,7 +64,6 @@ def downSub(rep, tvshow, season, episode, options):
         print '\ndownloading from ' + couple[choice][1]
         if verbose > 1:
             print "url tv show:", urltv
-
 
     ##tvshow page
     req = Request(urltv, urlencode(values))
