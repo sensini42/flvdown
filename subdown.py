@@ -28,9 +28,8 @@ def downSub(rep, tvshow, season, episode, options):
     subname = ''
     if rep != '':
         subname = rep + "/"
-    subname = subname + tvshow.replace(' ', '_') + season + \
-         episode + ".srt"
-
+    subname = subname + tvshow + season + episode + ".srt"
+    tvshow = tvshow.replace('_',' ')
     ##search page
     urlbase = 'http://www.tvsubtitles.net/'
     urlsearch = urlbase + 'search.php'
@@ -177,7 +176,7 @@ if __name__ == "__main__":
     if (len(sys.argv)>2):
         option = sys.argv[2] 
 
-    mtvshow = re.search('[a-z _&]*', query).group(0).replace('_',' ')
+    mtvshow = re.search('[a-z _&]*', query).group(0)
     mseason = re.search('(?<=0)?[0-9]{1,2}(?=[0-9]{2})', query).group(0)
     mepisode = re.search('[0-9]{2}$', query).group(0)
 
