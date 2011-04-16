@@ -22,14 +22,19 @@ def downSub(rep, tvshow, season, episode, options):
         if ("v" in options):
             verbose = 1
 
+    if len(episode) == 1:
+        episode = "0" + episode
+
     if verbose:
         print tvshow, "season", season, "episode", episode
 
     subname = ''
     if rep != '':
         subname = rep + "/"
-    subname = subname + tvshow + season + episode + ".srt"
-    tvshow = tvshow.replace('_',' ')
+    subname = subname + tvshow + season + \
+         episode + ".srt"
+
+    tvshow = tvshow.replace('_', ' ')
     ##search page
     urlbase = 'http://www.tvsubtitles.net/'
     urlsearch = urlbase + 'search.php'
@@ -42,8 +47,9 @@ def downSub(rep, tvshow, season, episode, options):
     the_page = response.read().lower()
 
     src = the_page.split('\n')
+
     for i in src:
-        if (tvshow + " (") in i:
+        if tvshow + " (" in i:
             alink = i.split('<div')
             possible = [ j.split('<')[1] for j in alink if tvshow in j ]
 
@@ -64,6 +70,7 @@ def downSub(rep, tvshow, season, episode, options):
         print '\ndownloading from ' + couple[choice][1]
         if verbose > 1:
             print "url tv show:", urltv
+
 
     ##tvshow page
     req = Request(urltv, urlencode(values))

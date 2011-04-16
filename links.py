@@ -27,9 +27,9 @@ def flvdown(tvshow, season, episode, options, list_site = None):
 
     ##add a trailing 0 if num episode < 10
     if len(episode) == 1:
-        filename = tvshow + season + "0" + episode 
+        filename = tvshow + '/' + tvshow + season + "0" + episode 
     else:
-        filename = tvshow + season + episode
+        filename = tvshow + '/' + tvshow + season + episode
         
     ##test if a file with similar name exist
     ret = os.system("ls " + filename + "* 2> /dev/null")
@@ -89,21 +89,17 @@ def flvdown(tvshow, season, episode, options, list_site = None):
                 print '\033[1;31mno link\033[0m found'
                 return -1
     final_url = final[0]
-    ##  print final_url
-    ##  return 
-    if verbose:
-        print '\ndownloading file', final_url
 
-    if (not os.path.isdir(tvshow)):
-        os.mkdir(tvshow)
-        
     ext = "." + final_url.split('.')[-1]
 
-    os.system("wget -c " + final_url + " -O " + tvshow + "/" + filename + ext)
-    tmpfile = final[1]
-    if (tmpfile):
-        os.remove(tmpfile + ".html")
-        os.remove(tmpfile + ".cook")
+    return (final_url, filename + ext)
+
+def getFile(source, dest):    
+
+    if (not os.path.isdir(dest.split('/')[0])):
+        os.mkdir(dest.split('/')[0])
+        
+    os.system("wget -c " + source + " -O " + dest)
 
     return 0
 
@@ -116,5 +112,10 @@ if __name__ == "__main__":
     option = ""
     if (len(sys.argv)>4):
         option = sys.argv[4] 
-    flvdown(sys.argv[1], sys.argv[2], sys.argv[3], option)
+    url, dest = flvdown(sys.argv[1], sys.argv[2], sys.argv[3], option)
+    if url != -1:
+        if len(sys.argv) > 4:
+            print '\ndownloading file', url
+        getFile(url, dest)
+
 
