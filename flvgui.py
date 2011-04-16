@@ -62,12 +62,20 @@ class DownThread(QThread):
             if (not os.path.isdir(self.tvshow)):
                 os.mkdir(self.tvshow)
             self.emit(SIGNAL("downStart( QString )"), filename )
-            urllib.urlretrieve(ret, filename, reporthook=self.downInfo)
-            subdown.downSub(self.tvshow, self.tvshow, self.season, \
+            try:
+                urllib.urlretrieve(ret, filename, reporthook=self.downInfo)
+                subdown.downSub(self.tvshow, self.tvshow, self.season, \
                      self.episode, self.option)
-        self.emit(SIGNAL("downFinished( QString , PyQt_PyObject)"), \
-                  self.tvshow + " " + self.season + " " + self.episode, \
-                  self.infofile)
+            except:
+                self.emit(SIGNAL("downFinished(QString, QString , \
+                     PyQt_PyObject)"), "download error", \
+                     self.tvshow + " " + self.season + " " + self.episode, \
+                     self.infofile)
+            else:
+                self.emit(SIGNAL("downFinished( QString, QString , \
+                     PyQt_PyObject)"), "download finished", \
+                     self.tvshow + " " + self.season + " " + self.episode, \
+                     self.infofile)
 
     def downInfo(self, infobloc, taillebloc, totalblocs):
         self.emit(SIGNAL("downInfo( PyQt_PyObject )"), \
@@ -578,14 +586,14 @@ class Flvgui(QtGui.QWidget):
              infoline, self)
         self.connect(dth, SIGNAL("downStart(QString)"), infoline.downStart)
         self.connect(dth, SIGNAL("downInfo(PyQt_PyObject)"), infoline.downInfo)
-        self.connect(dth, SIGNAL("downFinished(QString, PyQt_PyObject)"),
-                 self.endThread)
+        self.connect(dth, SIGNAL("downFinished(QString, QString, \
+             PyQt_PyObject)"), self.endThread)
         dth.start() 
 
-    def endThread(self, message, infoline):
+    def endThread(self, titre, message, infoline):
         """ when a download is finished """
-        print "Download finished", message
-        self.trayIcon.showMessage('flvgui', "Download finished " + message)
+        print titre, message
+        self.trayIcon.showMessage(titre, message)
         self.stackedWidget.removeWidget(infoline)
         if self.stackedWidget.count() < 2:
             self.nextbutton.hide()
