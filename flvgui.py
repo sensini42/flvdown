@@ -57,26 +57,26 @@ class DownThread(QThread):
         
     def run(self):
         "download ep, sub, emit signal"
-        ret, filename = links.flvdown(self.tvshow, self.season, self.episode, \
-                self.option, self.list_site)
-        if ret != -1:
-            if (not os.path.isdir(self.tvshow)):
-                os.mkdir(self.tvshow)
-            self.emit(SIGNAL("downStart( QString )"), filename )
-            try:
+        try:
+            ret, filename = links.flvdown(self.tvshow, self.season, \
+                   self.episode, self.option, self.list_site)
+            if ret != -1:
+                if (not os.path.isdir(self.tvshow)):
+                    os.mkdir(self.tvshow)
+                self.emit(SIGNAL("downStart( QString )"), filename )
                 urllib.urlretrieve(ret, filename, reporthook=self.downInfo)
                 subdown.downSub(self.tvshow, self.tvshow, self.season, \
                      self.episode, self.option)
-            except:
-                self.emit(SIGNAL("downFinished(QString, QString , \
-                     PyQt_PyObject)"), "download error", \
-                     self.tvshow + " " + self.season + " " + self.episode, \
-                     self.infofile)
-            else:
-                self.emit(SIGNAL("downFinished( QString, QString , \
-                     PyQt_PyObject)"), "download finished", \
-                     self.tvshow + " " + self.season + " " + self.episode, \
-                     self.infofile)
+        except:
+            self.emit(SIGNAL("downFinished(QString, QString , \
+                  PyQt_PyObject)"), "download error", \
+                  self.tvshow + " " + self.season + " " + self.episode, \
+                  self.infofile)
+        else:
+            self.emit(SIGNAL("downFinished( QString, QString , \
+                  PyQt_PyObject)"), "download finished", \
+                  self.tvshow + " " + self.season + " " + self.episode, \
+                  self.infofile)
 
     def downInfo(self, infobloc, taillebloc, totalblocs):
         self.emit(SIGNAL("downInfo( PyQt_PyObject )"), \
