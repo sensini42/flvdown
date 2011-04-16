@@ -15,7 +15,8 @@ import time
 ###take care of cookies
 ######################################################################
 from tempfile import NamedTemporaryFile
-cookieFile = NamedTemporaryFile(suffix='.cookies-next.lwp').name
+cookieFile = NamedTemporaryFile(suffix='.cookies-next.lwp')
+cookieFileName = cookieFile.name
 
 from os import path as ospath
 from os import system as ossystem
@@ -143,7 +144,7 @@ def removeFromNextEpisode(movieId, userId, seasonId, episodeId):
         print "could not login"
         return ""
 
-    cj.save(cookieFile)
+    cj.save(cookieFileName)
 
     url = urlbase + 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'    
     txdata = urllib.urlencode ({"showCat" : "episode",
@@ -176,7 +177,7 @@ def getSrcPageNextEpisode(url):
 
     txdata = None
 
-    cj.save(cookieFile)
+    cj.save(cookieFileName)
     req = request("http://next-episode.net/" + url, txdata, txheaders)
     src = urlopen(req).read()
     return src

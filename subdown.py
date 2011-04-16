@@ -144,7 +144,8 @@ def downSub(rep, tvshow, season, episode, options):
 
 
     ##save zipfile
-    filename = tempfile.NamedTemporaryFile(suffix='.zip').name
+    file_ = tempfile.NamedTemporaryFile(suffix='.zip')
+    filename = file_.name
 
     if verbose:
         print "saving in", filename
