@@ -37,7 +37,7 @@ def flvdown(tvshow, season, episode, options, list_site = None):
         print 'there is a file name ' + filename + '...\n'
         choice = raw_input('continue ? (y/n)\n')
         if choice not in 'yYoO':
-            return -1
+            return -1, None
     interact = 0
     verbose = 0
     ##process arguments
@@ -67,7 +67,7 @@ def flvdown(tvshow, season, episode, options, list_site = None):
     print "done"
     if possible_links == []:
         print '\033[1;31mno link\033[0m found'
-        return -1
+        return -1, None
     
     ##Sort possible_links
     if list_site != None :
@@ -87,7 +87,7 @@ def flvdown(tvshow, season, episode, options, list_site = None):
             possible_links.remove([link, znl])
             if possible_links == []:
                 print '\033[1;31mno link\033[0m found'
-                return -1
+                return -1, None
     final_url = final[0]
 
     ext = "." + final_url.split('.')[-1]
