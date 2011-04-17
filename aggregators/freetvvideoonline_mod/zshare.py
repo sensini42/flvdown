@@ -44,8 +44,10 @@ def getFlv(link, verbose):
     ##zshare form
     #ascii = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     #tmpfile = '/tmp/' + ''.join([random.choice(ascii) for _ in range(10)])
-    cooktmpfile = NamedTemporaryFile(suffix='.cook').name
-    htmltmpfile = NamedTemporaryFile(suffix='.html').name
+    cooktmp = NamedTemporaryFile(suffix='.cook')
+    cooktmpfile = cooktmp.name
+    htmltmp = NamedTemporaryFile(suffix='.html')
+    htmltmpfile = htmltmp.name
 
     #os.system("wget " + zshareform + " --post-data='download=1&referer2=\"" +\
     #          zsharelink + "\"'  --save-cookies=" + tmpfile + ".cook -O " +\
