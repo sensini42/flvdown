@@ -11,6 +11,7 @@ import os
 import links
 import subdown
 import time
+import traceback
 ######################################################################
 ###take care of cookies
 ######################################################################
@@ -68,6 +69,7 @@ class DownThread(QThread):
                 subdown.downSub(self.tvshow, self.tvshow, self.season, \
                      self.episode, self.option)
         except:
+            traceback.print_exc()
             self.emit(SIGNAL("downFinished(QString, QString , \
                   PyQt_PyObject)"), "download error", \
                   self.tvshow + " " + self.season + " " + self.episode, \
