@@ -33,8 +33,8 @@ def getFlv(link, verbose):
             divxlink = i.split("'")[3]
 
     if not divxlink:
-        if verbose:			
-            print '\033[1;31mvidxden link not found\033[0m (url zshare:' +\
+        if verbose:      
+            print '\033[1;31mvidxden link not found\033[0m (url:' +\
               link + ')'
         return -1
     
@@ -49,6 +49,12 @@ def getFlv(link, verbose):
     for i in src:
         if ('eval(function(p,a,c,k,e,d)' in i):
             packfunction = i.split('>')[1]
+
+    if not packfunction:
+        if verbose:
+            print '\033[1;31mvidxden link not found\033[0m (url:' +\
+              divxlink + ')'
+        return -1
 
     arguments = packfunction[115:-13].split(',')
     pjs = ','.join(arguments[:-3])[1:-1]

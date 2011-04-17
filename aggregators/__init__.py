@@ -1,11 +1,12 @@
 __all__ = ["freetvvideoonline", "sidereel", "viptvbase"]
 from urllib2 import urlopen
-def getPage(link):
+def getPage(link, verbose=''):
     """ return the lines list of the page link """
     try:
         response = urlopen(link)
     except IOError:
-        print '\033[1;31mlink not found\033[0m (url:' + link + ')'
+        if verbose:
+            print '\033[1;31mlink not found\033[0m (url:' + link + ')'
         return -1
     else:
         the_page = response.read()
