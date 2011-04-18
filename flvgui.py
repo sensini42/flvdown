@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """ gui for flvdown """
 from PyQt4 import QtGui
-from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import SIGNAL, Qt
 from PyQt4.QtCore import SLOT
 from PyQt4.QtCore import QThread
 from PyQt4.QtCore import QCoreApplication
@@ -40,6 +40,8 @@ if cookielib:
 
 conf = {'login':'login', 'password':'password', 'player':'mplayer', \
         'base_directory':'/tmp'}
+dict_bug = {}#'The Office (US)' : 'The Office', \
+#        'Brothers & Sisters' : 'Brothers and Sisters'}
 
 class DownThread(QThread):
     """download an episode in a thread"""
@@ -105,7 +107,7 @@ def checkConfigFile():
                          "rb", 0)
         for line in fileconf:
             tmp = line.split("=")
-            if (tmp[0] != 'order'):
+            if (tmp[0] != 'order' and tmp[0] != 'dict_bug'):
                 conf[tmp[0]] = tmp[1].replace('"','')[:-1]
         fileconf.close()
         return 1
@@ -198,8 +200,6 @@ def getListEpisode():
     
     src = source.split('showName">')
 
-    dict_bug = {'The Office (US)' : 'The Office', \
-        'Brothers & Sisters' : 'Brothers and Sisters'}
     listep = []
     for i in src[1:]:
         lines = i.split('\n')
@@ -268,6 +268,126 @@ class InfoDown(QtGui.QWidget):
                 self.barre.reset()
                 sel.barre.setRange(0, 0)
 
+class EltListDictBug(QtGui.QWidget):
+
+    def __init__(self, key, value):
+        super(EltListDictBug, self).__init__()
+
+        self.key = key
+        self.value = value
+
+        mainLayout = QtGui.QHBoxLayout(self)
+
+        arrowlabel = QtGui.QLabel("->")
+        arrowlabel.setAlignment(Qt.AlignHCenter)
+        button_rmv = QtGui.QPushButton("Remove")
+        button_rmv.connect(button_rmv, SIGNAL("clicked()"), \
+            self.removeDictBug)
+        mainLayout.addWidget(QtGui.QLabel(key))
+        mainLayout.addWidget(arrowlabel)
+        mainLayout.addWidget(QtGui.QLabel(value))
+        mainLayout.addWidget(button_rmv)
+
+    def removeDictBug(self):
+        self.emit(SIGNAL("removeDictBug( PyQt_PyObject )"), [self.key, \
+             self.value])
+
+
+class LineTvShow(QtGui.QWidget):
+    """ tvshow line """
+
+    def __init__(self, tvshow, season, info, ondisk):
+        super(LineTvShow, self).__init__()
+
+        mainLayout = QtGui.QHBoxLayout(self)
+        mainLayout.addWidget(QtGui.QLabel(tvshow))
+        mainLayout.addWidget(QtGui.QLabel(season))
+
+        if ondisk:
+            combo_ondisk = QtGui.QComboBox(self)
+            for (_, _, _, episodeId) in info:
+                combo_ondisk.addItem(str(episodeId))
+            mainLayout.addWidget(combo_ondisk)
+            ##play
+            button_play = QtGui.QPushButton("Play")
+            mainLayout.addWidget(button_play)
+            btn_callbackPlay = (lambda data = (tvshow, season, \
+                combo_ondisk): self.playClicked(data))
+            self.connect(button_play, SIGNAL("clicked()"), btn_callbackPlay) 
+            ##mark
+            button_mark = QtGui.QPushButton("Mark as read")
+            mainLayout.addWidget(button_mark)
+            btn_callbackMark = (lambda data = (combo_ondisk, \
+                info): self.markClicked(data))
+            self.connect(button_mark, SIGNAL("clicked()"), btn_callbackMark)
+            ##delete
+            button_delete = QtGui.QPushButton("Mark and Delete")
+            mainLayout.addWidget(button_delete)
+            btn_callbackDelete = (lambda data = (tvshow, season, \
+                    combo_ondisk, info): self.deleteClicked(data))
+            self.connect(button_delete, SIGNAL("clicked()"), btn_callbackDelete)
+        else: #notondisk
+            combo_notondisk = QtGui.QComboBox(self)
+            for num in info:
+                combo_notondisk.addItem(num)
+            mainLayout.addWidget(combo_notondisk)
+            ##down
+            button_down = QtGui.QPushButton("Down")
+            mainLayout.addWidget(button_down)
+            btn_callback = (lambda data = (tvshow, season, \
+                combo_notondisk): self.downClicked(data))
+            self.connect(button_down, SIGNAL("clicked()"), btn_callback)
+            ##downAll
+            button_downAll = QtGui.QPushButton("All")
+            mainLayout.addWidget(button_downAll)
+            btn_callbackAll = (lambda data = (tvshow, season, \
+                combo_notondisk): self.downAllClicked(data))
+            self.connect(button_downAll, SIGNAL("clicked()"), btn_callbackAll) 
+            
+    def downAllClicked(self, data):
+        self.emit(SIGNAL("downAllClicked( PyQt_PyObject )"), data)
+        
+    def downClicked(self, data):
+        self.emit(SIGNAL("downClicked( PyQt_PyObject )"), data)
+        
+    def playClicked(self, data):
+        """ when a button_play is clicked """
+        #data from combo
+        tvshow = str(data[0])
+        season = str(data[1])
+        tvshow = "_".join(tvshow.split(' ')).lower()
+        episode = str(data[2].currentText())
+        if (len(episode)==1):
+            episode = "0" + episode
+        files = os.listdir(tvshow)
+        _file = ""
+        for _file in files :
+            if _file.startswith(tvshow + season + episode) and \
+              not _file.endswith('srt'):
+                _file = tvshow + "/" + _file
+                break
+        VideoThread((conf['player']+ " " + _file), self).start()
+
+    @classmethod
+    def markClicked(cls, data):
+        """ when a button_mark is clicked """
+        #data from combo
+        (movieId, userId, seasonId, episodeId) = data[1][data[0].currentIndex()]
+        removeFromNextEpisode(movieId, userId, seasonId, episodeId)
+
+    @classmethod
+    def deleteClicked(cls, data):
+        """ when a button_delete is clicked """
+        tvshow = str(data[0])
+        season = str(data[1])
+        tvshow = "_".join(tvshow.split(' ')).lower()
+        episode = str(data[2].currentText())
+        (movieId, userId, seasonId, episodeId) = data[3][data[2].currentIndex()]
+        removeFromNextEpisode(movieId, userId, seasonId, episodeId)
+        if (len(episode)==1):
+            episode = "0" + episode
+        ossystem("rm " + tvshow + "/" + tvshow + season + episode + "*")
+
             
 class Flvgui(QtGui.QWidget):
     """ Gui for flvdown"""
@@ -285,31 +405,51 @@ class Flvgui(QtGui.QWidget):
         self.trayIcon.activated.connect(self.toggle)
         self.trayIcon.show()
 
-        self.list_site = QtGui.QListWidget()
-        self.tab_widget = QtGui.QTabWidget()
-        
-        self.tab1 = QtGui.QWidget()
-        self.tab2 = QtGui.QWidget()
-        self.tab3 = QtGui.QWidget()
-        self.tab4 = QtGui.QWidget()
+        self.setWindowTitle('flvgui')
 
-        self.tab_widget.addTab(self.tab1, "Playing")
-        self.tab_widget.addTab(self.tab2, "Downloading")
-        self.tab_widget.addTab(self.tab3, "Options")
-        self.tab_widget.addTab(self.tab4, "Site order")
-        self.tab_widget.setCurrentIndex(1)
+        self.list_ep = []
+        self.linetvshow = []
+
+        self.mainlayout()
+
+  
+    def mainlayout(self):
+        
         mainLayout = QtGui.QGridLayout(self)
-        mainLayout.addWidget(self.tab_widget, 0, 0, 1, 3)
 
-        self.populate()
-        
+        tab_widget = QtGui.QTabWidget()
+        mainLayout.addWidget(tab_widget, 0, 0, 1, 3)
+
+        self.tab1 = QtGui.QWidget()
+        tab_widget.addTab(self.tab1, "Playing")
+        self.maketab1()
+
+        self.tab2 = QtGui.QWidget()
+        tab_widget.addTab(self.tab2, "Downloading")
+        self.maketab2()
+
+        self.tab3 = QtGui.QWidget()
+        tab_widget.addTab(self.tab3, "Options")
+        self.maketab3()
+
+        self.tab4 = QtGui.QWidget()
+        tab_widget.addTab(self.tab4, "Site order")
+        self.maketab4()
+
+        self.tab5 = QtGui.QWidget()
+        tab_widget.addTab(self.tab5, "Dict Bug")
+        self.maketab5()
+
+        tab_widget.setCurrentIndex(1)
+        self.refresh()
+
         button_sub = QtGui.QPushButton("Subtitles")
         mainLayout.addWidget(button_sub, 1, 0)
         self.connect(button_sub, SIGNAL("clicked()"), self.downsub)
                 
         button_refresh = QtGui.QPushButton("Refresh")
         mainLayout.addWidget(button_refresh, 1, 1)
-        self.connect(button_refresh, SIGNAL("clicked()"), self.populate)
+        self.connect(button_refresh, SIGNAL("clicked()"), self.refresh)
                 
         button_close = QtGui.QPushButton("Close")
         mainLayout.addWidget(button_close, 1, 2)
@@ -317,104 +457,29 @@ class Flvgui(QtGui.QWidget):
         button_close.clicked.connect(self.close)
 
         self.setLayout(mainLayout)
-        self.setWindowTitle('flvgui')
-
-    def toggle(self):
-        """ toggle main frame """
-        if self.isVisible(): 
-            self.hide()
-        else: 
-            self.show()
 
 
-    def populate(self):
-        "populate the tab_widget"
-        oschdir(conf['base_directory'])
-        focusingOn = self.tab_widget.currentIndex()
-        self.tab_widget.removeTab(3)
-        self.tab_widget.removeTab(2)
-        self.tab_widget.removeTab(1)
-        self.tab_widget.removeTab(0)
-        del(self.tab1)
-        del(self.tab2)
-        del(self.tab3)
-        del(self.tab4)
-
-        self.tab1 = QtGui.QWidget()
-        self.tab2 = QtGui.QWidget()
-        self.tab3 = QtGui.QWidget()
-        self.tab4 = QtGui.QWidget()
-        
+    def maketab1(self):
+        """ playing tab """
         grid1 = QtGui.QGridLayout(self.tab1)
+  
+        ## data from next-episode
+        self.dataondisk = QtGui.QGridLayout(None)
+        grid1.addLayout(self.dataondisk, 1, 0)
+        
+    def maketab2(self):
+        """ downloading tab """
         grid2 = QtGui.QGridLayout(self.tab2)
-        grid3 = QtGui.QGridLayout(self.tab3)
-        grid4 = QtGui.QGridLayout(self.tab4)
-        
-        self.tab_widget.addTab(self.tab1, "Playing")
-        self.tab_widget.addTab(self.tab2, "Downloading")
-        self.tab_widget.addTab(self.tab3, "Options")
-        self.tab_widget.addTab(self.tab4, "Site order")
-        
-        self.tab_widget.setCurrentIndex(focusingOn)
 
-        self.getSites()
-        self.orderSites()
-        
-        button_up = QtGui.QPushButton("Up")
-        button_down = QtGui.QPushButton("Down")
-        self.connect(button_up, SIGNAL("clicked()"), self.moveUp)
-        self.connect(button_down, SIGNAL("clicked()"), self.moveDown)
-        
-        grid4.addWidget(self.list_site, 0, 1, 2, 1)
-        grid4.addWidget(button_up, 0, 2)
-        grid4.addWidget(button_down, 1, 2)
-
-
-
-        ##tab options
-        self.ed_checkbox = QtGui.QCheckBox('Interactive', self)
-        grid3.addWidget(self.ed_checkbox, 0, 0)
-            
-        i = 0
-        list_edit = []
-        for key in conf.keys():
-            grid3.addWidget(QtGui.QLabel(key), i+1, 0)
-            list_edit.append([key, QtGui.QLineEdit()])
-            grid3.addWidget(list_edit[i][1], i+1, 1, 1, 1) 
-            if key == 'password':
-                list_edit[i][1].setEchoMode(2)
-            list_edit[i][1].setText(conf[key])
-            i += 1
-        button_save = QtGui.QPushButton("Save config file")
-        btn_save_callback = (lambda data = (list_edit) : \
-             self.saveClicked(data))
-        self.connect(button_save, SIGNAL("clicked()"), btn_save_callback)
-        grid3.addWidget(button_save, 5, 0)
-
-        ##ouch
-        button_saveb = QtGui.QPushButton("Save config file")
-        btn_save_callbackb = (lambda data = (list_edit) : \
-             self.saveClicked(data))
-        self.connect(button_saveb, SIGNAL("clicked()"), btn_save_callbackb)
-        grid4.addWidget(button_saveb, 2, 1)
-        
-        ##tab downloading
-        empty_label = QtGui.QLabel("")
-        grid1.addWidget(QtGui.QLabel('Tv show'), 0, 0 )
-        grid1.addWidget(QtGui.QLabel('Season'), 0, 1 )
-        grid1.addWidget(QtGui.QLabel('Episode'), 0, 2 )
-
+        ## info line
         grid2.addWidget(QtGui.QLabel('Tv show'), 0, 0)
         grid2.addWidget(QtGui.QLabel('Season'), 0, 1)
         grid2.addWidget(QtGui.QLabel('Episode'), 0, 2)
-        grid2.addWidget(empty_label, 0, 3)
-        grid2.addWidget(empty_label, 0, 4)
 
-        #download not from next-episode
+        ## episode not on next-episode
         edit_tv = QtGui.QLineEdit()
         edit_se = QtGui.QLineEdit()
         edit_ep = QtGui.QLineEdit()
-        
         button_edit = QtGui.QPushButton("Down")
         btn_edit_callback = (lambda data = (edit_tv, \
              edit_se, edit_ep): self.downClicked(data))
@@ -430,120 +495,160 @@ class Flvgui(QtGui.QWidget):
         grid2.addWidget(edit_ep, 1, 2)
         grid2.addWidget(button_edit, 1, 3)
         grid2.addWidget(button_all_edit, 1, 4)
+
+        ## data from next-episode
+        self.datanotondisk = QtGui.QGridLayout(None)
+        grid2.addLayout(self.datanotondisk, 2, 0, 1, 5)
         
-
-        #lines from next-episode
-        list_ep = getListEpisode()
-
-        combo_ondisk = []
-        combo_notondisk = []
-        button_down = []
-        button_downAll = []
-        button_play = []
-        button_mark = []
-        button_delete = []
-
-        btn_callback = []
-        btn_callbackAll = []
-        btn_callbackPlay = []
-        btn_callbackMark = []
-        btn_callbackDelete = []
-
-        i_ondisk = 0
-        i_notondisk = 0
-
-        for (i,(tvshow, season, ondisk, notondisk)) in enumerate(list_ep):
-            if(ondisk != []):
-                #episode is on disk: playing tab
-                grid1.addWidget(QtGui.QLabel(tvshow), 1 + i_ondisk, 0)
-                grid1.addWidget(QtGui.QLabel(season), 1 + i_ondisk, 1)
-                combo_ondisk.append(QtGui.QComboBox(self))
-                for (_movieId, _userId, _seasonId, episodeId) in ondisk:
-                    combo_ondisk[i].addItem(str(episodeId))
-                grid1.addWidget(combo_ondisk[i], 1 + i_ondisk, 2)
-                ##play
-                button_play.append(QtGui.QPushButton("Play"))
-                grid1.addWidget(button_play[i], 1 + i_ondisk, 3)
-                btn_callbackPlay.append(lambda data = (tvshow, season, \
-                    combo_ondisk[i]): self.playClicked(data))
-                self.connect(button_play[i], \
-                    SIGNAL("clicked()"), btn_callbackPlay[i]) 
-                ##mark
-                button_mark.append(QtGui.QPushButton("Mark as read"))
-                grid1.addWidget(button_mark[i], 1 + i_ondisk, 4)
-                btn_callbackMark.append(lambda data = (combo_ondisk[i], \
-                    ondisk): self.markClicked(data))
-                self.connect(button_mark[i], \
-                    SIGNAL("clicked()"), btn_callbackMark[i])
-                ##delete
-                button_delete.append(QtGui.QPushButton("Mark and Delete"))
-                grid1.addWidget(button_delete[i], 1 + i_ondisk, 5)
-                btn_callbackDelete.append(lambda data = (tvshow, season, \
-                    combo_ondisk[i], ondisk): self.deleteClicked(data))
-                self.connect(button_delete[i], \
-                    SIGNAL("clicked()"), btn_callbackDelete[i]) 
-                i_ondisk += 1
-            else:
-                combo_ondisk.append([])
-                button_play.append([])
-                button_delete.append([])
-                button_mark.append([])
-                btn_callbackPlay.append([])
-                btn_callbackDelete.append([])
-                btn_callbackMark.append([])
-                
-            if(notondisk != []):
-                #episode is not on disk: downloading tab
-                grid2.addWidget(QtGui.QLabel(tvshow), 2 + i_notondisk, 0)
-                grid2.addWidget(QtGui.QLabel(season), 2 + i_notondisk, 1)
-                combo_notondisk.append(QtGui.QComboBox(self))
-                for num in notondisk:
-                    combo_notondisk[i].addItem(num)
-                grid2.addWidget(combo_notondisk[i], 2 + i_notondisk, 2)
-                ##down
-                button_down.append(QtGui.QPushButton("Down"))
-                grid2.addWidget(button_down[i], 2 + i_notondisk, 3)
-                btn_callback.append(lambda data = (tvshow, season, \
-                    combo_notondisk[i]): self.downClicked(data))
-                self.connect(button_down[i], \
-                    SIGNAL("clicked()"), btn_callback[i])
-                ##downAll
-                button_downAll.append(QtGui.QPushButton("All"))
-                grid2.addWidget(button_downAll[i], 2 + i_notondisk, 4)
-                btn_callbackAll.append(lambda data = (tvshow, season, \
-                    combo_notondisk[i]): self.downAllClicked(data))
-                self.connect(button_downAll[i], \
-                    SIGNAL("clicked()"), btn_callbackAll[i]) 
-                i_notondisk += 1
-            else:
-                combo_notondisk.append([])
-                button_down.append([])
-                button_downAll.append([])
-                btn_callback.append([])
-                btn_callbackAll.append([])
-        ##download tab, download all tvshows
+        ## button down all
         button_downAllES = QtGui.QPushButton("Down All")
-        grid2.addWidget(button_downAllES, 3 + i_notondisk, 3, 1, 2)
-        btn_callbackAllES = lambda data = (list_ep): \
+        grid2.addWidget(button_downAllES, 3, 3, 1, 2)
+        btn_callbackAllES = lambda data = (self.list_ep): \
                self.downAllESClicked(data)
         self.connect(button_downAllES, SIGNAL("clicked()"), btn_callbackAllES)
 
-        ##download tab, add tvshows
+        ## add tvshows
         ed_addShow = QtGui.QLineEdit()
-        grid2.addWidget(ed_addShow, 4 + i_notondisk, 0, 1, 3)
+        grid2.addWidget(ed_addShow, 4, 0, 1, 3)
         button_addShow = QtGui.QPushButton("Add tvshow")
-        grid2.addWidget(button_addShow, 4 + i_notondisk, 3, 1, 2)
+        grid2.addWidget(button_addShow, 4, 3, 1, 2)
         btn_callbackAddShow = lambda data = (ed_addShow): \
                               self.addShow(data)
         self.connect(button_addShow, SIGNAL("clicked()"), btn_callbackAddShow)
 
         ## info down
         self.stackedWidget = QtGui.QStackedWidget()
-        grid2.addWidget(self.stackedWidget, 5 + i_notondisk, 0, 1, 4)
+        grid2.addWidget(self.stackedWidget, 5, 0, 1, 4)
         self.nextbutton = QtGui.QPushButton("Next")
         self.nextbutton.clicked.connect(self.nextstacked)
         self.nextbutton.hide()
-        grid2.addWidget(self.nextbutton, 5 + i_notondisk, 4)
+        grid2.addWidget(self.nextbutton, 5, 4)
+
+    def maketab3(self):
+        """ options tab """
+        grid3 = QtGui.QGridLayout(self.tab3)
+
+        self.ed_checkbox = QtGui.QCheckBox('Interactive', self)
+        grid3.addWidget(self.ed_checkbox, 0, 0)
+            
+        i = 0
+        self.list_edit = []
+        for key in conf.keys():
+            grid3.addWidget(QtGui.QLabel(key), i+1, 0)
+            self.list_edit.append([key, QtGui.QLineEdit()])
+            grid3.addWidget(self.list_edit[i][1], i+1, 1, 1, 1) 
+            if key == 'password':
+                self.list_edit[i][1].setEchoMode(2)
+            self.list_edit[i][1].setText(conf[key])
+            i += 1
+
+        button_save = QtGui.QPushButton("Save config file")
+        self.connect(button_save, SIGNAL("clicked()"), self.saveClicked)
+        grid3.addWidget(button_save, 5, 0)
+        
+    def maketab4(self):
+        """ site order tab """
+        grid4 = QtGui.QGridLayout(self.tab4)
+
+        self.list_site = QtGui.QListWidget()
+        self.getSites()
+        self.orderSites()
+
+        button_up = QtGui.QPushButton("Up")
+        button_down = QtGui.QPushButton("Down")
+        self.connect(button_up, SIGNAL("clicked()"), self.moveUp)
+        self.connect(button_down, SIGNAL("clicked()"), self.moveDown)
+        
+        grid4.addWidget(self.list_site, 0, 1, 2, 1)
+        grid4.addWidget(button_up, 0, 2)
+        grid4.addWidget(button_down, 1, 2)
+
+        button_save = QtGui.QPushButton("Save config file")
+        self.connect(button_save, SIGNAL("clicked()"), self.saveClicked)
+        grid4.addWidget(button_save, 2, 1)
+        
+    def maketab5(self):
+        """ dict bug tab """
+        grid5 = QtGui.QGridLayout(self.tab5)
+
+        grid5.addWidget(QtGui.QLabel('Next-episode'), 0, 0)
+        grid5.addWidget(QtGui.QLabel('  ->  '), 0, 1)
+        grid5.addWidget(QtGui.QLabel('Down'), 0, 2)
+        grid5.addWidget(QtGui.QLabel(""), 0, 3)
+
+        self.lineedit_ne = QtGui.QLineEdit()
+        self.lineedit_d = QtGui.QLineEdit()
+        button_add = QtGui.QPushButton("Add dict bug")
+        self.connect(button_add, SIGNAL("clicked()"), self.addDictBug)
+        grid5.addWidget(self.lineedit_ne, 1, 0)
+        grid5.addWidget(QtGui.QLabel(""), 1, 1)
+        grid5.addWidget(self.lineedit_d, 1, 2)
+        grid5.addWidget(button_add, 1, 3)
+
+        self.dictbug = QtGui.QGridLayout()
+        grid5.addLayout(self.dictbug, 2, 0, 1, 4)
+
+        button_save = QtGui.QPushButton("Save config file")
+        self.connect(button_save, SIGNAL("clicked()"), self.saveClicked)
+        grid5.addWidget(button_save, 3, 0)
+
+        self.list_dictbug = self.getDictBug()
+        self.eltdictbug = []
+        self.refresh5()
+
+    def addDictBug(self):
+        self.list_dictbug.append([str(self.lineedit_ne.text()), \
+          str(self.lineedit_d.text())])
+        self.refresh5()
+
+    def removeDictBug(self, data):
+        self.list_dictbug.remove(data)
+        self.refresh5()
+
+    def refresh5(self):    
+        for i in self.eltdictbug:
+            i.setParent(None)
+            del(i)
+
+        self.eltdictbug = []
+        for (key, value) in self.list_dictbug:
+            tmp = EltListDictBug(key, value)
+            self.connect(tmp, SIGNAL("removeDictBug(PyQt_PyObject)"), \
+                self.removeDictBug)
+            self.dictbug.addWidget(tmp)
+            self.eltdictbug.append(tmp)
+
+    def toggle(self):
+        """ toggle main frame """
+        if self.isVisible(): 
+            self.hide()
+        else: 
+            self.show()
+
+
+    def refresh(self):
+        "populate the tab_widget"
+        oschdir(conf['base_directory'])
+        self.list_ep = getListEpisode()
+
+        for i in self.linetvshow:
+            i.setParent(None)
+            del(i)
+
+        self.linetvshow = []
+        for (i,(tvshow, season, ondisk, notondisk)) in enumerate(self.list_ep):
+            if(ondisk != []):
+                tmp = LineTvShow(tvshow, season, ondisk, True)
+                self.linetvshow.append(tmp)
+                self.dataondisk.addWidget(tmp)
+            if(notondisk != []):
+                tmp = LineTvShow(tvshow, season, notondisk, False)
+                self.connect(tmp, SIGNAL("downClicked(PyQt_PyObject)"), \
+                    self.downClicked)
+                self.connect(tmp, SIGNAL("downAllClicked(PyQt_PyObject)"), \
+                    self.downAllClicked)
+                self.linetvshow.append(tmp)
+                self.datanotondisk.addWidget(tmp)
 
     def nextstacked(self):
         if self.stackedWidget.count > 1:
@@ -559,19 +664,22 @@ class Flvgui(QtGui.QWidget):
         """ when we want to add a tvshow """
         addToNextEpisode(str(data.text()))
     
-    def saveClicked(self, data):
+    def saveClicked(self):
         """ when save button is clicked"""
-        # data = [ [key, QLineEdit] , ... ] 
         if (not os.path.exists(ospath.expanduser('~') + "/.config/flvdown/")):
             os.mkdir(ospath.expanduser('~') + "/.config/flvdown/")
         fileconf = open(ospath.expanduser('~') + \
             "/.config/flvdown/flv.conf", "w", 0)
-        for [key, line] in data:
+        for [key, line] in self.list_edit:
             fileconf.write(key + '="' + str(line.text()) + '\"\n')
             conf[key] = str(line.text())
         fileconf.write('order="')
         for row_item in range(self.list_site.count()):
             fileconf.write(self.list_site.item(row_item).text() + ', ')
+        fileconf.write('"\n')
+        fileconf.write('dict_bug="')
+        for (key, value) in self.list_dictbug:
+            fileconf.write(key + ' : ' + value + ', ')
         fileconf.write('"\n')
         
         fileconf.close()
@@ -655,49 +763,21 @@ class Flvgui(QtGui.QWidget):
         #data from combo
         ossystem("downsub.sh")
 
-    def playClicked(self, data):
-        """ when a button_play is clicked """
-        #data from combo
-        tvshow = str(data[0])
-        season = str(data[1])
-        tvshow = "_".join(tvshow.split(' ')).lower()
-        episode = str(data[2].currentText())
-        if (len(episode)==1):
-            episode = "0" + episode
-        files = os.listdir(tvshow)
-        _file = ""
-        for _file in files :
-            if _file.startswith(tvshow + season + episode) and \
-              not _file.endswith('srt'):
-                _file = tvshow + "/" + _file
-                break
-        VideoThread((conf['player']+ " " + _file), self).start()
-
-    @classmethod
-    def markClicked(cls, data):
-        """ when a button_mark is clicked """
-        #data from combo
-        (movieId, userId, seasonId, episodeId) = data[1][data[0].currentIndex()]
-        removeFromNextEpisode(movieId, userId, seasonId, episodeId)
-
-
-    @classmethod
-    def deleteClicked(cls, data):
-        """ when a button_delete is clicked """
-        tvshow = str(data[0])
-        season = str(data[1])
-        tvshow = "_".join(tvshow.split(' ')).lower()
-        episode = str(data[2].currentText())
-        (movieId, userId, seasonId, episodeId) = data[3][data[2].currentIndex()]
-        removeFromNextEpisode(movieId, userId, seasonId, episodeId)
-        if (len(episode)==1):
-            episode = "0" + episode
-#parent = ?
-#        reply = QtGui.QMessageBox.question(self, 'Message',
-#            "Are you sure you want to delete?", QtGui.QMessageBox.Yes | 
-#            QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-#        if reply:
-        ossystem("rm " + tvshow + "/" + tvshow + season + episode + "*")
+    def getDictBug(self):
+        list_dictbug = []
+        try:
+            fileconf = open(ospath.expanduser('~') + \
+                            "/.config/flvdown/flv.conf", "rb", 0)
+            for line in fileconf:
+                tmp = line.split("=")
+                if (tmp[0] == 'dict_bug'):
+                    list_dict = tmp[1].replace('"', '').split(',')[:-1]
+                    for ld in list_dict:
+                        list_dictbug.append([ld.split(':')[0], \
+                            ld.split(':')[1]])
+        except IOError:
+            print "check config"
+        return list_dictbug
 
     def getSites(self):
         """ check modules to populate list_site"""
