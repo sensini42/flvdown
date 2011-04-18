@@ -4,6 +4,7 @@
 import os
 import aggregators
 import sys 
+import re
 
 
 def getEpisodeLink(liste, verbose, interact):
@@ -91,6 +92,12 @@ def flvdown(tvshow, season, episode, options, list_site = None):
     final_url = final[0]
 
     ext = "." + final_url.split('.')[-1]
+
+    if re.match("^\d", final_url):
+        final_url = 'http://' + final_url 
+
+    if verbose:
+        print final_url
 
     return (final_url, filename + ext)
 

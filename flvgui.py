@@ -198,7 +198,8 @@ def getListEpisode():
     
     src = source.split('showName">')
 
-    dict_bug = {'The Office (US)' : 'The Office'}
+    dict_bug = {'The Office (US)' : 'The Office', \
+        'Brothers & Sisters' : 'Brothers and Sisters'}
     listep = []
     for i in src[1:]:
         lines = i.split('\n')
@@ -644,7 +645,7 @@ class Flvgui(QtGui.QWidget):
     def downAllESClicked(self, data):
         """ when the buttondownalles is clicked """
         print data[0]
-        for (tvshow, season, _ondisk, notondisk) in data[0]:
+        for (tvshow, season, _, notondisk) in data[0]:
             for epi in notondisk:
                 self.runThread(tvshow, str(season), str(epi))
 
