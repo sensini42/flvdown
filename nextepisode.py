@@ -1,115 +1,161 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+""" connect to next-episode and manage episode """
 
 from urllib import urlencode
 from urllib2 import Request, build_opener, HTTPCookieProcessor, \
    install_opener, urlopen
 from cookielib import LWPCookieJar
 from tempfile import NamedTemporaryFile
-from os.path import isfile
-from glob import glob
 
-def existFile(tvshow, season, episode):
-		if(len(episode)==1):
-				episode = "0" + episode
-		tvshow = '_'.join(tvshow.split()).lower()
-		return glob(tvshow + '/' + tvshow + season + episode + '.*')
-
-
+from episodetv import episodeTV
 class NextEpisode():
-		""" class to deal with next-episode.net """
+    """ class to deal with next-episode.net """
 
-		def __init__(self, login, password, dict_bug={}):
-				
-				# save parameters
-				self.login = login
-				self.password = password
+    def __init__(self, login, password, dict_bug={}):
+        # save parameters
+        self.__login = login
+        self.__pwd = password
+        self.dict_bug = dict_bug
 
-				
-				self.txheaders = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 5.5; WinNT)'}
-				self.urlbase = 'http://next-episode.net/'
-				self.dict_bug = dict_bug
-
-				# take care of cookies
-				self.cookieFile = NamedTemporaryFile()
-				self.cj = LWPCookieJar()
-				opener = build_opener(HTTPCookieProcessor(self.cj))
-				install_opener(opener)
-
-		def addDictBug(self, key, value):
-				self.dict_bug[key] = value
-
-		def getSrcPage(self, url, txdata=None):
-
-				req = Request(self.urlbase + url, txdata, self.txheaders)
-				src = urlopen(req).read()
-				self.cj.save(self.cookieFile.name)
-				return src
-
-		def connect(self):
-
-				txdata = urlencode({"username": self.login, "password": self.password})
-
-				try:
-						self.getSrcPage('userlogin', txdata)
-				except:
-						raise Exception('Connect Error')
+        # misc
+        self.__txheaders = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 5.5; WinNT)'}
+        self.__urlbase = 'http://next-episode.net/'
+        self.__list = None
+        
+        # take care of cookies
+        self.__cookieFile = NamedTemporaryFile()
+        self.__cj = LWPCookieJar()
+        opener = build_opener(HTTPCookieProcessor(self.__cj))
+        install_opener(opener)
+        
+        self.__connect()
+        self.updateList()      
 
 
-		def getListEpisode(self):
-				source = self.getSrcPage('track/')
-				if not source:
-						return []
+    def addDictBug(self, key, value):
+        """ add a new 'bug' """
+        self.dict_bug[key] = value
 
-				src = source.split('showName">')
+    def __getSrcPage(self, url, txdata=None):
+        """ return the source page from next-episode """
+        req = Request(self.__urlbase + url, txdata, self.__txheaders)
+        src = urlopen(req).read()
+        self.__cj.save(self.__cookieFile.name)
+        return src
 
-				listep = []
-				for i in src[1:]:
-						lines = i.split('\n')
-						if lines[0].endswith("</a>"):
-								#else: tvshow not tracked
-								item_ep_ondisk = []
-								item_ep_notondisk = []
-								for i in lines:
-										if "removeEpisode" in i:
-												tv_name = lines[0][:-4]
-												if tv_name in self.dict_bug:
-														tv_name = self.dict_bug[tv_name]
-												item_se = i.split()[9][1:-2]
-												num_ep = i.split()[10][1:-2]
-												strlist = i.split("removeEpisode(")[1].split(')')[0]
-												epilist = [x[1:-1] for x in strlist.split(', ')[:-1]]
-												if not existFile(tv_name, item_se, num_ep):
-														item_ep_notondisk.append(num_ep)
-												else:
-														item_ep_ondisk.append(num_ep)
-								if(item_ep_ondisk or item_ep_notondisk):
-										listep.append((tv_name, item_se, item_ep_ondisk, \
-										    item_ep_notondisk))
+    def __connect(self):
+        """ first connexion to next-episode : log in """
+        txdata = urlencode({"username": self.__login, "password": self.__pwd})
+        try:
+            self.__getSrcPage('userlogin', txdata)
+        except:
+            raise Exception('Connect Error')
+        
 
-				return listep
+    def __getListEpisode(self):
+        source = self.__getSrcPage('track/')
+        if not source:
+            return []
+        
+        src = source.split('showName">')
+        
+        listep = set()
+        
+        ##
+        ## a refaire avec des re
+        ##
+        for i in src[1:]:
+            lines = i.split('\n')
+            if lines[0].endswith("</a>"):
+                #else: tvshow not tracked
+                for i in lines:
+                    if "removeEpisode" in i:
+                        tv_name = lines[0][:-4]
+                        if tv_name in self.dict_bug:
+                            tv_name = self.dict_bug[tv_name]
+                        num_season = i.split()[9][1:-2]
+                        num_epi = i.split()[10][1:-2]
+                        id_list = i.split("removeEpisode(")[1].split(')')[0]
+                        ids = [x[1:-1] for x in id_list.split(', ')[:-1]]
+                        epitv = episodeTV(tv_name, num_season, num_epi, ids)
+                        listep.add(epitv)
+        return listep
 
-		def addShow(self, title):
-				src = self.getSrcPage('-'.join(title.split(' ')))
-				url = src.split('to watchlist')[0].split('"')[-2]
-				self.getSrcPage(url)
+    def addShow(self, title):
+        """ add the _title_ show to watchlist """
+        src = self.__getSrcPage('-'.join(title.split(' ')))
+        url = src.split('to watchlist')[0].split('"')[-2]
+        self.__getSrcPage(url)
 
-		def removeEpisode(self, movieId, userId, seasonId, episodeId):
-				url = 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'
-				txdata = urlencode({"showCat": "episode", \
-				                    "movieId": movieId, \
-														"userId": userId, \
-														"seasonId": seasonId, \
-														"episodeId": episodeId, \
-														"parsedString": seasonId + "x" + episodeId})
-				self.getSrcPage(url, txdata)
-				
+    def markAsRead(self, movieId, userId, seasonId, episodeId):
+        """ mark the episode as read"""
+        url = 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'
+        txdata = urlencode({"showCat": "episode", \
+                            "movieId": movieId, \
+                            "userId": userId, \
+                            "seasonId": seasonId, \
+                            "episodeId": episodeId, \
+                            "parsedString": seasonId + "x" + episodeId})
+        self.__getSrcPage(url, txdata)
+
+
+    def updateList(self):
+        """ update the list of episodes """
+#        for i in self.__list:
+#            del(i)#utile?
+        self.__list = self.__getListEpisode()
+        
+    def printList(self):
+        """ print the list of episodes """
+        for i in  self.__list:
+            print i.getBaseName()
+        
+    def removeShow(self, title):
+        """ remove the _title_show from watchlist """
+        src = self.getSrcPage('-'.join(title.split(' ')))
+        url = src.split('from watchlist')[0].split('"')[-2]
+        self.getSrcPage(url)
+
+    def trackShow(self, movieId):
+        """ trackshow """
+        self.getSrcPage('track?startTracking=' + movieId)
+
+    def untrackShow(self, movieId, userId):
+        """ untrack show """
+        url = 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'
+        txdata = urlencode({"showCat": "stopTracking", \
+                            "movieId": movieId, \
+                            "userId": userId, \
+                            "seasonId": 0, \
+                            "episodeId": 0, \
+                            "parsedString": 0})
+        self.getSrcPage(url, txdata)
+
+    def getSuggestions(self):
+        """
+        return the list of suggestion
+        in format (tvshow, movieid)
+        """
+        src = self.getSrcPage('we_suggest/').split('\n')
+        sugges = []
+        for i in src:
+            if 'hideid' in i:
+                res = findall('href="([^"]*)"', i)
+                for i in range(len(res)-1):
+                    if 'hideid' in res[i+1]:
+                        sugges.append( (res[i].split('/')[-1], \
+                            res[i+1].split('=')[-1]) )
+                break
+        return sugges
+
+
 import sys
 if __name__ == '__main__':
-		ne = NextEpisode(sys.argv[1], sys.argv[2])
-		ne.addDictBug('The Office (US)', 'The Office')
-		ne.addDictBug('Brothers & Sisters', 'Brothers and Sisters')
-		ne.connect()
-		#print ne.getListEpisode()
-		#ne.addShow('chelsea lately')
-		#ne.removeEpisode('619', '66436', '5', '7')
+    ne = NextEpisode(sys.argv[1], sys.argv[2])
+    ne.printList()
+    #print ne.getListEpisode()
+    #ne.addShow('chelsea lately')
+    #ne.removeEpisode('619', '66436', '5', '7')
 
 
