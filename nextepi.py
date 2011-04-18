@@ -26,16 +26,20 @@ class nextepi():
     """ connect to next-episode and manage episode """
 
     def __init__(self, login, password):
-        self.login = login
-        self.pwd = password
-        self.log()
-        ## to delete show
-        self.userId = None
-        self.listToWatch = self.listToWatch()
+        self.__login = login
+        self.__pwd = password
+        self.__log()
+        self.__userId = None        ## to delete show
+        self.__list = self.__listToWatch()
 
-    def log(self):
+    def __log(self):
         """ first connexion to next-episode : log in, fill userID """
         pass
+    #http://stackoverflow.com/questions/2030652/logging-into-facebook-with-python
+        ## cookie = cookielib.CookieJar()
+        ## opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( cookie ) )
+        ## urllib2.install_opener( opener )
+
     ###ou vont les cookies ? 
         ## import urllib
         ## txdata = urllib.urlencode ({"username" : conf['login'], \
@@ -48,12 +52,10 @@ class nextepi():
         ## except IOError:
         ##     print "could not login"
         ##     return ""
-
         ## txdata = None
-
         ## cj.save(cookieFileName)
 
-    def listToWatch(self):
+    def __listToWatch(self):
         """ return the list of episode not seen """
         ##epi = episodeTV(show, bla, bli)
         ## return  a list of epi
@@ -90,6 +92,9 @@ class nextepi():
     ## return listep
 
         pass
+
+    def getList(self):
+        return self.__list
 
     def addShow(self, title):
         """ add the _title_ show to watch """
@@ -132,7 +137,7 @@ class nextepi():
     
 
 
-    def getSrc(url):
+    def __getSrc(url):
         """ return the source page from next-episode """
         pass
         ## req = request("http://next-episode.net/" + url, txdata, txheaders)
