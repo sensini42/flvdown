@@ -52,7 +52,7 @@ class episodeTV():
         tvfiles = oslistdir(self.tvshow_)
         videoFile = ""
         for videoFile in tvfiles:
-            if (videoFile.startswith(self.getBasename()) and \
+            if (videoFile.startswith(self.getBaseName()) and \
               not (videoFile == self.getSrtName())):
                 videoFile = self.tvshow_ + "/" + videoFile
                 break

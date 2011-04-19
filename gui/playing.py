@@ -119,9 +119,12 @@ class Playing(QtGui.QWidget):
         mainLayout.addWidget(self.nothingtoplay, 1, 0, 1, 6)
 
         ## title
-        mainLayout.addWidget(QtGui.QLabel("show"), 1, 0)
-        mainLayout.addWidget(QtGui.QLabel("season"), 1, 1)
-        mainLayout.addWidget(QtGui.QLabel("episode"), 1, 2)
+        self.show_label = QtGui.QLabel('Show')
+        self.season_label = QtGui.QLabel('Season')
+        self.episode_label = QtGui.QLabel('Episode')
+        mainLayout.addWidget(self.show_label, 1, 0)
+        mainLayout.addWidget(self.season_label, 1, 1)
+        mainLayout.addWidget(self.episode_label, 1, 2)
 
         ## combo show
         self.show_cb = QtGui.QComboBox()
@@ -164,6 +167,9 @@ class Playing(QtGui.QWidget):
         self.button_play.setVisible(value)
         self.button_mark.setVisible(value)
         self.button_delete.setVisible(value)
+        self.show_label.setVisible(value)
+        self.season_label.setVisible(value)
+        self.episode_label.setVisible(value)
         self.nothingtoplay.setVisible(not value)
 
     def update(self, player=None):
