@@ -40,7 +40,7 @@ class episodeTV():
     
     def removeFile(self):
         """ delete the file """
-        ossystem("rm " + tvshow + "/" + tvshow + season + episode + "*")
+        ossystem("rm " + self.tvshow_ + "/" + self.getBaseName() + ".*")
     
     
     def existFile(self):
