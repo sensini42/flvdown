@@ -64,6 +64,8 @@ def removeFromNextEpisode(movieId, userId, seasonId, episodeId):
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread
+from PyQt4.QtCore import Qt
+
 
 from os import system as ossystem
 from os import listdir as oslistdir
@@ -85,7 +87,7 @@ class VideoThread(QThread):
 class Playing(QtGui.QWidget):
     """ display playing list """
 
-    def __init__(self, list_ep=None, player='mplayer'):
+    def __init__(self, nextep, player='mplayer'):
         """ initialisation """
         super(Playing, self).__init__()
 
@@ -99,9 +101,9 @@ class Playing(QtGui.QWidget):
         self.season_l = None
         self.episode_cb = None
         self.info = None
-
+        self.nextep = nextep
         self.populate()
-        self.update(list_ep, player)
+        self.update(player)
 
     def populate(self):
         """ create layout """
@@ -110,6 +112,11 @@ class Playing(QtGui.QWidget):
 
         ## better display
         mainLayout.addWidget(QtGui.QStackedWidget(), 0, 0, 1, 6)
+        
+        ## nothingtoplay
+        self.nothingtoplay = QtGui.QLabel('Nothing to play')
+        self.nothingtoplay.setAlignment(Qt.AlignHCenter)
+        mainLayout.addWidget(self.nothingtoplay, 1, 0, 1, 6)
 
         ## title
         mainLayout.addWidget(QtGui.QLabel("show"), 1, 0)
@@ -157,16 +164,20 @@ class Playing(QtGui.QWidget):
         self.button_play.setVisible(value)
         self.button_mark.setVisible(value)
         self.button_delete.setVisible(value)
+        self.nothingtoplay.setVisible(not value)
 
-    def update(self, list_ep=None, player=None):
+    def update(self, player=None):
         """ update """
         if player:
             self.player = player
+        list_ep = self.nextep.getList()
         if list_ep:
             self.list_ep = list_ep
             self.show_cb.clear()
-            for (tvshow, _, ondisk, _) in self.list_ep:
-                if ondisk:
+            for episode in self.list_ep:
+                tvshow = episode.tvshowSpace
+                if episode.isOnDisk and \
+                     (self.show_cb.findText(episode.tvshowSpace) == -1):
                     self.show_cb.addItem(tvshow)
             if self.show_cb.count() > 0:
                 self.changeShow()
@@ -177,50 +188,33 @@ class Playing(QtGui.QWidget):
     def changeShow(self):
         """ when show_cb is changed """
         show = self.show_cb.currentText()
-        for (tvshow, season, ondisk, _) in self.list_ep:
+        self.episode_cb.clear()
+        self.info = []
+        for episode in self.list_ep:
+            tvshow = episode.tvshowSpace
+            strepi = episode.strEpisode
+            season = episode.strSeason
             if show == tvshow:
-                self.season_l.setText(str(season))
-                self.episode_cb.clear()
-                self.info = []
-                for (mid, uid, sid, epi) in ondisk:
-                    self.episode_cb.addItem(epi)
-                    self.info.append([tvshow, season, (mid, uid, sid, epi)])
+                self.season_l.setText(season)
+                if episode.isOnDisk:
+                    self.episode_cb.addItem(strepi)
+                    self.info.append(episode)
 
     def playClicked(self):
         """ when a button_play is clicked """
-        (tvshow, season, (_, _, _, episode)) = \
-            self.info[self.episode_cb.currentIndex()]
-        tvshow = "_".join(tvshow.split(' ')).lower()
-        if (len(episode)==1):
-            episode = "0" + episode
-        files = oslistdir(tvshow)
-        _file = ""
-        for _file in files :
-            if _file.startswith(tvshow + season + episode) and \
-              not _file.endswith('srt'):
-                _file = tvshow + "/" + _file
-                break
-        #print "play " + self.player + " " + _file
-        VideoThread((self.player+ " " + _file), self).start()
+        episode = self.info[self.episode_cb.currentIndex()]
+        videoName = episode.getVideoName()
+        VideoThread((self.player+ " " + videoName), self).start()
 
     def markClicked(self):
         """ when a button_mark is clicked """
-        (_, _, (movieId, userId, seasonId, episodeId)) = \
-            self.info[self.episode_cb.currentIndex()]
+        episode = self.info[self.episode_cb.currentIndex()]
         #print "mark", (movieId, userId, seasonId, episodeId)
-        removeFromNextEpisode(movieId, userId, seasonId, episodeId)
+        self.nextep.markAsRead(*(episode.ids))
+
 
     def deleteClicked(self):
         """ when a button_delete is clicked """
         self.markClicked()
-        (tvshow, season, (_, _, _, episode)) = \
-            self.info[self.episode_cb.currentIndex()]
-        tvshow = "_".join(tvshow.split(' ')).lower()
-        if (len(episode)==1):
-            episode = "0" + episode
-        files = oslistdir(tvshow)
-        for _file in files :
-            if _file.startswith(tvshow + season + episode):
-                #print "remove", tvshow + "/" + _file
-                osremove(tvshow + "/" + _file)
-   
+        episode = self.info[self.episode_cb.currentIndex()]
+        episode.removeFile()

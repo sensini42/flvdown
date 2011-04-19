@@ -9,6 +9,7 @@ from cookielib import LWPCookieJar
 from tempfile import NamedTemporaryFile
 
 from episodetv import episodeTV
+from operator import attrgetter
 class NextEpisode():
     """ class to deal with next-episode.net """
 
@@ -71,7 +72,7 @@ class NextEpisode():
                 #else: tvshow not tracked
                 for i in lines:
                     if "removeEpisode" in i:
-                        tv_name = lines[0][:-4]
+                        tv_name = lines[0][:-4].lower()
                         if tv_name in self.dict_bug:
                             tv_name = self.dict_bug[tv_name]
                         num_season = i.split()[9][1:-2]
@@ -80,6 +81,7 @@ class NextEpisode():
                         ids = [x[1:-1] for x in id_list.split(', ')[:-1]]
                         epitv = episodeTV(tv_name, num_season, num_epi, ids)
                         listep.add(epitv)
+        listep = sorted(listep, key=attrgetter('tvshow_','strEpisode'))
         return listep
 
     def addShow(self, title):
@@ -105,6 +107,11 @@ class NextEpisode():
 #        for i in self.__list:
 #            del(i)#utile?
         self.__list = self.__getListEpisode()
+        
+    def getList(self):
+        """ return the list of episodes """
+        self.updateList()
+        return self.__list
         
     def printList(self):
         """ print the list of episodes """

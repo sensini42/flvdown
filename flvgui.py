@@ -12,6 +12,7 @@ import links
 import subdown
 import time
 import traceback
+from nextepisode import NextEpisode
 ######################################################################
 ###take care of cookies
 ######################################################################
@@ -21,8 +22,9 @@ cookieFileName = cookieFile.name
 
 from os import path as ospath
 from os import system as ossystem
-from os import chdir as oschdir
 from os import remove as osremove
+from os import chdir as oschdir
+
 cj = None
 cookielib = None
 
@@ -47,83 +49,6 @@ from gui.dictbug import Dictbug
 
 conf2 = {}
 dict_bug2 = {}
-
-def existFile(tvshow, season, episode):
-    """ test if a matching file exists """
-    import glob
-    if (len(episode)==1):
-        episode = "0" + episode
-    tvshow_ = '_'.join(tvshow.split()).lower()
-    return glob.glob(tvshow_ + '/' + tvshow_ + season + episode + '.*')
-    
-
-def getSrcPageNextEpisode(url):
-    """ return the source page from next-episode """
-
-    import urllib
-    txdata = urllib.urlencode ({"username" : conf2['login'], \
-        "password" : conf2['password']})
-    txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Win NT)'}
-
-    try:
-        req = request("http://next-episode.net/", txdata, txheaders)
-        urlopen(req)
-    except IOError:
-        print "could not login"
-        return ""
-
-    txdata = None
-
-    cj.save(cookieFileName)
-    req = request("http://next-episode.net/" + url, txdata, txheaders)
-    src = urlopen(req).read()
-    return src
-
-
-def getListEpisode():
-    """
-    return the list of episode from next-episode
-    in format (tvshow, season, listepisodeOnDisk, listepisodeNotOnDisk)
-    listepisode contains for each episode
-    (movieId, userId, seasonId, episodeId)
-    """
-    source = getSrcPageNextEpisode("track/")
-    if (source == ""):
-        return []
-    
-    src = source.split('showName">')
-
-    listep = []
-    for i in src[1:]:
-        lines = i.split('\n')
-        if lines[0].endswith("</a>"):
-            #else: tvshow not tracked
-            item_ep_ondisk = []
-            item_ep_notondisk = []
-            for i in lines:
-                if "removeEpisode" in i:
-                    tv_name = lines[0][:-4]
-                    if tv_name in dict_bug2:
-                        tv_name = dict_bug2[tv_name]
-                    item_se = i.split()[9][1:-2]
-                    num_ep = i.split()[10][1:-2]
-                    strlist = i.split("removeEpisode(")[1].split(')')[0]
-                    epilist = [x[1:-1] for x in strlist.split(', ')[:-1]]
-                    if(not existFile(tv_name, item_se, num_ep)):
-                        item_ep_notondisk.append(num_ep)
-                    else:
-                        item_ep_ondisk.append(epilist)
-            if(item_ep_ondisk or item_ep_notondisk):
-                listep.append((tv_name, item_se, item_ep_ondisk, \
-                               item_ep_notondisk))
-    return listep
-
-
-
-
-
-
-
 
 class Flvgui(QtGui.QWidget):
     """ Gui for flvdown"""
@@ -151,7 +76,8 @@ class Flvgui(QtGui.QWidget):
         self.setWindowTitle('flvgui')
 
         self.list_ep = []
-
+        self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
+                                  self.dict_bug)
         self.mainlayout()
 
     def checkConfigFile(self):
@@ -204,10 +130,10 @@ class Flvgui(QtGui.QWidget):
         tab_widget = QtGui.QTabWidget()
         mainLayout.addWidget(tab_widget, 0, 0, 1, 3)
 
-        self.playing = Playing()
+        self.playing = Playing(self.nextep)
         tab_widget.addTab(self.playing, "Playing")
 
-        self.downloading = Downloading(parent=self)
+        self.downloading = Downloading(self.nextep, parent=self)
         tab_widget.addTab(self.downloading, "Downloading")
 
         self.options = Options(self.conf, parent=self)
@@ -286,10 +212,8 @@ class Flvgui(QtGui.QWidget):
     def update(self):
         "populate the tab_widget"
         oschdir(self.conf['base_directory'])
-        self.list_ep = getListEpisode()
-
-        self.playing.update(self.list_ep, self.conf['player'])
-        self.downloading.update(self.list_ep, self.list_site)
+        self.playing.update(self.conf['player'])
+        self.downloading.update(list_site=self.list_site)
 
 
     

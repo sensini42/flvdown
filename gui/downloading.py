@@ -74,19 +74,20 @@ import traceback
 import time
 
 import subdown
+import links
+import episodetv
 
 class DownThread(QThread):
     """download an episode in a thread"""
 
-    def __init__(self, (tvshow, season, episode), option, list_site, \
+    def __init__(self, episode, option, list_site, \
                  infofile, parent = None):
         """ initialisation """
-        self.tvshow = tvshow
-        self.season = season
-        self.episode = episode
+        self.tvshow = episode.tvshow_
+        self.season = episode.strSeason
+        self.episode = episode.strEpisode
         self.option = option
-        self.list_site = [str(list_site.item(i).text()) \
-                      for i in range(list_site.count())]
+        self.list_site = list_site
         self.infofile = infofile
         self.parent = parent
         
@@ -175,7 +176,7 @@ class InfoDown(QtGui.QWidget):
 class Downloading(QtGui.QWidget):
     """ display playing list """
 
-    def __init__(self, list_ep=None, list_site=None, parent=None):
+    def __init__(self, nextep, list_site=None, parent=None):
         """ initialisation """
         super(Downloading, self).__init__()
 
@@ -197,9 +198,9 @@ class Downloading(QtGui.QWidget):
         self.button_down = None
         self.button_all = None
         self.nextbutton = None
-
+        self.nextep = nextep
         self.populate()
-        self.update(list_ep, list_site)
+        self.update(list_site)
 
     def populate(self):
         """ create layout """
@@ -291,14 +292,16 @@ class Downloading(QtGui.QWidget):
         self.button_downall.setVisible(value)
         
 
-    def update(self, list_ep=None, list_site=None):
+    def update(self, list_site=None):
         """ update """
+        list_ep = self.nextep.getList()
         if list_ep:
             self.list_ep = list_ep
             self.show_cb.clear()
-            for (tvshow, _, _, notondisk) in self.list_ep:
-                if notondisk:
-                    self.show_cb.addItem(tvshow)
+            for episode in self.list_ep:
+                if (not episode.isOnDisk) and \
+                     (self.show_cb.findText(episode.tvshowSpace) == -1):
+                    self.show_cb.addItem(episode.tvshowSpace)
             if self.show_cb.count() != 0:
                 self.changeShow()
                 self.displayButtons(True)
@@ -310,42 +313,42 @@ class Downloading(QtGui.QWidget):
     def changeShow(self):
         """ when show_cb is changed """
         show = self.show_cb.currentText()
-        for (tvshow, season, _, notondisk) in self.list_ep:
+        self.episode_cb.clear()
+        self.info = []
+        for episode in self.list_ep:
+            tvshow = episode.tvshowSpace
             if show == tvshow:
-                self.season_l.setText(str(season))
-                self.episode_cb.clear()
-                self.info = []
-                for epi in notondisk:
-                    self.episode_cb.addItem(epi)
-                    self.info.append([tvshow, season, epi])
+                self.season_l.setText(episode.strSeason)
+                if not episode.isOnDisk:
+                    self.episode_cb.addItem(episode.strEpisode)
+                    self.info.append(episode)
 
-    @classmethod
-    def addShow(cls, data):
+
+    def addShow(self, data):
         """ when we want to add a tvshow """
-        addToNextEpisode(str(data.text()))
+        self.nextep.addShow(str(data.text()))
 
     def nextstacked(self):
         """ view next downloading """
         swc = self.stackedWidget.count()
         if swc > 1:
             swci = self.stackedWidget.currentIndex()
-            if swci != swc -1:
-                self.stackedWidget.setCurrentIndex( swci + 1)
+            if swci != swc - 1:
+                self.stackedWidget.setCurrentIndex(swci + 1)
             else:
                 self.stackedWidget.setCurrentIndex(0)
 
-    def runThread(self, tvshow, season, episode):
+    def runThread(self, episode):
         """ run a download thread """
         option = ""
         if self.ed_checkbox.isChecked():
             option += "i"
-        tvshow = "_".join(tvshow.split(' ')).lower()
-        infoline = InfoDown(tvshow + " " + season + " " + episode)
+        tvshow = episode.tvshow_
+        infoline = InfoDown(episode.getBaseName())
         self.stackedWidget.addWidget(infoline)
         if self.stackedWidget.count() > 1:
             self.nextbutton.show()
-        dth = DownThread((tvshow, season, episode), option, self.list_site,
-             infoline, self)
+        dth = DownThread(episode, option, self.list_site, infoline, self)
         self.connect(dth, SIGNAL("downStart(QString)"), infoline.downStart)
         self.connect(dth, SIGNAL("downInfo(PyQt_PyObject)"), infoline.downInfo)
         self.connect(dth, SIGNAL("downFinished(QString, QString, \
@@ -374,24 +377,24 @@ class Downloading(QtGui.QWidget):
         list_ep = list(set_ep)
         list_ep.sort()
         for i in list_ep:
-            self.runThread(tvshow, season, str(i))
+            epi = episodetv.episodeTV(tvshow, season, str(i), None)
+            self.runThread(epi)
 
     def downClicked(self):
         """ when down from combo """
-        (tvshow, season, episode) = self.info[self.episode_cb.currentIndex()]
-        self.runThread(tvshow, season, episode)
+        episode = self.info[self.episode_cb.currentIndex()]
+        self.runThread(episode)
 
     def allClicked(self):
         """ when all from combo """
         for i in range(self.episode_cb.count()):
-            (tvshow, season, episode) = self.info[i]
-            self.runThread(tvshow, season, episode)
+            episode = self.info[i]
+            self.runThread(episode)
 
     def downallClicked(self):
         """ when downall is clicked """
-        for (tvshow, season, _, notondisk) in self.list_ep:
-            for episode in notondisk:
-                self.runThread(tvshow, season, episode)
+        for episode in self.list_ep:
+            self.runThread(episode)
 
 
    

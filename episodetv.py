@@ -11,7 +11,7 @@ from os import listdir as oslistdir
 class episodeTV():
     """ one instance for one episode """
     def __init__(self, tvshow, season, episode, ids):
-        self.tvshow = tvshow
+        self.tvshow = tvshow.lower()
         self.tvshow_ = "_".join(self.tvshow.split(" "))
         self.tvshowSpace = " ".join(self.tvshow.split("_"))
         self.numSeason = int(season)
@@ -25,9 +25,8 @@ class episodeTV():
         self.isOnDisk = self.existFile()
 
     def getBaseName(self):
-        """ return foo_1_01 """
-        return self.tvshow_ + "_" + self.strSeason + "_" + \
-               self.strEpisode
+        """ return foo101 """
+        return self.tvshow_ + self.strSeason + self.strEpisode
 
     def getSrtName(self):
         """ return foo_1_01.srt """
@@ -50,12 +49,12 @@ class episodeTV():
     
     def getVideoName(self):
         """ return the name of the video file (once downloaded) """
-        tvfiles = os.listdir(self.tvshow_)
+        tvfiles = oslistdir(self.tvshow_)
         videoFile = ""
         for videoFile in tvfiles:
             if (videoFile.startswith(self.getBasename()) and \
               not (videoFile == self.getSrtName())):
                 videoFile = self.tvshow_ + "/" + videoFile
                 break
-        
+        return videoFile
     
