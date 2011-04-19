@@ -206,10 +206,13 @@ class Downloading(QtGui.QWidget):
         
         mainLayout = QtGui.QGridLayout(self)
 
+        ## better display
+        mainLayout.addWidget(QtGui.QStackedWidget(), 0, 0, 1, 5)
+
         ## title
-        mainLayout.addWidget(QtGui.QLabel("show"), 0, 0)
-        mainLayout.addWidget(QtGui.QLabel("season"), 0, 1)
-        mainLayout.addWidget(QtGui.QLabel("episode"), 0, 2)
+        mainLayout.addWidget(QtGui.QLabel("show"), 1, 0)
+        mainLayout.addWidget(QtGui.QLabel("season"), 1, 1)
+        mainLayout.addWidget(QtGui.QLabel("episode"), 1, 2)
 
         ## episode not on next-episode
         edit_tv = QtGui.QLineEdit()
@@ -219,41 +222,41 @@ class Downloading(QtGui.QWidget):
         btn_edit_callback = (lambda data = (edit_tv, \
              edit_se, edit_ep): self.downFreeClicked(data))
         self.connect(button_edit, SIGNAL("clicked()"), btn_edit_callback)
-        mainLayout.addWidget(edit_tv, 1, 0)
-        mainLayout.addWidget(edit_se, 1, 1)
-        mainLayout.addWidget(edit_ep, 1, 2)
-        mainLayout.addWidget(button_edit, 1, 3, 1, 2)
+        mainLayout.addWidget(edit_tv, 2, 0)
+        mainLayout.addWidget(edit_se, 2, 1)
+        mainLayout.addWidget(edit_ep, 2, 2)
+        mainLayout.addWidget(button_edit, 2, 3, 1, 2)
 
         ## combo show
         self.show_cb = QtGui.QComboBox()
         self.show_cb.currentIndexChanged.connect(self.changeShow)
-        mainLayout.addWidget(self.show_cb, 2, 0)
+        mainLayout.addWidget(self.show_cb, 3, 0)
 
         ## label season
         self.season_l = QtGui.QLabel('')
-        mainLayout.addWidget(self.season_l, 2, 1)
+        mainLayout.addWidget(self.season_l, 3, 1)
 
         ## combo episode
         self.episode_cb = QtGui.QComboBox()
-        mainLayout.addWidget(self.episode_cb, 2, 2)
+        mainLayout.addWidget(self.episode_cb, 3, 2)
 
         ## button down 
         self.button_down = QtGui.QPushButton("Down")
-        mainLayout.addWidget(self.button_down, 2, 3)
+        mainLayout.addWidget(self.button_down, 3, 3)
         self.button_down.clicked.connect(self.downClicked)
 
         ## button all
         self.button_all = QtGui.QPushButton("All")
-        mainLayout.addWidget(self.button_all, 2, 4)
+        mainLayout.addWidget(self.button_all, 3, 4)
         self.button_all.clicked.connect(self.allClicked)
 
         ## checkbox interactive
         self.ed_checkbox = QtGui.QCheckBox('Interactive download', self)
-        mainLayout.addWidget(self.ed_checkbox, 3, 1, 1, 2)
+        mainLayout.addWidget(self.ed_checkbox, 4, 1, 1, 2)
 
         ## button downall
         self.button_downall = QtGui.QPushButton("Down All")
-        mainLayout.addWidget(self.button_downall, 3, 3, 1, 2)
+        mainLayout.addWidget(self.button_downall, 4, 3, 1, 2)
         self.button_downall.clicked.connect(self.downallClicked)
 
         ## add tvshows

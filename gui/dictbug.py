@@ -6,59 +6,6 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import Qt, SIGNAL
 
 
-class EltListDictBug(QtGui.QWidget):
-
-    def __init__(self, nature, key='', value=''):
-        super(EltListDictBug, self).__init__()
-        self.mainLayout = QtGui.QHBoxLayout(self)
-    
-        self.arrowlabel = QtGui.QLabel("->")
-        self.arrowlabel.setAlignment(Qt.AlignHCenter)
-
-        if nature == 0:
-            self.createTitle()
-        elif nature == 1:
-            self.createNew()
-        elif nature == 2:
-            self.createEntry(key, value)
-        else:
-            raise Exception('unknown nature')
-
-
-    def createTitle(self):
-        self.mainLayout.addWidget(QtGui.QLabel('Next-episode'))
-        self.mainLayout.addWidget(self.arrowlabel)
-        self.mainLayout.addWidget(QtGui.QLabel('Down'))
-        self.mainLayout.addWidget(QtGui.QLabel(''))
-    
-    def createNew(self):
-        self.lineedit_ne = QtGui.QLineEdit()
-        self.lineedit_d = QtGui.QLineEdit()
-        button_add = QtGui.QPushButton("Add dict bug")
-        button_add.connect(button_add, SIGNAL("clicked()"), self.addDictBug)
-        self.mainLayout.addWidget(self.lineedit_ne)
-        self.mainLayout.addWidget(self.arrowlabel)
-        self.mainLayout.addWidget(self.lineedit_d)
-        self.mainLayout.addWidget(button_add)
-
-    def createEntry(self, key, value):
-        button_rmv = QtGui.QPushButton("Remove")
-        button_rmv_callback = (lambda data = [key, value]: \
-            self.removeDictBug(data))
-        button_rmv.connect(button_rmv, SIGNAL("clicked()"), \
-            button_rmv_callback)
-        self.mainLayout.addWidget(QtGui.QLabel(key))
-        self.mainLayout.addWidget(self.arrowlabel)
-        self.mainLayout.addWidget(QtGui.QLabel(value))
-        self.mainLayout.addWidget(button_rmv)
-
-    def removeDictBug(self, data):
-        self.emit(SIGNAL("removeDictBug( PyQt_PyObject )"), data)
-
-    def addDictBug(self):
-        self.emit(SIGNAL("addDictBug( PyQt_PyObject )"), \
-           [self.lineedit_ne.text(), self.lineedit_d.text()])
-
 class Dictbug(QtGui.QWidget):
     """ display playing list """
 
@@ -76,23 +23,42 @@ class Dictbug(QtGui.QWidget):
     def populate(self):
         """ create layout """
         
-        mainLayout = QtGui.QVBoxLayout(self)
+        self.mainLayout = QtGui.QGridLayout(self)
 
-        mainLayout.addWidget(EltListDictBug(0))
+        ## better display
+        self.mainLayout.addWidget(QtGui.QStackedWidget(), 0, 0, 1, 4)
 
-        add = EltListDictBug(1)
-        self.connect(add, SIGNAL("addDictBug(PyQt_PyObject)"), \
-            self.addDictBug)
-        mainLayout.addWidget(add)
+        ## title
+        self.mainLayout.addWidget(QtGui.QLabel('Next-episode'), 1, 0)
+        arrowlabelt = QtGui.QLabel("->")
+        arrowlabelt.setAlignment(Qt.AlignHCenter)
+        self.mainLayout.addWidget(arrowlabelt, 1, 1)
+        self.mainLayout.addWidget(QtGui.QLabel('Down'), 1, 2)
 
-        self.dictbug = QtGui.QGridLayout()
-        mainLayout.addLayout(self.dictbug)
+        ## add line
+        self.lineedit_ne = QtGui.QLineEdit()
+        arrowlabel = QtGui.QLabel("->")
+        arrowlabel.setAlignment(Qt.AlignHCenter)
+        self.lineedit_d = QtGui.QLineEdit()
+        button_add = QtGui.QPushButton("Add dict bug")
+        button_add.connect(button_add, SIGNAL("clicked()"), self.addDictBug)
+        self.mainLayout.addWidget(self.lineedit_ne, 2, 0)
+        self.mainLayout.addWidget(arrowlabel, 2, 1)
+        self.mainLayout.addWidget(self.lineedit_d, 2, 2)
+        self.mainLayout.addWidget(button_add, 2, 3)
 
+        ## data 
+        for key in self.list_dictbug.keys():
+            value = self.list_dictbug[key]
+            self.addEntry(key, value)
+
+        ## save button
         button_save = QtGui.QPushButton("Save config file")
         self.connect(button_save, SIGNAL("clicked()"), self.saveClicked)
-        mainLayout.addWidget(button_save)
+        self.mainLayout.addWidget(button_save, 1000, 0)
 
-        self.refresh5()
+        ## better display
+        self.mainLayout.addWidget(QtGui.QStackedWidget(), 1001, 0, 1, 4)
 
     def saveClicked(self):
         self.parent.updateConf()
@@ -100,23 +66,30 @@ class Dictbug(QtGui.QWidget):
     def getListDictBug(self):
         return self.list_dictbug
    
-    def addDictBug(self, data):
-        self.list_dictbug[str(data[0])] = str(data[1])
-        self.refresh5()
+    def addDictBug(self):
+        key, value = str(self.lineedit_ne.text()), str(self.lineedit_d.text())
+        self.list_dictbug[key] = value
+        self.addEntry(key, value)
 
     def removeDictBug(self, data):
-        del self.list_dictbug[data[0]]
-        self.refresh5()
+        del self.list_dictbug[data[1]]
+        for i in range(4):
+            self.eltdictbug[data[0]][i].hide()
 
-    def refresh5(self):    
-        for i in self.eltdictbug:
-            i.setParent(None)
-            del(i)
+    def addEntry(self, key, value):
+        ind = len(self.eltdictbug)
+        button = QtGui.QPushButton("Remove")
+        button_callback = (lambda data = [ind, key]: \
+            self.removeDictBug(data))
+        button.connect(button, SIGNAL("clicked()"), button_callback)
+        labelkey = QtGui.QLabel(key)
+        labelarrow = QtGui.QLabel("->")
+        labelarrow.setAlignment(Qt.AlignHCenter)
+        labelvalue = QtGui.QLabel(value)
+        self.eltdictbug.append([labelkey, labelarrow, labelvalue, button])
+        self.mainLayout.addWidget(labelkey, 3 + ind, 0)
+        self.mainLayout.addWidget(labelarrow, 3 + ind, 1)
+        self.mainLayout.addWidget(labelvalue, 3 + ind, 2)
+        self.mainLayout.addWidget(button, 3 + ind, 3)
 
-        self.eltdictbug = []
-        for key in self.list_dictbug.keys():
-            tmp = EltListDictBug(2, key, self.list_dictbug[key])
-            self.connect(tmp, SIGNAL("removeDictBug(PyQt_PyObject)"), \
-                self.removeDictBug)
-            self.dictbug.addWidget(tmp)
-            self.eltdictbug.append(tmp)
+

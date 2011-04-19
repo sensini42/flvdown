@@ -108,41 +108,44 @@ class Playing(QtGui.QWidget):
         
         mainLayout = QtGui.QGridLayout(self)
 
+        ## better display
+        mainLayout.addWidget(QtGui.QStackedWidget(), 0, 0, 1, 6)
+
         ## title
-        mainLayout.addWidget(QtGui.QLabel("show"), 0, 0)
-        mainLayout.addWidget(QtGui.QLabel("season"), 0, 1)
-        mainLayout.addWidget(QtGui.QLabel("episode"), 0, 2)
+        mainLayout.addWidget(QtGui.QLabel("show"), 1, 0)
+        mainLayout.addWidget(QtGui.QLabel("season"), 1, 1)
+        mainLayout.addWidget(QtGui.QLabel("episode"), 1, 2)
 
         ## combo show
         self.show_cb = QtGui.QComboBox()
         self.show_cb.currentIndexChanged.connect(self.changeShow)
-        mainLayout.addWidget(self.show_cb, 1, 0)
+        mainLayout.addWidget(self.show_cb, 2, 0)
 
         ## label season
         self.season_l = QtGui.QLabel('')
-        mainLayout.addWidget(self.season_l, 1, 1)
+        mainLayout.addWidget(self.season_l, 2, 1)
 
         ## combo episode
         self.episode_cb = QtGui.QComboBox()
-        mainLayout.addWidget(self.episode_cb, 1, 2)
+        mainLayout.addWidget(self.episode_cb, 2, 2)
 
         ## button play
         self.button_play = QtGui.QPushButton("Play")
-        mainLayout.addWidget(self.button_play, 1, 3)
+        mainLayout.addWidget(self.button_play, 2, 3)
         self.button_play.clicked.connect(self.playClicked)
 
         ## button mark
         self.button_mark = QtGui.QPushButton("Mark as read")
-        mainLayout.addWidget(self.button_mark, 1, 4)
+        mainLayout.addWidget(self.button_mark, 2, 4)
         self.button_mark.clicked.connect(self.markClicked)
 
         ## button delete
         self.button_delete = QtGui.QPushButton("Mark and Delete")
-        mainLayout.addWidget(self.button_delete, 1, 5)
+        mainLayout.addWidget(self.button_delete, 2, 5)
         self.button_delete.clicked.connect(self.deleteClicked)
 
         ## better display
-        mainLayout.addWidget(QtGui.QStackedWidget(), 2, 0, 1, 6)
+        mainLayout.addWidget(QtGui.QStackedWidget(), 3, 0, 1, 6)
 
         self.displayButtons(False)
 
