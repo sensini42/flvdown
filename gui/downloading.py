@@ -7,16 +7,13 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import QThread, SIGNAL
 from display import Display
 
-from os import path as ospath
-from os import mkdir as osmkdir
-
 import traceback
+import urllib
 import time
 
 import subdown
 import links
 import episodetv
-import urllib
 
 class DownThread(QThread):
     """download an episode in a thread"""
@@ -24,9 +21,7 @@ class DownThread(QThread):
     def __init__(self, episode, option, list_site, \
                  infofile, parent = None):
         """ initialisation """
-        self.tvshow = episode.tvshow_
-        self.season = episode.strSeason
-        self.episode = episode.strEpisode
+        self.episode = episode
         self.option = option
         self.list_site = list_site
         self.infofile = infofile
@@ -37,30 +32,26 @@ class DownThread(QThread):
     def run(self):
         """ download ep, sub, emit signal """
         try:
-            ret, filename = links.flvdown(self.tvshow, self.season, \
-                   self.episode, self.option, self.list_site)
-            if ret != -1:
-                if (not ospath.isdir(self.tvshow)):
-                    osmkdir(self.tvshow)
-                self.emit(SIGNAL("downStart( QString )"), filename )
-                urllib.urlretrieve(ret, filename, reporthook=self.downInfo)
-                subdown.downSub(self.tvshow, self.tvshow, self.season, \
-                     self.episode, self.option)
+            link, filename = links.flvdown(self.episode, self.option, \
+                  self.list_site)
+            if link:
+                self.episode.createDir()
+                self.emit(SIGNAL("downStart(QString)"), filename)
+                urllib.urlretrieve(link, filename, reporthook=self.downInfo)
+                subdown.downSub(filename, self.option)
         except:
             traceback.print_exc()
             self.emit(SIGNAL("downFinished(QString, QString , \
                   PyQt_PyObject)"), "download error", \
-                  self.tvshow + " " + self.season + " " + self.episode, \
-                  self.infofile)
+                  self.episode.getBaseName(), self.infofile)
         else:
-            self.emit(SIGNAL("downFinished( QString, QString , \
+            self.emit(SIGNAL("downFinished(QString, QString , \
                   PyQt_PyObject)"), "download finished", \
-                  self.tvshow + " " + self.season + " " + self.episode, \
-                  self.infofile)
+                  self.episode.getBaseName(), self.infofile)
 
     def downInfo(self, infobloc, taillebloc, totalblocs):
         """ report hook """
-        self.emit(SIGNAL("downInfo( PyQt_PyObject )"), \
+        self.emit(SIGNAL("downInfo(PyQt_PyObject)"), \
                   [infobloc, taillebloc, totalblocs])
 
 

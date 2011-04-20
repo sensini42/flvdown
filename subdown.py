@@ -9,7 +9,7 @@ import re
 import tempfile
 
 
-def downSub(rep, tvshow, season, episode, options):
+def downSub(videoname, options):
     """ down subtitle """
 
     interact = 0
@@ -22,17 +22,16 @@ def downSub(rep, tvshow, season, episode, options):
         if ("v" in options):
             verbose = 1
 
-    if len(episode) == 1:
-        episode = "0" + episode
+    subname = ".".join(videoname.split('.')[:-1]) + ".srt"
+
+    query = videoname.split('/')[-1].split('.')[0]
+
+    tvshow = re.search('[a-z _&]*', query).group(0)
+    season = re.search('(?<=0)?[0-9]{1,2}(?=[0-9]{2})', query).group(0)
+    episode = re.search('[0-9]{2}$', query).group(0)
 
     if verbose:
         print tvshow, "season", season, "episode", episode
-
-    subname = ''
-    if rep != '':
-        subname = rep + "/"
-    subname = subname + tvshow + season + \
-         episode + ".srt"
 
     tvshow = tvshow.replace('_', ' ')
     ##search page
@@ -175,17 +174,13 @@ def downSub(rep, tvshow, season, episode, options):
 
 if __name__ == "__main__":
     videoname = sys.argv[1]
-    mrep = "/".join(videoname.split('/')[:-1])
-    query = videoname.split('/')[-1].split('.')[0]
 
     option = ""
     if (len(sys.argv)>2):
         option = sys.argv[2] 
 
-    mtvshow = re.search('[a-z _&]*', query).group(0)
-    mseason = re.search('(?<=0)?[0-9]{1,2}(?=[0-9]{2})', query).group(0)
-    mepisode = re.search('[0-9]{2}$', query).group(0)
+    downSub(videoname, option)  
 
-    downSub(mrep, mtvshow, mseason, mepisode, option) 
+
 
 

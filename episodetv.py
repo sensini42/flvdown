@@ -10,7 +10,7 @@ from os import listdir as oslistdir
 
 class episodeTV():
     """ one instance for one episode """
-    def __init__(self, tvshow, season, episode, ids):
+    def __init__(self, tvshow, season, episode, ids=None):
         self.tvshow = tvshow.lower()
         self.tvshow_ = "_".join(self.tvshow.split(" "))
         self.tvshowSpace = " ".join(self.tvshow.split("_"))
@@ -34,8 +34,8 @@ class episodeTV():
 
     def createDir(self):
         """ create directory if it doesn't exist """
-        if (not ospath.isdir(self.tvshow)):
-            osmkdir(self.tvshow)
+        if (not ospath.isdir(self.tvshow_)):
+            osmkdir(self.tvshow_)
             
     
     def removeFile(self):
