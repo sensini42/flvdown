@@ -5,7 +5,7 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread, SIGNAL
-from display import Display
+from gui.display import Display
 
 import traceback
 import urllib

@@ -5,10 +5,11 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread
-from PyQt4.QtCore import Qt
-from display import Display
+from gui.display import Display
 
 from os import system as ossystem
+
+import subdown
 
 class VideoThread(QThread):
     """play in a thread"""
@@ -31,6 +32,10 @@ class Playing(Display):
 
         # pylint warning
         self.player = None
+        self.button_play = None
+        self.button_mark = None
+        self.button_delete = None
+
         super(Playing, self).__init__(nextep)
         self.update(player)
 
@@ -82,6 +87,14 @@ class Playing(Display):
         """ when a button_play is clicked """
         episode = self.info[self.episode_cb.currentIndex()]
         videoName = episode.getVideoName()
+        if episode.getSrtName() == "":
+            subdown.downSub(videoName)
+            if episode.getSrtName() == "":
+                reply = QtGui.QMessageBox.question(self, 'Message', \
+                   "srt file missing. continue?", QtGui.QMessageBox.Yes | \
+                   QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.No:
+                    return
         VideoThread((self.player+ " " + videoName), self).start()
 
     def markClicked(self):

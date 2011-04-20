@@ -9,7 +9,7 @@ import re
 import tempfile
 
 
-def downSub(videoname, options):
+def downSub(videoname, options=""):
     """ down subtitle """
 
     interact = 0
@@ -173,13 +173,13 @@ def downSub(videoname, options):
 
 
 if __name__ == "__main__":
-    videoname = sys.argv[1]
+    _videoname = sys.argv[1]
 
     option = ""
     if (len(sys.argv)>2):
         option = sys.argv[2] 
 
-    downSub(videoname, option)  
+    downSub(_videoname, option)  
 
 
 

@@ -13,6 +13,11 @@ class Dictbug(QtGui.QWidget):
         """ initialisation """
         super(Dictbug, self).__init__()
 
+        ## pylint warning
+        self.mainLayout = None
+        self.lineedit_ne = None
+        self.lineedit_d = None
+
         self.parent = parent
 
         self.list_dictbug = dict_bug
