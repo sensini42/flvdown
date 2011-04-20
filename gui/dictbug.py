@@ -70,8 +70,8 @@ class Dictbug(QtGui.QWidget):
    
     def addDictBug(self):
         """ add an entry in dictbug"""
-        key, value = str(self.lineedit_ne.text()).strip(), \
-                     str(self.lineedit_d.text()).strip()
+        key, value = str(self.lineedit_ne.text()).strip().lower(), \
+                     str(self.lineedit_d.text()).strip().lower()
         self.list_dictbug[key] = value
         self.addEntry(key, value)
 
