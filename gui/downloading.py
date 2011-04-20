@@ -283,5 +283,8 @@ class Downloading(Display):
         for episode in self.list_ep:
             self.runThread(episode)
 
+    def isInProgress(self):
+        """ check if there is some download in progress """
+        return self.stackedWidget.count() > 0
 
    

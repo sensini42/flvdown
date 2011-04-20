@@ -185,7 +185,17 @@ class Flvgui(QtGui.QWidget):
         self.playing.update(self.conf['player'])
         self.downloading.update(list_site=self.list_site)
 
-
+    def closeEvent(self, event):
+        if self.downloading.isInProgress():
+            reply = QtGui.QMessageBox.question(self, 'Message', \
+                  "Are you sure to quit?", QtGui.QMessageBox.Yes | \
+                  QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.No:
+                event.ignore()
+            else:
+                event.accept()
+        else:
+            event.accept()
     
 
 def main():
