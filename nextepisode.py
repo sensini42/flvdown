@@ -13,7 +13,7 @@ from operator import attrgetter
 class NextEpisode():
     """ class to deal with next-episode.net """
 
-    def __init__(self, login, password, dict_bug={}):
+    def __init__(self, login, password, dict_bug):
         # save parameters
         self.__login = login
         self.__pwd = password
@@ -31,12 +31,8 @@ class NextEpisode():
         install_opener(opener)
         
         self.__connect()
-        self.updateList()      
+        self.update()
 
-
-    def addDictBug(self, key, value):
-        """ add a new 'bug' """
-        self.dict_bug[key] = value
 
     def __getSrcPage(self, url, txdata=None):
         """ return the source page from next-episode """
@@ -102,15 +98,23 @@ class NextEpisode():
         self.__getSrcPage(url, txdata)
 
 
-    def updateList(self):
+    def update(self, login=None, password=None):
         """ update the list of episodes """
 #        for i in self.__list:
 #            del(i)#utile?
+        changeLP = False
+        if login:
+            self.__login = login
+            changeLP = True
+        if password:
+            self.__pwd = password
+            changeLP = True
+        if changeLP:
+            self.__connect()
         self.__list = self.__getListEpisode()
         
     def getList(self):
         """ return the list of episodes """
-        self.updateList()
         return self.__list
         
     def printList(self):

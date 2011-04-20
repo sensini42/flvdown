@@ -18,8 +18,6 @@ from gui.options import Options
 from gui.siteorder import Siteorder
 from gui.dictbug import Dictbug
 
-conf2 = {}
-dict_bug2 = {}
 
 class Flvgui(QtGui.QWidget):
     """ Gui for flvdown"""
@@ -33,13 +31,6 @@ class Flvgui(QtGui.QWidget):
                 'Please check config', \
                 QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
         
-        ## to delete
-        conf2['login'] = self.conf['login'] 
-        conf2['password'] = self.conf['password']
-        for key in self.dict_bug.keys():
-            dict_bug2[key] = self.dict_bug[key]
-        ##
-
         self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), self)
         self.trayIcon.activated.connect(self.toggle)
         self.trayIcon.show()
@@ -143,15 +134,11 @@ class Flvgui(QtGui.QWidget):
 
     def updateConf(self):
         """ update the config"""
-        conf = self.options.getOptions()
-        self.conf.update(conf)
+        self.conf.update(self.options.getOptions())
         self.list_site = self.siteorder.getListSite()
-        dict_bug = self.dictbug.getListDictBug()
-        self.dict_bug.update(dict_bug)
+        self.dict_bug.update(self.dictbug.getListDictBug())
         self.saveConf()
-
-        self.playing.update(player=self.conf['player'])
-        self.downloading.update(list_site=self.list_site)
+        self.update()
 
     def saveConf(self):
         """ save the config"""
@@ -180,12 +167,14 @@ class Flvgui(QtGui.QWidget):
         ossystem("downsub.sh")
 
     def update(self):
-        "populate the tab_widget"
+        """ update tab """
         oschdir(self.conf['base_directory'])
+        self.nextep.update(self.conf['login'], self.conf['password'])
         self.playing.update(self.conf['player'])
         self.downloading.update(list_site=self.list_site)
 
     def closeEvent(self, event):
+        """ call when close_button is clicked """
         if self.downloading.isInProgress():
             reply = QtGui.QMessageBox.question(self, 'Message', \
                   "Are you sure to quit?", QtGui.QMessageBox.Yes | \
