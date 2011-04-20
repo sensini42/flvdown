@@ -2,67 +2,6 @@
 # -*- coding: utf-8 -*-
 """ gui for downloading tab """
 
-### to delete when nextepisode class ok 
-
-from os import path as ospath
-conf = {}
-
-def checkConfigFile():
-    """ read config file """
-    try:
-        fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", \
-                         "rb", 0)
-        for line in fileconf:
-            tmp = line.split("=")
-            if (tmp[0] != 'order' and tmp[0] != 'dict_bug'):
-                conf[tmp[0]] = tmp[1].replace('"','')[:-1]
-        fileconf.close()
-        return 1
-    except IOError:
-        print "check config"
-        return -1
-
-
-from tempfile import NamedTemporaryFile
-cookieFile = NamedTemporaryFile(suffix='.cookies-next.lwp')
-cookieFileName = cookieFile.name
-
-import urllib2, cookielib, urllib
-cj = cookielib.LWPCookieJar()
-
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-urllib2.install_opener(opener)
-
-def addToNextEpisode(title):
-    """ add 'title' to next-episode watch-list """
-    urltitle = '-'.join(title.split(' ')) + '/'
-    src = getSrcPageNextEpisode(urltitle)
-    url = src.split('to watchlist')[0].split('"')[-2]
-    
-    src = getSrcPageNextEpisode(url)
-
-def getSrcPageNextEpisode(url):
-    """ return the source page from next-episode """
-
-    txdata = urllib.urlencode ({"username" : conf['login'], \
-        "password" : conf['password']})
-    txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Win NT)'}
-
-    try:
-        req = urllib2.Request("http://next-episode.net/", txdata, txheaders)
-        urllib2.urlopen(req)
-    except IOError:
-        print "could not login"
-        return ""
-
-    txdata = None
-
-    cj.save(cookieFileName)
-    req = urllib2.Request("http://next-episode.net/" + url, txdata, txheaders)
-    src = urllib2.urlopen(req).read()
-    return src
-
-###
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread, SIGNAL
@@ -179,9 +118,6 @@ class Downloading(QtGui.QWidget):
     def __init__(self, nextep, list_site=None, parent=None):
         """ initialisation """
         super(Downloading, self).__init__()
-
-        # to remove when nextepisode class is ok
-        checkConfigFile()
 
         self.parent = parent
 

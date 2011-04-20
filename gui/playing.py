@@ -2,65 +2,6 @@
 # -*- coding: utf-8 -*-
 """ gui for playing tab """
 
-### to delete when nextepisode class ok 
-
-from os import path as ospath
-conf = {}
-
-def checkConfigFile():
-    """ read config file """
-    try:
-        fileconf = open(ospath.expanduser('~') + "/.config/flvdown/flv.conf", \
-                         "rb", 0)
-        for line in fileconf:
-            tmp = line.split("=")
-            if (tmp[0] != 'order' and tmp[0] != 'dict_bug'):
-                conf[tmp[0]] = tmp[1].replace('"','')[:-1]
-        fileconf.close()
-        return 1
-    except IOError:
-        print "check config"
-        return -1
-
-
-from tempfile import NamedTemporaryFile
-cookieFile = NamedTemporaryFile(suffix='.cookies-next.lwp')
-cookieFileName = cookieFile.name
-
-import urllib2, cookielib, urllib
-cj = cookielib.LWPCookieJar()
-
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-urllib2.install_opener(opener)
-
-def removeFromNextEpisode(movieId, userId, seasonId, episodeId):
-    """ mark as read in next-episode """
-
-    txdata = urllib.urlencode ({"username" : conf['login'], \
-        "password" : conf['password']})
-    txheaders =  {'User-agent' : 'Mozilla/4.0 (compatible; MSIE 5.5; Win NT)'}
-    urlbase = "http://next-episode.net/"
-    try:
-        req = urllib2.Request(urlbase, txdata, txheaders)
-        urllib2.urlopen(req)
-    except IOError:
-        print "could not login"
-        return ""
-
-    cj.save(cookieFileName)
-
-    url = urlbase + 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'    
-    txdata = urllib.urlencode ({"showCat" : "episode",
-                                "movieId" : movieId,
-                                "userId" : userId,
-                                "seasonId" : seasonId,
-                                "episodeId" : episodeId,
-                                "parsedString" : seasonId + "x" + episodeId})
-    req = urllib2.Request(url, txdata, txheaders)
-    src = urllib2.urlopen(req).read()
-    print src
-
-###
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread
@@ -90,9 +31,6 @@ class Playing(QtGui.QWidget):
     def __init__(self, nextep, player='mplayer'):
         """ initialisation """
         super(Playing, self).__init__()
-
-        # to remove when nextepisode class is ok
-        checkConfigFile()
 
         # pylint warning
         self.list_ep = None

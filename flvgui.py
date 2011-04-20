@@ -13,33 +13,12 @@ import subdown
 import time
 import traceback
 from nextepisode import NextEpisode
-######################################################################
-###take care of cookies
-######################################################################
-from tempfile import NamedTemporaryFile
-cookieFile = NamedTemporaryFile(suffix='.cookies-next.lwp')
-cookieFileName = cookieFile.name
+
 
 from os import path as ospath
 from os import system as ossystem
 from os import remove as osremove
 from os import chdir as oschdir
-
-cj = None
-cookielib = None
-
-import cookielib            
-import urllib2    
-import urllib
-urlopen = urllib2.urlopen
-cj = cookielib.LWPCookieJar()
-request = urllib2.Request
-
-if cookielib:
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    urllib2.install_opener(opener)
-##end of cookies
-######################################################################
 
 from gui.playing import Playing
 from gui.downloading import Downloading
