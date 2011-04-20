@@ -5,6 +5,7 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QThread, SIGNAL
+from display import Display
 
 from os import path as ospath
 from os import mkdir as osmkdir
@@ -113,44 +114,31 @@ class InfoDown(QtGui.QWidget):
                 self.barre.setRange(0, 0)
 
 
-class Downloading(QtGui.QWidget):
+class Downloading(Display):
     """ display playing list """
 
     def __init__(self, nextep, list_site=None, parent=None):
         """ initialisation """
-        super(Downloading, self).__init__()
-
         self.parent = parent
 
         # pylint warning
-        self.info = None
         self.ed_checkbox = None
         self.stackedWidget = None
-        self.list_ep = None
         self.list_site = None
-        self.show_cb = None
-        self.episode_cb = None
-        self.season_l = None
         self.button_downall = None
         self.button_down = None
         self.button_all = None
         self.nextbutton = None
-        self.nextep = nextep
-        self.populate()
+        super(Downloading, self).__init__(nextep)
         self.update(list_site)
+
 
     def populate(self):
         """ create layout """
-        
-        mainLayout = QtGui.QGridLayout(self)
 
         ## better display
-        mainLayout.addWidget(QtGui.QStackedWidget(), 0, 0, 1, 5)
+        self.mainLayout.addWidget(QtGui.QStackedWidget(), 0, 0, 1, 5)
 
-        ## title
-        mainLayout.addWidget(QtGui.QLabel("show"), 1, 0)
-        mainLayout.addWidget(QtGui.QLabel("season"), 1, 1)
-        mainLayout.addWidget(QtGui.QLabel("episode"), 1, 2)
 
         ## episode not on next-episode
         edit_tv = QtGui.QLineEdit()
@@ -160,106 +148,65 @@ class Downloading(QtGui.QWidget):
         btn_edit_callback = (lambda data = (edit_tv, \
              edit_se, edit_ep): self.downFreeClicked(data))
         self.connect(button_edit, SIGNAL("clicked()"), btn_edit_callback)
-        mainLayout.addWidget(edit_tv, 2, 0)
-        mainLayout.addWidget(edit_se, 2, 1)
-        mainLayout.addWidget(edit_ep, 2, 2)
-        mainLayout.addWidget(button_edit, 2, 3, 1, 2)
+        self.mainLayout.addWidget(edit_tv, 3, 0)
+        self.mainLayout.addWidget(edit_se, 3, 1)
+        self.mainLayout.addWidget(edit_ep, 3, 2)
+        self.mainLayout.addWidget(button_edit, 3, 3, 1, 2)
 
-        ## combo show
-        self.show_cb = QtGui.QComboBox()
-        self.show_cb.currentIndexChanged.connect(self.changeShow)
-        mainLayout.addWidget(self.show_cb, 3, 0)
-
-        ## label season
-        self.season_l = QtGui.QLabel('')
-        mainLayout.addWidget(self.season_l, 3, 1)
-
-        ## combo episode
-        self.episode_cb = QtGui.QComboBox()
-        mainLayout.addWidget(self.episode_cb, 3, 2)
 
         ## button down 
         self.button_down = QtGui.QPushButton("Down")
-        mainLayout.addWidget(self.button_down, 3, 3)
+        self.mainLayout.addWidget(self.button_down, 2, 3)
         self.button_down.clicked.connect(self.downClicked)
 
         ## button all
         self.button_all = QtGui.QPushButton("All")
-        mainLayout.addWidget(self.button_all, 3, 4)
+        self.mainLayout.addWidget(self.button_all, 2 4)
         self.button_all.clicked.connect(self.allClicked)
 
         ## checkbox interactive
         self.ed_checkbox = QtGui.QCheckBox('Interactive download', self)
-        mainLayout.addWidget(self.ed_checkbox, 4, 1, 1, 2)
+        self.mainLayout.addWidget(self.ed_checkbox, 4, 1, 1, 2)
 
         ## button downall
         self.button_downall = QtGui.QPushButton("Down All")
-        mainLayout.addWidget(self.button_downall, 4, 3, 1, 2)
+        self.mainLayout.addWidget(self.button_downall, 4, 3, 1, 2)
         self.button_downall.clicked.connect(self.downallClicked)
 
         ## add tvshows
         ed_addShow = QtGui.QLineEdit()
-        mainLayout.addWidget(ed_addShow, 5, 0, 1, 3)
+        self.mainLayout.addWidget(ed_addShow, 5, 0, 1, 3)
         button_addShow = QtGui.QPushButton("Add tvshow")
-        mainLayout.addWidget(button_addShow, 5, 3, 1, 2)
+        self.mainLayout.addWidget(button_addShow, 5, 3, 1, 2)
         btn_callbackAddShow = (lambda data = (ed_addShow): \
                                   self.addShow(data))
         self.connect(button_addShow, SIGNAL("clicked()"), btn_callbackAddShow)
 
         ## info down
         self.stackedWidget = QtGui.QStackedWidget()
-        mainLayout.addWidget(self.stackedWidget, 6, 0, 1, 4)
+        self.mainLayout.addWidget(self.stackedWidget, 6, 0, 1, 4)
         self.nextbutton = QtGui.QPushButton("Next")
         self.nextbutton.clicked.connect(self.nextstacked)
         self.nextbutton.hide()
-        mainLayout.addWidget(self.nextbutton, 6, 4)
+        self.mainLayout.addWidget(self.nextbutton, 6, 4)
 
         ## better display
-        mainLayout.addWidget(QtGui.QStackedWidget(), 7, 0, 1, 5)
+        self.mainLayout.addWidget(QtGui.QStackedWidget(), 7, 0, 1, 5)
 
-        self.displayButtons(False)
+        super(Downloading, self).populate()
 
     def displayButtons(self, value):
         """ display or not buttons """
-        self.show_cb.setVisible(value)
-        self.season_l.setVisible(value)
-        self.episode_cb.setVisible(value)
         self.button_down.setVisible(value)
         self.button_all.setVisible(value)
         self.button_downall.setVisible(value)
-        
+        super(Downloading, self).displayButtons(value)
 
     def update(self, list_site=None):
         """ update """
-        list_ep = self.nextep.getList()
-        if list_ep:
-            self.list_ep = list_ep
-            self.show_cb.clear()
-            for episode in self.list_ep:
-                if (not episode.isOnDisk) and \
-                     (self.show_cb.findText(episode.tvshowSpace) == -1):
-                    self.show_cb.addItem(episode.tvshowSpace)
-            if self.show_cb.count() != 0:
-                self.changeShow()
-                self.displayButtons(True)
-            else:
-                self.displayButtons(False)
         if list_site:
             self.list_site = list_site
-            
-    def changeShow(self):
-        """ when show_cb is changed """
-        show = self.show_cb.currentText()
-        self.episode_cb.clear()
-        self.info = []
-        for episode in self.list_ep:
-            tvshow = episode.tvshowSpace
-            if show == tvshow:
-                self.season_l.setText(episode.strSeason)
-                if not episode.isOnDisk:
-                    self.episode_cb.addItem(episode.strEpisode)
-                    self.info.append(episode)
-
+        super(Downloading, self).update()
 
     def addShow(self, data):
         """ when we want to add a tvshow """
