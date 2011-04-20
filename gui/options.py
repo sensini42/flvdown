@@ -38,9 +38,11 @@ class Options(QtGui.QWidget):
         mainLayout.addWidget(button_save, i, 0)
 
     def saveClicked(self):
+        """ save the config"""
         self.parent.updateConf()
 
     def getOptions(self):
+        """ return the config """
         options = {} 
         for (key, line) in self.list_edit:
             options[key] = str(line.text())

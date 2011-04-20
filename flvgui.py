@@ -2,22 +2,14 @@
 # -*- coding: utf-8 -*-
 """ gui for flvdown """
 from PyQt4 import QtGui
-from PyQt4.QtCore import SIGNAL, Qt
-from PyQt4.QtCore import SLOT
-from PyQt4.QtCore import QThread
-from PyQt4.QtCore import QCoreApplication
+from PyQt4.QtCore import SIGNAL
 
 import os
-import links
-import subdown
-import time
-import traceback
 from nextepisode import NextEpisode
 
 
 from os import path as ospath
 from os import system as ossystem
-from os import remove as osremove
 from os import chdir as oschdir
 
 from gui.playing import Playing
@@ -77,10 +69,8 @@ class Flvgui(QtGui.QWidget):
                         self.list_site.insert(i, site.strip())
                 elif tmp[0] == 'dict_bug':
                     list_dict = tmp[1].replace('"', '').split(',')[:-1]
-                    for ld in list_dict:
-                        key = ld.split(':')[0].strip()
-                        value = ld.split(':')[1].strip()
-                        self.dict_bug[key] = value
+                    self.dict_bug = dict(map(str.strip, i.split(':')) \
+                                         for i in list_dict)
                 else:
                     self.conf[tmp[0]] = tmp[1].replace('"','')[:-1]
             fileconf.close()
@@ -88,8 +78,9 @@ class Flvgui(QtGui.QWidget):
         except IOError:
             print "check config"
             return -1
-  
-    def getSites(self):
+
+    @classmethod
+    def getSites(cls):
         """ check modules to populate list_site"""
         import sys
         import aggregators
@@ -103,7 +94,7 @@ class Flvgui(QtGui.QWidget):
         return list_site
         
     def mainlayout(self):
-        
+        """ define the main layout"""
         mainLayout = QtGui.QGridLayout(self)
 
         tab_widget = QtGui.QTabWidget()
@@ -151,19 +142,19 @@ class Flvgui(QtGui.QWidget):
 
 
     def updateConf(self):
+        """ update the config"""
         conf = self.options.getOptions()
-        for key in conf.keys():
-            self.conf[key] = conf[key]
+        self.conf.update(conf)
         self.list_site = self.siteorder.getListSite()
         dict_bug = self.dictbug.getListDictBug()
-        for key in dict_bug.keys():
-            self.dict_bug[key] = dict_bug[key]
+        self.dict_bug.update(dict_bug)
         self.saveConf()
 
         self.playing.update(player=self.conf['player'])
         self.downloading.update(list_site=self.list_site)
 
     def saveConf(self):
+        """ save the config"""
         if (not os.path.exists(ospath.expanduser('~') + "/.config/flvdown/")):
             os.mkdir(ospath.expanduser('~') + "/.config/flvdown/")
         fileconf = open(ospath.expanduser('~') + \

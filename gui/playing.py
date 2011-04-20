@@ -9,8 +9,6 @@ from PyQt4.QtCore import Qt
 
 
 from os import system as ossystem
-from os import listdir as oslistdir
-from os import remove as osremove
 
 class VideoThread(QThread):
     """play in a thread"""

@@ -14,9 +14,6 @@ class Siteorder(QtGui.QWidget):
 
         self.parent = parent
 
-        ## pylint warning
-        self.list_site = None
-
         self.populate(list_site)
 
     def populate(self, list_site):

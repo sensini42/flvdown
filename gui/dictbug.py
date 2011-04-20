@@ -30,14 +30,14 @@ class Dictbug(QtGui.QWidget):
 
         ## title
         self.mainLayout.addWidget(QtGui.QLabel('Next-episode'), 1, 0)
-        arrowlabelt = QtGui.QLabel("->")
+        arrowlabelt = QtGui.QLabel(u"→")
         arrowlabelt.setAlignment(Qt.AlignHCenter)
         self.mainLayout.addWidget(arrowlabelt, 1, 1)
         self.mainLayout.addWidget(QtGui.QLabel('Down'), 1, 2)
 
         ## add line
         self.lineedit_ne = QtGui.QLineEdit()
-        arrowlabel = QtGui.QLabel("->")
+        arrowlabel = QtGui.QLabel(u"→")
         arrowlabel.setAlignment(Qt.AlignHCenter)
         self.lineedit_d = QtGui.QLineEdit()
         button_add = QtGui.QPushButton("Add dict bug")
@@ -61,29 +61,35 @@ class Dictbug(QtGui.QWidget):
         self.mainLayout.addWidget(QtGui.QStackedWidget(), 1001, 0, 1, 4)
 
     def saveClicked(self):
+        """ save config file"""
         self.parent.updateConf()
 
     def getListDictBug(self):
+        """ return the dict of bug"""
         return self.list_dictbug
    
     def addDictBug(self):
-        key, value = str(self.lineedit_ne.text()), str(self.lineedit_d.text())
+        """ add an entry in dictbug"""
+        key, value = str(self.lineedit_ne.text()).strip(), \
+                     str(self.lineedit_d.text()).strip()
         self.list_dictbug[key] = value
         self.addEntry(key, value)
 
     def removeDictBug(self, data):
+        """ remove an entry in dictbug"""
         del self.list_dictbug[data[1]]
         for i in range(4):
             self.eltdictbug[data[0]][i].hide()
 
     def addEntry(self, key, value):
+        """ display the entry"""
         ind = len(self.eltdictbug)
         button = QtGui.QPushButton("Remove")
         button_callback = (lambda data = [ind, key]: \
             self.removeDictBug(data))
         button.connect(button, SIGNAL("clicked()"), button_callback)
         labelkey = QtGui.QLabel(key)
-        labelarrow = QtGui.QLabel("->")
+        labelarrow = QtGui.QLabel(u"→")
         labelarrow.setAlignment(Qt.AlignHCenter)
         labelvalue = QtGui.QLabel(value)
         self.eltdictbug.append([labelkey, labelarrow, labelvalue, button])

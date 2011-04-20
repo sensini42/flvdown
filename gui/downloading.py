@@ -15,6 +15,7 @@ import time
 import subdown
 import links
 import episodetv
+import urllib
 
 class DownThread(QThread):
     """download an episode in a thread"""
@@ -279,7 +280,6 @@ class Downloading(QtGui.QWidget):
         option = ""
         if self.ed_checkbox.isChecked():
             option += "i"
-        tvshow = episode.tvshow_
         infoline = InfoDown(episode.getBaseName())
         self.stackedWidget.addWidget(infoline)
         if self.stackedWidget.count() > 1:
