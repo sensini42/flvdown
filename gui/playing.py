@@ -72,7 +72,11 @@ class Playing(Display):
         """ update """
         if player:
             self.player = player
-        super(Playing, self).update()
+        super(Playing, self).update(True)
+        
+    def changeShow(self):
+        """ when show_cb is changed """
+        super(Playing, self).changeShow(True)
             
     def playClicked(self):
         """ when a button_play is clicked """

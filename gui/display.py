@@ -67,14 +67,14 @@ class Display(QtGui.QWidget):
         self.episode_label.setVisible(value)
         self.nothingtodo.setVisible(not value)
 
-    def update(self, toUpdate=None):
+    def update(self, condition=True):
         """ update """
         list_ep = self.nextep.getList()
         if list_ep:
             self.list_ep = list_ep
             self.show_cb.clear()
             for episode in self.list_ep:
-                if episode.isOnDisk and \
+                if (episode.isOnDisk == condition) and \
                      (self.show_cb.findText(episode.tvshowSpace) == -1):
                     self.show_cb.addItem(episode.tvshowSpace)
             if self.show_cb.count() > 0:
@@ -83,7 +83,7 @@ class Display(QtGui.QWidget):
             else:
                 self.displayButtons(False)
             
-    def changeShow(self):
+    def changeShow(self, condition=True):
         """ when show_cb is changed """
         show = self.show_cb.currentText()
         self.episode_cb.clear()
@@ -92,7 +92,7 @@ class Display(QtGui.QWidget):
             tvshow = episode.tvshowSpace
             if show == tvshow:
                 self.season_l.setText(episode.strSeason)
-                if episode.isOnDisk:
+                if episode.isOnDisk==condition:
                     self.episode_cb.addItem(episode.strEpisode)
                     self.info.append(episode)
 

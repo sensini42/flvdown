@@ -161,7 +161,7 @@ class Downloading(Display):
 
         ## button all
         self.button_all = QtGui.QPushButton("All")
-        self.mainLayout.addWidget(self.button_all, 2 4)
+        self.mainLayout.addWidget(self.button_all, 2, 4)
         self.button_all.clicked.connect(self.allClicked)
 
         ## checkbox interactive
@@ -206,7 +206,11 @@ class Downloading(Display):
         """ update """
         if list_site:
             self.list_site = list_site
-        super(Downloading, self).update()
+        super(Downloading, self).update(False)
+        
+    def changeShow(self):
+        """ when show_cb is changed """
+        super(Downloading, self).changeShow(False)
 
     def addShow(self, data):
         """ when we want to add a tvshow """

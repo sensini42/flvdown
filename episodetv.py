@@ -22,7 +22,7 @@ class episodeTV():
         else:
             self.strEpisode = str(self.numEpisode)
         self.ids = ids
-        self.isOnDisk = self.existFile()
+        self.isOnDisk = (self.existFile() != [])
 
     def getBaseName(self):
         """ return foo101 """
