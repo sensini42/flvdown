@@ -4,7 +4,6 @@
 
 
 from PyQt4 import QtGui
-from PyQt4.QtCore import QThread
 from PyQt4.QtCore import Qt
 
 
@@ -23,6 +22,11 @@ class Display(QtGui.QWidget):
         self.season_l = None
         self.episode_cb = None
         self.info = None
+        self.show_label = None
+        self.season_label = None
+        self.episode_label = None
+        self.nothingtodo = None
+
         self.nextep = nextep
         self.populate()
 
@@ -92,7 +96,7 @@ class Display(QtGui.QWidget):
             tvshow = episode.tvshowSpace
             if show == tvshow:
                 self.season_l.setText(episode.strSeason)
-                if episode.isOnDisk==condition:
+                if episode.isOnDisk == condition:
                     self.episode_cb.addItem(episode.strEpisode)
                     self.info.append(episode)
 

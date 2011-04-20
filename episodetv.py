@@ -29,8 +29,14 @@ class episodeTV():
         return self.tvshow_ + self.strSeason + self.strEpisode
 
     def getSrtName(self):
-        """ return foo_1_01.srt """
-        return self.getBaseName() + ".srt"
+        """ return the name of the srt file (once downloaded) """
+        tvfiles = oslistdir(self.tvshow_)
+        srtFile = ""
+        for _file in tvfiles:
+            if _file == self.getBaseName() + '.srt':
+                srtFile = self.tvshow_ + "/" + _file
+                break
+        return srtFile
 
     def createDir(self):
         """ create directory if it doesn't exist """
@@ -51,10 +57,10 @@ class episodeTV():
         """ return the name of the video file (once downloaded) """
         tvfiles = oslistdir(self.tvshow_)
         videoFile = ""
-        for videoFile in tvfiles:
-            if (videoFile.startswith(self.getBaseName()) and \
-              not (videoFile == self.getSrtName())):
-                videoFile = self.tvshow_ + "/" + videoFile
+        for _file in tvfiles:
+            if (_file.startswith(self.getBaseName()) and \
+              not _file.endswith('.srt')):
+                videoFile = self.tvshow_ + "/" + _file
                 break
         return videoFile
     

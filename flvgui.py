@@ -4,12 +4,11 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 
-import os
 from nextepisode import NextEpisode
 
 
 from os import path as ospath
-from os import system as ossystem
+from os import mkdir as osmkdir
 from os import chdir as oschdir
 
 from gui.playing import Playing
@@ -22,24 +21,35 @@ from gui.dictbug import Dictbug
 class Flvgui(QtGui.QWidget):
     """ Gui for flvdown"""
         
-    def __init__(self, parent=None):
+    def __init__(self):
         """ nothing special here"""
         super(Flvgui, self).__init__()
+
+        ## pylint warning
+        self.playing = None
+        self.downloading = None
+        self.siteorder = None
+        self.dictbug = None
+        self.options = None
+        self.conf = None
+        self.list_site = None
+        self.dict_bug = None
 
         if (self.checkConfigFile()==-1):
             QtGui.QMessageBox.warning(self, 'Config File', \
                 'Please check config', \
                 QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
         
-        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), self)
+        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
+            self)
         self.trayIcon.activated.connect(self.toggle)
         self.trayIcon.show()
 
         self.setWindowTitle('flvgui')
 
-        self.list_ep = []
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
+
         self.mainlayout()
 
     def checkConfigFile(self):
@@ -89,7 +99,7 @@ class Flvgui(QtGui.QWidget):
         mainLayout = QtGui.QGridLayout(self)
 
         tab_widget = QtGui.QTabWidget()
-        mainLayout.addWidget(tab_widget, 0, 0, 1, 3)
+        mainLayout.addWidget(tab_widget, 0, 0, 1, 2)
 
         self.playing = Playing(self.nextep)
         tab_widget.addTab(self.playing, "Playing")
@@ -109,16 +119,12 @@ class Flvgui(QtGui.QWidget):
         tab_widget.setCurrentIndex(1)
         self.update()
 
-        button_sub = QtGui.QPushButton("Subtitles")
-        mainLayout.addWidget(button_sub, 1, 0)
-        self.connect(button_sub, SIGNAL("clicked()"), self.downsub)
-                
         button_refresh = QtGui.QPushButton("Refresh")
-        mainLayout.addWidget(button_refresh, 1, 1)
+        mainLayout.addWidget(button_refresh, 1, 0)
         self.connect(button_refresh, SIGNAL("clicked()"), self.update)
                 
         button_close = QtGui.QPushButton("Close")
-        mainLayout.addWidget(button_close, 1, 2)
+        mainLayout.addWidget(button_close, 1, 1)
         button_close.clicked.connect(self.close)
 
         self.setLayout(mainLayout)
@@ -142,8 +148,8 @@ class Flvgui(QtGui.QWidget):
 
     def saveConf(self):
         """ save the config"""
-        if (not os.path.exists(ospath.expanduser('~') + "/.config/flvdown/")):
-            os.mkdir(ospath.expanduser('~') + "/.config/flvdown/")
+        if (not ospath.exists(ospath.expanduser('~') + "/.config/flvdown/")):
+            osmkdir(ospath.expanduser('~') + "/.config/flvdown/")
         fileconf = open(ospath.expanduser('~') + \
             "/.config/flvdown/flv.conf", "w", 0)
         for key in self.conf.keys():
@@ -159,12 +165,6 @@ class Flvgui(QtGui.QWidget):
         
         fileconf.close()
 
-
-    @classmethod
-    def downsub(cls):
-        """ when a button_sub is clicked """
-        #data from combo
-        ossystem("downsub.sh")
 
     def update(self):
         """ update tab """
