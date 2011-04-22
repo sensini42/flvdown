@@ -13,6 +13,8 @@ def getLinks(tvshow, season, episode):
     urltv = getTvShowUrl(tvshow, season)
     src_urltv = getPage(urltv)
     possible_links = []
+    if (src_urltv == -1):
+        return possible_links
     for line in src_urltv:
         for nameModule in freetvvideoonline_mod.__all__:
             if ((nameModule in line) and (('Episode '+episode + '<') in line)):

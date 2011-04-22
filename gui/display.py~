@@ -1,0 +1,65 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+""" gui for playing tab """
+
+
+from PyQt4 import QtGui
+from PyQt4.QtCore import QThread
+from PyQt4.QtCore import Qt
+
+
+
+class Display(QtGui.QWidget):
+    """ display list """
+
+    def __init__(self, nextep):
+        """ initialisation """
+        super(Display, self).__init__()
+
+        # pylint warning
+        self.list_ep = None
+        self.show_cb = None
+        self.season_l = None
+        self.episode_cb = None
+        self.info = None
+        self.nextep = nextep
+
+    def populate(self):
+        """ create layout """
+        pass
+
+    def displayButtons(self, value):
+        """ display or not Buttons """
+        self.show_cb.setVisible(value)
+        self.season_l.setVisible(value)
+        self.episode_cb.setVisible(value)
+
+    def update(self, toUpdate=None):
+        """ update """
+        list_ep = self.nextep.getList()
+        if list_ep:
+            self.list_ep = list_ep
+            self.show_cb.clear()
+            for episode in self.list_ep:
+                if episode.isOnDisk and \
+                     (self.show_cb.findText(episode.tvshowSpace) == -1):
+                    self.show_cb.addItem(episode.tvshowSpace)
+            if self.show_cb.count() > 0:
+                self.changeShow()
+                self.displayButtons(True)
+            else:
+                self.displayButtons(False)
+            
+    def changeShow(self):
+        """ when show_cb is changed """
+        show = self.show_cb.currentText()
+        self.episode_cb.clear()
+        self.info = []
+        for episode in self.list_ep:
+            tvshow = episode.tvshowSpace
+            if show == tvshow:
+                self.season_l.setText(episode.strSeason)
+                if episode.isOnDisk:
+                    self.episode_cb.addItem(episode.strEpisode)
+                    self.info.append(episode)
+

@@ -19,6 +19,8 @@ def getLinks(tvshow, season, episode):
     while(doNext):
         urltv = getTvShowUrl(tvshow, season, episode, numPage)
         src_urltv = getPage(urltv)
+        if (src_urltv == -1):
+            return possible_links
         npage = False
         for line in src_urltv:
             if ("next_page" in line):
