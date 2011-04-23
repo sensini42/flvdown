@@ -272,7 +272,8 @@ class Downloading(Display):
     def downallClicked(self):
         """ when downall is clicked """
         for episode in self.list_ep:
-            self.runThread(episode)
+            if not episode.isOnDisk:
+                self.runThread(episode)
 
     def isInProgress(self):
         """ check if there is some download in progress """
