@@ -22,7 +22,7 @@ def getFlv(link, verbose):
     src = getPage(loombolink)
     urlfile = ''
     for i in src:
-        if ('file' in i):
+        if ('file' in i) and not (('No such file') in i):
             urlfile = i.split("'")[3][7:]
 
     if urlfile == '':

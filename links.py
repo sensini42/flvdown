@@ -104,11 +104,10 @@ def flvdown(episode, options, list_site = None):
 
     if re.match("^\d", final_url):
         final_url = 'http://' + final_url 
-
+    
     if verbose:
         print final_url
-    print final_url
-    return (None, None)
+    
     return (final_url, filename + ext)
 
 def getFile(source, dest):    
