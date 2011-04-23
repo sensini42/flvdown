@@ -15,8 +15,10 @@ class Display(QtGui.QWidget):
         """ initialisation """
         super(Display, self).__init__()
 
-        # pylint warning
         self.mainLayout = QtGui.QGridLayout(self)
+        self.setLayout(self.mainLayout)
+
+        # pylint warning
         self.list_ep = None
         self.show_cb = None
         self.season_l = None

@@ -30,11 +30,11 @@ class InfoDown(QtGui.QWidget):
         self.button.hide()
 
         mainLayout = QtGui.QGridLayout(self)
-
         mainLayout.addWidget(filedown, 0, 0)
         mainLayout.addWidget(self.barre, 0, 1)
         mainLayout.addWidget(self.infodown, 0, 2)
         mainLayout.addWidget(self.button, 0, 3)
+        self.setLayout(mainLayout)
     
         self.down = Down(episode, option, list_site, self)
         self.connect(self.down, SIGNAL("downStart()"), self.downStart)
@@ -74,6 +74,7 @@ class InfoDown(QtGui.QWidget):
         self.infodown.setText(msg)
         self.running = False
         self.button.setText("Remove")
+        self.button.show()
 
     def downStart(self):
         """ down start """
@@ -115,6 +116,7 @@ class Progress(QtGui.QWidget):
         self.parent = parent
 
         self.mainLayout = QtGui.QVBoxLayout(self)
+        self.setLayout(self.mainLayout)
         self.list_progress = []
 
         self.populate()
