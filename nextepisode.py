@@ -8,8 +8,11 @@ from urllib2 import Request, build_opener, HTTPCookieProcessor, \
 from cookielib import LWPCookieJar
 from tempfile import NamedTemporaryFile
 
+from re import findall
+
 from episodetv import episodeTV
 from operator import attrgetter
+
 class NextEpisode():
     """ class to deal with next-episode.net """
 
@@ -17,7 +20,7 @@ class NextEpisode():
         # save parameters
         self.__login = login
         self.__pwd = password
-        self.dict_bug = dict_bug
+        self.dict_bug = None
 
         # misc
         self.__txheaders = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 5.5; WinNT)'}
@@ -31,7 +34,7 @@ class NextEpisode():
         install_opener(opener)
         
         self.__connect()
-        self.update()
+        self.update(dict_bug)
 
 
     def __getSrcPage(self, url, txdata=None):
@@ -51,6 +54,7 @@ class NextEpisode():
         
 
     def __getListEpisode(self):
+        """ get list episode from next-episode """
         source = self.__getSrcPage('track/')
         if not source:
             return []
@@ -98,10 +102,12 @@ class NextEpisode():
         self.__getSrcPage(url, txdata)
 
 
-    def update(self, login=None, password=None):
+    def update(self, dict_bug, login=None, password=None):
         """ update the list of episodes """
 #        for i in self.__list:
 #            del(i)#utile?
+        self.dict_bug = {}
+        self.dict_bug.update(dict_bug)
         changeLP = False
         if login:
             self.__login = login
@@ -124,13 +130,13 @@ class NextEpisode():
         
     def removeShow(self, title):
         """ remove the _title_show from watchlist """
-        src = self.getSrcPage('-'.join(title.split(' ')))
+        src = self.__getSrcPage('-'.join(title.split(' ')))
         url = src.split('from watchlist')[0].split('"')[-2]
-        self.getSrcPage(url)
+        self.__getSrcPage(url)
 
     def trackShow(self, movieId):
         """ trackshow """
-        self.getSrcPage('track?startTracking=' + movieId)
+        self.__getSrcPage('track?startTracking=' + movieId)
 
     def untrackShow(self, movieId, userId):
         """ untrack show """
@@ -141,14 +147,14 @@ class NextEpisode():
                             "seasonId": 0, \
                             "episodeId": 0, \
                             "parsedString": 0})
-        self.getSrcPage(url, txdata)
+        self.__getSrcPage(url, txdata)
 
     def getSuggestions(self):
         """
         return the list of suggestion
         in format (tvshow, movieid)
         """
-        src = self.getSrcPage('we_suggest/').split('\n')
+        src = self.__getSrcPage('we_suggest/').split('\n')
         sugges = []
         for i in src:
             if 'hideid' in i:

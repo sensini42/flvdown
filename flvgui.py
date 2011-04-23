@@ -16,6 +16,7 @@ from gui.downloading import Downloading
 from gui.options import Options
 from gui.siteorder import Siteorder
 from gui.dictbug import Dictbug
+from gui.progress import Progress
 
 
 class Flvgui(QtGui.QWidget):
@@ -24,33 +25,31 @@ class Flvgui(QtGui.QWidget):
     def __init__(self):
         """ nothing special here"""
         super(Flvgui, self).__init__()
+        self.setWindowTitle('flvgui')
 
         ## pylint warning
-        self.playing = None
-        self.downloading = None
-        self.siteorder = None
-        self.dictbug = None
-        self.options = None
         self.conf = None
         self.list_site = None
         self.dict_bug = None
 
-        if (self.checkConfigFile()==-1):
-            QtGui.QMessageBox.warning(self, 'Config File', \
-                'Please check config', \
-                QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
+        self.checkConfigFile()
         
         self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
             self)
         self.trayIcon.activated.connect(self.toggle)
         self.trayIcon.show()
 
-        self.setWindowTitle('flvgui')
 
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
+        self.playing = Playing(self.nextep)
+        self.progress = Progress(self.list_site)
+        self.downloading = Downloading(self.nextep, self.progress, parent=self)
+        self.options = Options(self.conf, parent=self)
+        self.siteorder = Siteorder(self.list_site, parent=self)
+        self.dictbug = Dictbug(self.dict_bug, parent=self)
 
-        self.mainlayout()
+        self.populate()
 
     def checkConfigFile(self):
         """ read config file """
@@ -75,10 +74,11 @@ class Flvgui(QtGui.QWidget):
                 else:
                     self.conf[tmp[0]] = tmp[1].replace('"','')[:-1]
             fileconf.close()
-            return 1
         except IOError:
             print "check config"
-            return -1
+            QtGui.QMessageBox.warning(self, 'Config File', \
+                'Please check config', \
+                QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
 
     @classmethod
     def getSites(cls):
@@ -94,27 +94,19 @@ class Flvgui(QtGui.QWidget):
                 list_site.append(subsite)
         return list_site
         
-    def mainlayout(self):
+    def populate(self):
         """ define the main layout"""
         mainLayout = QtGui.QGridLayout(self)
 
         tab_widget = QtGui.QTabWidget()
         mainLayout.addWidget(tab_widget, 0, 0, 1, 2)
 
-        self.playing = Playing(self.nextep)
         tab_widget.addTab(self.playing, "Playing")
-
-        self.downloading = Downloading(self.nextep, parent=self)
         tab_widget.addTab(self.downloading, "Downloading")
-
-        self.options = Options(self.conf, parent=self)
         tab_widget.addTab(self.options, "Options")
-
-        self.siteorder = Siteorder(self.list_site, parent=self)
         tab_widget.addTab(self.siteorder, "Site order")
-
-        self.dictbug = Dictbug(self.dict_bug, parent=self)
         tab_widget.addTab(self.dictbug, "Dict Bug")
+        tab_widget.addTab(self.progress, "Progress")
 
         tab_widget.setCurrentIndex(1)
         self.update()
@@ -142,6 +134,7 @@ class Flvgui(QtGui.QWidget):
         """ update the config"""
         self.conf.update(self.options.getOptions())
         self.list_site = self.siteorder.getListSite()
+        self.dict_bug = {}
         self.dict_bug.update(self.dictbug.getListDictBug())
         self.saveConf()
         self.update()
@@ -169,13 +162,15 @@ class Flvgui(QtGui.QWidget):
     def update(self):
         """ update tab """
         oschdir(self.conf['base_directory'])
-        self.nextep.update(self.conf['login'], self.conf['password'])
+        self.nextep.update(self.dict_bug, self.conf['login'], \
+               self.conf['password'])
         self.playing.update(self.conf['player'])
-        self.downloading.update(list_site=self.list_site)
+        self.downloading.update()
+        self.progress.update(self.list_site)
 
     def closeEvent(self, event):
         """ call when close_button is clicked """
-        if self.downloading.isInProgress():
+        if self.progress.isInProgress():
             reply = QtGui.QMessageBox.question(self, 'Message', \
                   "Are you sure to quit?", QtGui.QMessageBox.Yes | \
                   QtGui.QMessageBox.No, QtGui.QMessageBox.No)

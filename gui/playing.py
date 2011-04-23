@@ -4,24 +4,11 @@
 
 
 from PyQt4 import QtGui
-from PyQt4.QtCore import QThread
-from gui.display import Display
 
-from os import system as ossystem
+from gui.display import Display
+from threads import Video
 
 import subdown
-
-class VideoThread(QThread):
-    """play in a thread"""
-
-    def __init__(self, cmd, parent = None):
-        """ initialisation """
-        self.cmd = cmd
-        QThread.__init__(self, parent)
-        
-    def run(self):
-        """ play in the background """
-        ossystem(self.cmd)
 
 
 class Playing(Display):
@@ -95,7 +82,7 @@ class Playing(Display):
                    QtGui.QMessageBox.No, QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.No:
                     return
-        VideoThread((self.player+ " " + videoName), self).start()
+        Video(episode, self.player, self).start()
 
     def markClicked(self):
         """ when a button_mark is clicked """

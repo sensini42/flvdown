@@ -1,1 +1,2 @@
-__all__ = ["display", "playing", "downloading", "options", "siteorder", "dictbug"]
+__all__ = ["display", "playing", "downloading", "options", "siteorder", \
+      "dictbug", "progress"]

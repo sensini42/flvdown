@@ -4,124 +4,28 @@
 
 
 from PyQt4 import QtGui
-from PyQt4.QtCore import QThread, SIGNAL
+from PyQt4.QtCore import SIGNAL
 from gui.display import Display
 
-import traceback
-import urllib
-import time
-
-import subdown
-import links
 import episodetv
-
-class DownThread(QThread):
-    """download an episode in a thread"""
-
-    def __init__(self, episode, option, list_site, \
-                 infofile, parent = None):
-        """ initialisation """
-        self.episode = episode
-        self.option = option
-        self.list_site = list_site
-        self.infofile = infofile
-        self.parent = parent
-        
-        QThread.__init__(self, parent)
-        
-    def run(self):
-        """ download ep, sub, emit signal """
-        try:
-            link, filename = links.flvdown(self.episode, self.option, \
-                  self.list_site)
-            if link:
-                self.episode.createDir()
-                self.emit(SIGNAL("downStart(QString)"), filename)
-                urllib.urlretrieve(link, filename, reporthook=self.downInfo)
-                subdown.downSub(filename, self.option)
-        except:
-            traceback.print_exc()
-            self.emit(SIGNAL("downFinished(QString, QString , \
-                  PyQt_PyObject)"), "download error", \
-                  self.episode.getBaseName(), self.infofile)
-        else:
-            self.emit(SIGNAL("downFinished(QString, QString , \
-                  PyQt_PyObject)"), "download finished", \
-                  self.episode.getBaseName(), self.infofile)
-
-    def downInfo(self, infobloc, taillebloc, totalblocs):
-        """ report hook """
-        self.emit(SIGNAL("downInfo(PyQt_PyObject)"), \
-                  [infobloc, taillebloc, totalblocs])
-
-
-class InfoDown(QtGui.QWidget):
-    """ info about down """
-
-    def __init__(self, show):
-        """ initialisation """
-        super(InfoDown, self).__init__()
-
-        self.filedown = QtGui.QLabel(show)
-        self.barre = QtGui.QProgressBar(self)
-        self.barre.hide()
-        self.infodown = QtGui.QLabel("")
-
-        mainLayout = QtGui.QGridLayout(self)
-
-        mainLayout.addWidget(self.filedown, 0, 0, 1, 1)
-        mainLayout.addWidget(self.barre, 0, 1, 1, 2)
-        mainLayout.addWidget(self.infodown, 0, 3, 1, 1)
-    
-        # pylint warning
-        self.time_begin = None
-
-    def downStart(self, msg):
-        """ down start """
-        self.time_begin = time.time()
-        self.filedown.setText(msg)
-        self.barre.reset()
-        self.barre.setRange(0, 100)
-        self.barre.setValue(0)
-        self.barre.show()
-
-    def downInfo(self, msg):
-        """ down info """
-        bloc, taille, total = msg
-        if total > 0:
-            value = int(float(bloc)*float(taille)/float(total)*100)
-            self.barre.setValue(value)
-            try:
-                speed = float(bloc*taille) / float(time.time()-self.time_begin)
-                time_left = float(total-bloc*taille) / speed
-                self.infodown.setText( str("%.2f ko/s " %float(speed/1024)) + \
-                   str("time_left: %s:%02d:%02d" %(int(time_left/3600.0), \
-                   (time_left%3600)/60.0, (time_left%3600)%60)) )
-            except ZeroDivisionError:
-                pass
-        else:
-            if self.barre.maximum > 0:
-                self.barre.reset()
-                self.barre.setRange(0, 0)
 
 
 class Downloading(Display):
     """ display playing list """
 
-    def __init__(self, nextep, list_site=None, parent=None):
+    def __init__(self, nextep, progress, parent=None):
         """ initialisation """
         self.parent = parent
+        self.progress = progress
 
         # pylint warning
         self.ed_checkbox = None
-        self.stackedWidget = None
-        self.list_site = None
         self.button_downall = None
         self.button_down = None
         self.button_all = None
-        self.nextbutton = None
+
         super(Downloading, self).__init__(nextep)
-        self.update(list_site)
+        self.update()
 
 
     def populate(self):
@@ -173,16 +77,8 @@ class Downloading(Display):
                                   self.addShow(data))
         self.connect(button_addShow, SIGNAL("clicked()"), btn_callbackAddShow)
 
-        ## info down
-        self.stackedWidget = QtGui.QStackedWidget()
-        self.mainLayout.addWidget(self.stackedWidget, 6, 0, 1, 4)
-        self.nextbutton = QtGui.QPushButton("Next")
-        self.nextbutton.clicked.connect(self.nextstacked)
-        self.nextbutton.hide()
-        self.mainLayout.addWidget(self.nextbutton, 6, 4)
-
         ## better display
-        self.mainLayout.addWidget(QtGui.QStackedWidget(), 7, 0, 1, 5)
+        self.mainLayout.addWidget(QtGui.QStackedWidget(), 6, 0, 1, 5)
 
         super(Downloading, self).populate()
 
@@ -193,10 +89,8 @@ class Downloading(Display):
         self.button_downall.setVisible(value)
         super(Downloading, self).displayButtons(value)
 
-    def update(self, list_site=None):
+    def update(self):
         """ update """
-        if list_site:
-            self.list_site = list_site
         super(Downloading, self).update(False)
         
     def changeShow(self):
@@ -207,39 +101,12 @@ class Downloading(Display):
         """ when we want to add a tvshow """
         self.nextep.addShow(str(data.text()))
 
-    def nextstacked(self):
-        """ view next downloading """
-        swc = self.stackedWidget.count()
-        if swc > 1:
-            swci = self.stackedWidget.currentIndex()
-            if swci != swc - 1:
-                self.stackedWidget.setCurrentIndex(swci + 1)
-            else:
-                self.stackedWidget.setCurrentIndex(0)
-
     def runThread(self, episode):
         """ run a download thread """
         option = ""
         if self.ed_checkbox.isChecked():
             option += "i"
-        infoline = InfoDown(episode.getBaseName())
-        self.stackedWidget.addWidget(infoline)
-        if self.stackedWidget.count() > 1:
-            self.nextbutton.show()
-        dth = DownThread(episode, option, self.list_site, infoline, self)
-        self.connect(dth, SIGNAL("downStart(QString)"), infoline.downStart)
-        self.connect(dth, SIGNAL("downInfo(PyQt_PyObject)"), infoline.downInfo)
-        self.connect(dth, SIGNAL("downFinished(QString, QString, \
-             PyQt_PyObject)"), self.endThread)
-        dth.start() 
-
-    def endThread(self, titre, message, infoline):
-        """ when a download is finished """
-        print titre, message
-        self.parent.trayIcon.showMessage(titre, message)
-        self.stackedWidget.removeWidget(infoline)
-        if self.stackedWidget.count() < 2:
-            self.nextbutton.hide()
+        self.progress.addLine(episode, option)
 
     def downFreeClicked(self, data):
         """ when down from form """
@@ -275,8 +142,3 @@ class Downloading(Display):
             if not episode.isOnDisk:
                 self.runThread(episode)
 
-    def isInProgress(self):
-        """ check if there is some download in progress """
-        return self.stackedWidget.count() > 0
-
-   
