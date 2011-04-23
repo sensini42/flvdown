@@ -18,6 +18,8 @@ class InfoDown(QtGui.QWidget):
         """ initialisation """
         super(InfoDown, self).__init__()
 
+        self.episode = episode
+
         # pylint warning
         self.time_begin = None
 
@@ -36,11 +38,11 @@ class InfoDown(QtGui.QWidget):
         mainLayout.addWidget(self.button, 0, 3)
         self.setLayout(mainLayout)
     
-        self.down = Down(episode, option, list_site, self)
+        self.down = Down(self.episode, option, list_site, self)
         self.connect(self.down, SIGNAL("downStart()"), self.downStart)
         self.connect(self.down, SIGNAL("downInfo(PyQt_PyObject)"), \
                 self.downInfo)
-        self.connect(self.down, SIGNAL("downFinish(PyQt_PyObject)"), \
+        self.connect(self.down, SIGNAL("downFinish(QString)"), \
                 self.downFinish)
         self.running = True
         self.down.start()
@@ -58,23 +60,20 @@ class InfoDown(QtGui.QWidget):
         else:
             self.hide()
 
-    def downFinish(self, finish):
+    def downFinish(self, msgdown):
         """ down finish """
         self.barre.hide()
-        if finish:
-            msg = 'finished in '
-        else: # stop by user
-            msg = 'stop after '
+        msg = msgdown
         if self.time_begin:
             ttime = time.time() - self.time_begin
-            msg = msg + str("%s:%02d:%02d" %(int(ttime/3600), \
-                 (ttime%3600)/60.0, (ttime%3600)%60))
-        else:
-            msg = msg + 'undefined'
+            msg = msg + " (" + str("%s:%02d:%02d" %(int(ttime/3600), \
+                 (ttime%3600)/60.0, (ttime%3600)%60)) + ")"
         self.infodown.setText(msg)
         self.running = False
         self.button.setText("Remove")
         self.button.show()
+        self.emit(SIGNAL("downFinished(QString, QString)"), \
+                self.episode.getBaseName(), msgdown)
 
     def downStart(self):
         """ down start """
@@ -137,6 +136,8 @@ class Progress(QtGui.QWidget):
     def addLine(self, episode, options):
         """ add new progress line """
         tmp = InfoDown(episode, options, self.list_site)
+        self.connect(tmp, SIGNAL("downFinished(QString, QString)"), \
+                self.parent.showMessage)
         self.list_progress.append(tmp)
         nbr = len(self.list_progress)
         self.mainLayout.insertWidget(nbr, tmp)
@@ -148,4 +149,3 @@ class Progress(QtGui.QWidget):
                 return True
         return False
 
-   

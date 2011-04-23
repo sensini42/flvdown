@@ -43,7 +43,7 @@ class Flvgui(QtGui.QWidget):
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
         self.playing = Playing(self.nextep)
-        self.progress = Progress(self.list_site)
+        self.progress = Progress(self.list_site, parent=self)
         self.downloading = Downloading(self.nextep, self.progress, parent=self)
         self.options = Options(self.conf, parent=self)
         self.siteorder = Siteorder(self.list_site, parent=self)
@@ -129,6 +129,9 @@ class Flvgui(QtGui.QWidget):
         else: 
             self.show()
 
+    def showMessage(self, title, message):
+        """ tray icon notification """
+        self.trayIcon.showMessage(title, message)
 
     def updateConf(self):
         """ update the config"""

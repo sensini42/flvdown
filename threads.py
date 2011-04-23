@@ -12,6 +12,14 @@ import traceback
 import links
 import subdown
 
+class NoSubFound(Exception):
+    """ class exception """
+    pass
+
+class NoLinkFound(Exception):
+    """ class exception """
+    pass
+
 class Abort(Exception):
     """ class exception """
     pass
@@ -38,14 +46,21 @@ class Down(QThread):
                 self.episode.createDir()
                 self.emit(SIGNAL("downStart()"))
                 urllib.urlretrieve(link, filename, reporthook=self.downInfo)
-                subdown.downSub(filename, self.option)
+                if subdown.downSub(filename, self.option) == -1:
+                    raise NoSubFound()
+            else:
+                raise NoLinkFound()
+        except NoSubFound:
+            self.emit(SIGNAL("downFinish(QString)"), "no sub found")
+        except NoLinkFound:
+            self.emit(SIGNAL("downFinish(QString)"), "no link found")
         except Abort:
-            self.emit(SIGNAL("downFinish(PyQt_PyObject)"), False)
+            self.emit(SIGNAL("downFinish(QString)"), "download aborted")
         except:
             traceback.print_exc()
-            self.emit(SIGNAL("downFinish(PyQt_PyObject)"), False)
+            self.emit(SIGNAL("downFinish(QString)"), "download error")
         else:
-            self.emit(SIGNAL("downFinish(PyQt_PyObject)"), True)
+            self.emit(SIGNAL("downFinish(QString)"), "download finished")
 
     def stopDown(self):
         """ stop """
