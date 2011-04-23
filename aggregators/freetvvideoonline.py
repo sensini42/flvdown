@@ -11,6 +11,7 @@ def getTvShowUrl(tvshow, season):
 def getLinks(tvshow, season, episode):
     """return all video links"""
     urltv = getTvShowUrl(tvshow, season)
+    print urltv
     src_urltv = getPage(urltv)
     possible_links = []
     if (src_urltv == -1):
