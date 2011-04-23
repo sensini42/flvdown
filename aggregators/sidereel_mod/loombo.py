@@ -9,7 +9,7 @@ def getFlv(link, verbose):
         if ("src='http://loombo.com/embed" in i):
             loombolink = i.split("'")[5]
 
-    if not loombolink:
+    if (not loombolink) or (loombolink == 'no'):
         if verbose:			
             print '\033[1;31mloombo link not found\033[0m \
                    (url loombo:' + link + ')'

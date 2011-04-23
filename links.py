@@ -48,37 +48,56 @@ def flvdown(episode, options, list_site = None):
             verbose = 1
 
     possible_links = []
-    for i in aggregators.__all__:
-        #        if verbose:
-        print "checking", i
-        __import__("aggregators." + i)
-        possible_links += sys.modules["aggregators."+i].getLinks( \
-            episode.tvshow, episode.strSeason, str(int(episode.strEpisode)))
-    #    if verbose:
-    print "done"
-    if possible_links == []:
-        print '\033[1;31mno link\033[0m found'
-        return None, None
-    
-    ##Sort possible_links
-    if list_site != None :
-        prio = dict(zip(['_mod.'.join(i.split(' : ')) \
-                     for i in list_site], range(len(list_site))))
-   
-        possible_links = sorted(possible_links, key=lambda i: prio[i[1]])
-
-    url_found = False
-    while not url_found:
+    if interact or not list_site:
+        #check all site
+        for i in aggregators.__all__:
+            #        if verbose:
+            print "checking", i
+            __import__("aggregators." + i)
+            possible_links += sys.modules["aggregators."+i].getLinks( \
+                episode.tvshow, episode.strSeason, \
+                str(int(episode.strEpisode)))
+        print "done"
+        if possible_links == []:
+            print '\033[1;31mno link\033[0m found'
+            return None, None
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
         __import__("aggregators." + znl)
         final = sys.modules["aggregators." + znl].getFlv(link, verbose)
-        if final != -1:
-            url_found = True
-        else:
-            possible_links.remove([link, znl])
-            if possible_links == []:
-                print '\033[1;31mno link\033[0m found'
-                return None, None
+        if final == -1:
+            print '\033[1;31mno link\033[0m found'
+            return None, None
+    else:
+    ##Sort possible_links
+#        prio = dict(zip(['_mod.'.join(i.split(' : ')) \
+#                     for i in list_site], range(len(list_site))))
+#        print prio
+        list_sites = list_site[:]
+        url_found = False
+        modulesChecked = []
+        while ((not url_found) and  list_sites):
+            hmod, hsite = list_sites.pop(0).split(' : ')
+            print "checking", hmod, hsite
+            if hmod not in modulesChecked:
+                i = "aggregators." + hmod
+                __import__(i)
+                modulesChecked.append(hmod)
+                possible_links += sys.modules[i].getLinks( \
+                    episode.tvshow, episode.strSeason, \
+                    str(int(episode.strEpisode)))
+            links_for_sites = [l for l in possible_links \
+                              if hmod + "_mod." + hsite in l]
+            while (links_for_sites and (not url_found)):
+                (link, znl) = getEpisodeLink(links_for_sites, verbose, interact)
+                __import__("aggregators." + znl)
+                final = sys.modules["aggregators." + znl].getFlv(link, verbose)
+                if final != -1:
+                    url_found = True
+                else:
+                    links_for_sites.remove([link, znl])
+        if not url_found:
+            print '\033[1;31mno link\033[0m found'
+            return None, None
     final_url = final[0]
 
     ext = "." + final_url.split('.')[-1]
@@ -88,7 +107,8 @@ def flvdown(episode, options, list_site = None):
 
     if verbose:
         print final_url
-
+    print final_url
+    return (None, None)
     return (final_url, filename + ext)
 
 def getFile(source, dest):    
