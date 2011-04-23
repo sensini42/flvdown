@@ -55,7 +55,7 @@ def flvdown(episode, options, list_site = None):
             print "checking", i
             __import__("aggregators." + i)
             possible_links += sys.modules["aggregators."+i].getLinks( \
-                episode.tvshow, episode.strSeason, \
+                episode.tvshowSpace, episode.strSeason, \
                 str(int(episode.strEpisode)))
         print "done"
         if possible_links == []:
@@ -83,7 +83,7 @@ def flvdown(episode, options, list_site = None):
                 __import__(i)
                 modulesChecked.append(hmod)
                 possible_links += sys.modules[i].getLinks( \
-                    episode.tvshow, episode.strSeason, \
+                    episode.tvshowSpace, episode.strSeason, \
                     str(int(episode.strEpisode)))
             links_for_sites = [l for l in possible_links \
                               if hmod + "_mod." + hsite in l]
