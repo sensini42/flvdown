@@ -1,2 +1,5 @@
-__all__ = ["vidxden", "novamov", "loombo", "watchseries.eu", \
-           "watch-streaming-tv-episodes.com"]
+__all__ = ["vidxden", "novamov", "loombo", "watchserieseu", \
+           "watchstreamingtvepisodescom"]
+__all2__ = {"vidxden":"vidxden", "novamov":"novamov", "loombo":"loombo", \
+            "watchserieseu":"watchseries.eu", \
+           "watchstreamingtvepisodescom":"watch-streaming-tv-episodes.com"}

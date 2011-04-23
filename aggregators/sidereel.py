@@ -28,7 +28,8 @@ def getLinks(tvshow, season, episode):
             if ("disabled next_page" in line):
                 doNext = False
             for nameModule in sidereel_mod.__all__:
-                if ((nameModule in line) and ('data-viewable-url') in line):
+                realName = sidereel_mod.__all2__[nameModule]
+                if ((realName in line) and ('data-viewable-url') in line):
                     possible_links.append([line.split('"')[5], \
                                            "sidereel_mod." + nameModule])
         numPage += 1
