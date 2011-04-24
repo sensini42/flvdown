@@ -23,7 +23,7 @@ class Playing(Display):
         self.button_mark = None
         self.button_delete = None
 
-        super(Playing, self).__init__(nextep)
+        super(Playing, self).__init__(nextep, True)
         self.update(player)
 
     def populate(self):
@@ -64,12 +64,8 @@ class Playing(Display):
         """ update """
         if player:
             self.player = player
-        super(Playing, self).update(True)
+        super(Playing, self).update()
         
-    def changeShow(self):
-        """ when show_cb is changed """
-        super(Playing, self).changeShow(True)
-            
     def playClicked(self):
         """ when a button_play is clicked """
         episode = self.info[self.episode_cb.currentIndex()]
