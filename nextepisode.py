@@ -14,7 +14,8 @@ from re import findall
 from episodetv import episodeTV
 from operator import attrgetter
 
-regex = re.compile("changeCurrentSeason\('(.*)', '(.*)', '(.*)', '(.*)', '(.*)', .*\)")
+chgcs = re.compile("changeCurrentSeason\('(.*)', '(.*)', '(.*)', '(.*)', '(.*)', .*\)")
+rmve = re.compile("removeEpisode\('(.*)', '(.*)', '(.*)', '(.*)', .*\)")
 
 class NextEpisode():
     """ class to deal with next-episode.net """
@@ -71,11 +72,9 @@ class NextEpisode():
         lines = src.split('\n')
         for i in lines:
             if "removeEpisode" in i:
-                num_season = i.split()[9][1:-2]
-                num_epi = i.split()[10][1:-2]
-                id_list = i.split("removeEpisode(")[1].split(')')[0]
-                ids = [x[1:-1] for x in id_list.split(', ')[:-1]]
-                epitv = episodeTV(tv_name, num_season, num_epi, ids)
+                resul = rmve.search(i)
+                ids = [x for x in resul.group(1, 2, 3, 4)]
+                epitv = episodeTV(tv_name, ids[2], ids[3], ids)
                 listep.add(epitv)
         return listep
 
@@ -90,9 +89,6 @@ class NextEpisode():
         
         listep = set()
         
-        ##
-        ## a refaire avec des re
-        ##
         for i in src[1:]:
             lines = i.split('\n')
             if lines[0].endswith("</a>"):
@@ -102,19 +98,14 @@ class NextEpisode():
                     tv_name = self.dict_bug[tv_name]
                 for i in lines:
                     if "removeEpisode" in i:
-                        num_season = i.split()[9][1:-2]
-                        num_epi = i.split()[10][1:-2]
-                        id_list = i.split("removeEpisode(")[1].split(')')[0]
-                        ids = [x[1:-1] for x in id_list.split(', ')[:-1]]
-                        epitv = episodeTV(tv_name, num_season, num_epi, ids)
+                        resul = rmve.search(i)
+                        ids = [x for x in resul.group(1, 2, 3, 4)]
+                        epitv = episodeTV(tv_name, ids[2], ids[3], ids)
                         listep.add(epitv)
                     elif "changeCurrentSeason" in i:
-                        resul = regex.search(i)
-                        tableId = resul.group(1)
-                        movieId = resul.group(2)
-                        userId = resul.group(3)
-                        seasonId = resul.group(4)
-                        ids = resul.group(5)
+                        resul = chgcs.search(i)
+                        tableId, movieId, userId, seasonId, ids = \
+                            resul.group(1, 2, 3, 4, 5)
                         listtmp = self.__nextSeason(tv_name, movieId, userId, \
                                   seasonId, ids, tableId)
                         for epitv in listtmp:
