@@ -47,11 +47,16 @@ def downSub(videoname, options=""):
 
     src = the_page.split('\n')
 
+    possible = None
     for i in src:
         if tvshow + " (" in i:
             alink = i.split('<div')
             possible = [ j.split('<')[1] for j in alink if tvshow in j ]
 
+    if not possible:
+        print '\033[1;31m('+subname+') show not found\033[0m'
+        return -1
+        
     couple = [ (i.split('"')[1], i.split('>')[1]) for i in possible ]
  
     if verbose:
