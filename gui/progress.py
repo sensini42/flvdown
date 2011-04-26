@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 
 import time
 
-from threads import Down
+from threads import Down, Hook
 
 
 class InfoDown(QtGui.QWidget):
@@ -40,6 +40,7 @@ class InfoDown(QtGui.QWidget):
     
         self.down = Down(self.episode, option, list_site, self)
         self.connect(self.down, SIGNAL("downStart()"), self.downStart)
+        self.connect(self.down, SIGNAL("downStartWget()"), self.downStartWget)
         self.connect(self.down, SIGNAL("downInfo(PyQt_PyObject)"), \
                 self.downInfo)
         self.connect(self.down, SIGNAL("downFinish(QString)"), \
@@ -62,6 +63,8 @@ class InfoDown(QtGui.QWidget):
 
     def downFinish(self, msgdown):
         """ down finish """
+        if self.hook:
+            self.hook.stopDown()
         self.barre.hide()
         msg = msgdown
         if self.time_begin:
@@ -74,6 +77,15 @@ class InfoDown(QtGui.QWidget):
         self.button.show()
         self.emit(SIGNAL("downFinished(QString, QString)"), \
                 self.episode.getBaseName(), msgdown)
+
+    def downStartWget(self):
+        """ down start """
+        self.downStart()
+        self.hook = Hook(self)
+        self.connect(self.hook, SIGNAL("downInfo(PyQt_PyObject)"), \
+                self.downInfo)
+        self.hook.start()
+				self.button.hide()
 
     def downStart(self):
         """ down start """

@@ -18,7 +18,7 @@ def getFlv(link, verbose):
         if verbose:      
             print '\033[1;31mzshare link not found\033[0m (url zshare:' +\
               link + ')'
-        return -1
+        return None, None 
         
     if verbose :    
         print '\ndownloading ' + zsharelink
@@ -36,7 +36,7 @@ def getFlv(link, verbose):
         if verbose:      
             print '\033[1;31mform not found\033[0m (url zshare:' +\
               zsharelink + ')'
-        return -1
+        return None, None
 
     if verbose :    
         print '\ndownloading ' + zshareform
@@ -66,18 +66,18 @@ def getFlv(link, verbose):
         if ('link_enc' in i):
             urlfile = ''.join(eval('[' + i.split('(')[1].split(')')[0] + ']'))
 
-    waiting(50, verbose)
-
     if urlfile == '':
         if verbose:      
             print '\033[1;31mfile not found\033[0m (urls zshare:' +\
               zshareform + ' and ' + zsharelink+ ')'
-        return -1
+        return None, None
+
+    waiting(50, verbose)
 
     #urlfile = " --load-cookies=" + tmpfile + ".cook --save-cookies=" +\
     #          tmpfile + ".cook --keep-session-cookies " + urlfile
     urlfile = " --load-cookies=" + cooktmpfile + " --save-cookies=" +\
               cooktmpfile + " --keep-session-cookies " + urlfile
     #return (urlfile, tmpfile)
-    return (urlfile, None)
+    return (urlfile, cooktmp)
 

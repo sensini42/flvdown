@@ -35,7 +35,7 @@ def flvdown(episode, options, list_site = None):
         print 'there is a file name ' + filename + '...\n'
         choice = raw_input('continue ? (y/n)\n')
         if choice not in 'yYoO':
-            return None, None
+            return None, None, None
 
     interact = 0
     verbose = 0
@@ -60,13 +60,14 @@ def flvdown(episode, options, list_site = None):
         print "done"
         if possible_links == []:
             print '\033[1;31mno link\033[0m found'
-            return None, None
+            return None, None, None
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
         __import__("aggregators." + znl)
-        final = sys.modules["aggregators." + znl].getFlv(link, verbose)
-        if final == -1:
+        final_url, cook = sys.modules["aggregators." + znl].getFlv(link, \
+            verbose)
+        if not final_url:
             print '\033[1;31mno link\033[0m found'
-            return None, None
+            return None, None, None
     else:
     ##Sort possible_links
 #        prio = dict(zip(['_mod.'.join(i.split(' : ')) \
@@ -90,15 +91,15 @@ def flvdown(episode, options, list_site = None):
             while (links_for_sites and (not url_found)):
                 (link, znl) = getEpisodeLink(links_for_sites, verbose, interact)
                 __import__("aggregators." + znl)
-                final = sys.modules["aggregators." + znl].getFlv(link, verbose)
-                if final != -1:
+                final_url, cook = sys.modules["aggregators." + znl].getFlv( \
+                    link, verbose)
+                if final_url:
                     url_found = True
                 else:
                     links_for_sites.remove([link, znl])
         if not url_found:
             print '\033[1;31mno link\033[0m found'
-            return None, None
-    final_url = final[0]
+            return None, None, None
 
     ext = "." + final_url.split('.')[-1]
 
@@ -108,9 +109,9 @@ def flvdown(episode, options, list_site = None):
     if verbose:
         print final_url
     
-    return (final_url, filename + ext)
+    return (final_url, filename + ext, cook)
 
-def getFile(source, dest):    
+def getFile(source, dest, cook):    
 
     if (not os.path.isdir(dest.split('/')[0])):
         os.mkdir(dest.split('/')[0])
@@ -125,10 +126,10 @@ if __name__ == "__main__":
     if (len(sys.argv)>4):
         option = sys.argv[4] 
     episode = episodetv.episodeTV(sys.argv[1], sys.argv[2], sys.argv[3])
-    url, dest = flvdown(episode, option)
+    url, dest, cook = flvdown(episode, option)
     if url:
         if option:
             print '\ndownloading file', url, 'to', dest
-        getFile(url, dest)
+        getFile(url, dest, cook)
 
 

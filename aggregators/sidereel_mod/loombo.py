@@ -13,7 +13,7 @@ def getFlv(link, verbose):
         if verbose:			
             print '\033[1;31mloombo link not found\033[0m \
                    (url loombo:' + link + ')'
-        return -1
+        return None, None
 
     if verbose :    
         print '\ndownloading ' + loombolink
@@ -29,6 +29,6 @@ def getFlv(link, verbose):
         if verbose:			
             print '\033[1;31mfile not found\033[0m \
             (url loombo:' + loombolink + ')'
-        return -1
+        return None, None
     else:
         return (urlfile, None)

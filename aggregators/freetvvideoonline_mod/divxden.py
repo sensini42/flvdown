@@ -36,7 +36,7 @@ def getFlv(link, verbose):
         if verbose:      
             print '\033[1;31mvidxden link not found\033[0m (url:' +\
               link + ')'
-        return -1
+        return None, None 
     
     if verbose :    
         print '\ndownloading ' + divxlink
@@ -54,7 +54,7 @@ def getFlv(link, verbose):
         if verbose:
             print '\033[1;31mvidxden link not found\033[0m (url:' +\
               divxlink + ')'
-        return -1
+        return None, None
 
     arguments = packfunction[115:-13].split(',')
     pjs = ','.join(arguments[:-3])[1:-1]

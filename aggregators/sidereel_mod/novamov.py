@@ -14,7 +14,7 @@ def getFlv(link, verbose):
     if not novamovlink:
         if verbose:			
             print '\033[1;31mnovamov link not found\033[0m (url: ' + link + ')'
-        return -1
+        return None, None
 
     if verbose :    
         print '\ndownloading ' + novamovlink
@@ -29,7 +29,7 @@ def getFlv(link, verbose):
     if urlfile == '':
         if verbose:			
             print '\033[1;31mfile not found\033[0m (url: ' + novamovlink + ')'
-        return -1
+        return None, None
     else:
         return (urlfile, None)
 

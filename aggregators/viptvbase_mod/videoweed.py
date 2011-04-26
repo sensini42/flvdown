@@ -12,6 +12,6 @@ def getFlv(link, verbose):
         if verbose:			
             print '\033[1;31mfile not found\033[0m \
             (url :' + link + ')'
-        return -1
+        return None, None
     else:
         return (urlfile, None)

@@ -13,9 +13,10 @@ def getFlv(link, verbose):
             videoweedlink = i.split("'")[3]
 
     if not videoweedlink:
-        if verbose:			
-            print '\033[1;31mvideoweed link not found\033[0m (url: ' + link + ')'
-        return -1
+        if verbose:      
+            print '\033[1;31mvideoweed link not found\033[0m (url: ' + \
+                link + ')'
+        return None, None
 
     if verbose :    
         print '\ndownloading ' + videoweedlink
@@ -28,9 +29,9 @@ def getFlv(link, verbose):
             urlfile = i.split('"')[1]
 
     if urlfile == '':
-        if verbose:			
+        if verbose:      
             print '\033[1;31mfile not found\033[0m (url: ' + videoweedlink + ')'
-        return -1
+        return None, None
     else:
         print urlfile
         return (urlfile, None)
