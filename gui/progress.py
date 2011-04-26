@@ -22,6 +22,7 @@ class InfoDown(QtGui.QWidget):
 
         # pylint warning
         self.time_begin = None
+        self.hook = None
 
         filedown = QtGui.QLabel(episode.getBaseName())
         self.barre = QtGui.QProgressBar(self)
