@@ -85,7 +85,7 @@ class InfoDown(QtGui.QWidget):
         self.connect(self.hook, SIGNAL("downInfo(PyQt_PyObject)"), \
                 self.downInfo)
         self.hook.start()
-				self.button.hide()
+        self.button.hide()
 
     def downStart(self):
         """ down start """
