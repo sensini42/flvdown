@@ -11,7 +11,7 @@ from PyQt4.QtCore import Qt
 class Display(QtGui.QWidget):
     """ display list """
 
-    def __init__(self, nextep):
+    def __init__(self, nextep, condition):
         """ initialisation """
         super(Display, self).__init__()
 
@@ -21,7 +21,7 @@ class Display(QtGui.QWidget):
         # pylint warning
         self.list_ep = None
         self.show_cb = None
-        self.season_l = None
+        self.season_cb = None
         self.episode_cb = None
         self.info = None
         self.show_label = None
@@ -30,6 +30,7 @@ class Display(QtGui.QWidget):
         self.nothingtodo = None
 
         self.nextep = nextep
+        self.condition = condition
         self.populate()
 
     def populate(self):
@@ -53,9 +54,10 @@ class Display(QtGui.QWidget):
         self.show_cb.currentIndexChanged.connect(self.changeShow)
         self.mainLayout.addWidget(self.show_cb, 2, 0)
 
-        ## label season
-        self.season_l = QtGui.QLabel('')
-        self.mainLayout.addWidget(self.season_l, 2, 1)
+        ## combo season
+        self.season_cb = QtGui.QComboBox()
+        self.season_cb.currentIndexChanged.connect(self.changeSeason)
+        self.mainLayout.addWidget(self.season_cb, 2, 1)
 
         ## combo episode
         self.episode_cb = QtGui.QComboBox()
@@ -66,21 +68,21 @@ class Display(QtGui.QWidget):
     def displayButtons(self, value):
         """ display or not Buttons """
         self.show_cb.setVisible(value)
-        self.season_l.setVisible(value)
+        self.season_cb.setVisible(value)
         self.episode_cb.setVisible(value)
         self.show_label.setVisible(value)
         self.season_label.setVisible(value)
         self.episode_label.setVisible(value)
         self.nothingtodo.setVisible(not value)
 
-    def update(self, condition=True):
+    def update(self):
         """ update """
         list_ep = self.nextep.getList()
         if list_ep:
             self.list_ep = list_ep
             self.show_cb.clear()
             for episode in self.list_ep:
-                if (episode.isOnDisk == condition) and \
+                if (episode.isOnDisk == self.condition) and \
                      (self.show_cb.findText(episode.tvshowSpace) == -1):
                     self.show_cb.addItem(episode.tvshowSpace)
             if self.show_cb.count() > 0:
@@ -89,16 +91,28 @@ class Display(QtGui.QWidget):
             else:
                 self.displayButtons(False)
             
-    def changeShow(self, condition=True):
+    def changeShow(self):
         """ when show_cb is changed """
         show = self.show_cb.currentText()
+        self.season_cb.clear()
+        for episode in self.list_ep:
+            tvshow = episode.tvshowSpace
+            if show == tvshow:
+                if episode.isOnDisk == self.condition and \
+                     (self.season_cb.findText(episode.strSeason) == -1):
+                    self.season_cb.addItem(episode.strSeason)
+        self.changeSeason()
+
+    def changeSeason(self):
+        show = self.show_cb.currentText()
+        season = self.season_cb.currentText()
         self.episode_cb.clear()
         self.info = []
         for episode in self.list_ep:
             tvshow = episode.tvshowSpace
-            if show == tvshow:
-                self.season_l.setText(episode.strSeason)
-                if episode.isOnDisk == condition:
+            tvseason = episode.strSeason
+            if show == tvshow and season == tvseason:
+                if episode.isOnDisk == self.condition:
                     self.episode_cb.addItem(episode.strEpisode)
                     self.info.append(episode)
 

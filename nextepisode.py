@@ -8,10 +8,14 @@ from urllib2 import Request, build_opener, HTTPCookieProcessor, \
 from cookielib import LWPCookieJar
 from tempfile import NamedTemporaryFile
 
+import re
 from re import findall
 
 from episodetv import episodeTV
 from operator import attrgetter
+
+chgcs = re.compile("changeCurrentSeason\('(.*)', '(.*)', '(.*)', '(.*)', '(.*)', .*\)")
+rmve = re.compile("removeEpisode\('(.*)', '(.*)', '(.*)', '(.*)', .*\)")
 
 class NextEpisode():
     """ class to deal with next-episode.net """
@@ -52,6 +56,28 @@ class NextEpisode():
         except:
             raise Exception('Connect Error')
         
+    def __nextSeason(self, tv_name, movieId, userId, seasonId, ids, tableId):
+        """ mark the episode as read"""
+        url = 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'
+        txdata = urlencode({"showCat": "changeSeason", \
+                            "movieId": movieId, \
+                            "userId": userId, \
+                            "seasonId": seasonId, \
+                            "page": "changeActiveSeason", \
+                            "ids": ids, \
+                            "allCollapsed": "expanded", \
+                            "tableId": tableId})
+        src = self.__getSrcPage(url, txdata)
+        listep = set()
+        lines = src.split('\n')
+        for i in lines:
+            if "removeEpisode" in i:
+                resul = rmve.search(i)
+                ids = [x for x in resul.group(1, 2, 3, 4)]
+                epitv = episodeTV(tv_name, ids[2], ids[3], ids)
+                listep.add(epitv)
+        return listep
+
 
     def __getListEpisode(self):
         """ get list episode from next-episode """
@@ -63,25 +89,29 @@ class NextEpisode():
         
         listep = set()
         
-        ##
-        ## a refaire avec des re
-        ##
         for i in src[1:]:
             lines = i.split('\n')
             if lines[0].endswith("</a>"):
                 #else: tvshow not tracked
+                tv_name = lines[0][:-4].lower()
+                if tv_name in self.dict_bug:
+                    tv_name = self.dict_bug[tv_name]
                 for i in lines:
                     if "removeEpisode" in i:
-                        tv_name = lines[0][:-4].lower()
-                        if tv_name in self.dict_bug:
-                            tv_name = self.dict_bug[tv_name]
-                        num_season = i.split()[9][1:-2]
-                        num_epi = i.split()[10][1:-2]
-                        id_list = i.split("removeEpisode(")[1].split(')')[0]
-                        ids = [x[1:-1] for x in id_list.split(', ')[:-1]]
-                        epitv = episodeTV(tv_name, num_season, num_epi, ids)
+                        resul = rmve.search(i)
+                        ids = [x for x in resul.group(1, 2, 3, 4)]
+                        epitv = episodeTV(tv_name, ids[2], ids[3], ids)
                         listep.add(epitv)
-        listep = sorted(listep, key=attrgetter('tvshow_','strEpisode'))
+                    elif "changeCurrentSeason" in i:
+                        resul = chgcs.search(i)
+                        tableId, movieId, userId, seasonId, ids = \
+                            resul.group(1, 2, 3, 4, 5)
+                        listtmp = self.__nextSeason(tv_name, movieId, userId, \
+                                  seasonId, ids, tableId)
+                        for epitv in listtmp:
+                            listep.add(epitv)
+
+        listep = sorted(listep, key=attrgetter('tvshow_', 'strSeason', 'strEpisode'))
         return listep
 
     def addShow(self, title):

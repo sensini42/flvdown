@@ -24,7 +24,7 @@ class Downloading(Display):
         self.button_down = None
         self.button_all = None
 
-        super(Downloading, self).__init__(nextep)
+        super(Downloading, self).__init__(nextep, False)
         self.update()
 
 
@@ -88,14 +88,6 @@ class Downloading(Display):
         self.button_all.setVisible(value)
         self.button_downall.setVisible(value)
         super(Downloading, self).displayButtons(value)
-
-    def update(self):
-        """ update """
-        super(Downloading, self).update(False)
-        
-    def changeShow(self):
-        """ when show_cb is changed """
-        super(Downloading, self).changeShow(False)
 
     def addShow(self, data):
         """ when we want to add a tvshow """
