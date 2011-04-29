@@ -5,6 +5,7 @@
 
 from PyQt4.QtCore import SIGNAL
 from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 import time
 
@@ -127,20 +128,22 @@ class Progress(QtGui.QWidget):
         self.list_site = list_site
         self.parent = parent
 
-        self.mainLayout = QtGui.QVBoxLayout(self)
-        self.setLayout(self.mainLayout)
+        widget = QtGui.QWidget()
+        self.mainLayout = QtGui.QVBoxLayout(widget)
+        self.mainLayout.insertWidget(0, QtGui.QStackedWidget())
+        self.mainLayout.insertWidget(1000, QtGui.QStackedWidget())        
+        widget.setMinimumSize(500, 1000)
+        scrollarea = QtGui.QScrollArea()
+        scrollarea.setWidget(widget)
+        scrollarea.resize(300, 300)
+        scrollarea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollarea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollarea.show()
+        tLayout = QtGui.QVBoxLayout(self)
+        tLayout.addWidget(scrollarea)
+        self.setLayout(tLayout)
         self.list_progress = []
 
-        self.populate()
-
-    def populate(self):
-        """ create layout """
-
-        ## better display
-        self.mainLayout.insertWidget(0, QtGui.QStackedWidget())
-
-        ## better display
-        self.mainLayout.insertWidget(1000, QtGui.QStackedWidget())
 
     def update(self, list_site):
         """ update """
@@ -149,6 +152,7 @@ class Progress(QtGui.QWidget):
     def addLine(self, episode, options):
         """ add new progress line """
         tmp = InfoDown(episode, options, self.list_site)
+#        tmp.setMinimumSize(500, 1000)
         self.connect(tmp, SIGNAL("downFinished(QString, QString)"), \
                 self.parent.showMessage)
         self.list_progress.append(tmp)
