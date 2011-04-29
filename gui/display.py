@@ -104,6 +104,7 @@ class Display(QtGui.QWidget):
         self.changeSeason()
 
     def changeSeason(self):
+        """ when season_cb is changed """
         show = self.show_cb.currentText()
         season = self.season_cb.currentText()
         self.episode_cb.clear()
@@ -115,4 +116,21 @@ class Display(QtGui.QWidget):
                 if episode.isOnDisk == self.condition:
                     self.episode_cb.addItem(episode.strEpisode)
                     self.info.append(episode)
+
+    def removeEpisode(self, episode):
+        """ delete an entry """
+        self.info.remove(episode)
+        index = self.episode_cb.findText(episode.strEpisode, \
+                      flags=Qt.MatchExactly)
+        self.episode_cb.removeItem(index)
+        if self.episode_cb.count() == 0:
+            index = self.season_cb.findText(episode.strSeason, \
+                          flags=Qt.MatchExactly)
+            self.season_cb.removeItem(index)
+            if self.season_cb.count() == 0:
+                index = self.show_cb.findText(episode.tvshowSpace, \
+                              flags=Qt.MatchExactly)
+                self.show_cb.removeItem(index)
+                if self.show_cb.count() == 0:
+                    self.displayButtons(False)
 

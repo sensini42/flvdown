@@ -85,10 +85,13 @@ class Playing(Display):
         episode = self.info[self.episode_cb.currentIndex()]
         #print "mark", (movieId, userId, seasonId, episodeId)
         self.nextep.markAsRead(*(episode.ids))
-
+        self.removeEpisode(episode)
 
     def deleteClicked(self):
         """ when a button_delete is clicked """
-        self.markClicked()
         episode = self.info[self.episode_cb.currentIndex()]
+        self.nextep.markAsRead(*(episode.ids))
         episode.removeFile()
+        self.removeEpisode(episode)
+
+
