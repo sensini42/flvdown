@@ -58,7 +58,7 @@ def downSub(episode, options=""):
     tvshow = episode.tvshowSpace
     season = episode.strSeason
     numepi = episode.strEpisode
-    subname = episode.getSrtName()
+    subname = episode.getVideoName().split('.')[0] + ".srt"
     if verbose:
         print tvshow, "season", season, "episode", numepi
 
