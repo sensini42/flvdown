@@ -57,14 +57,14 @@ class Down(QThread):
                         ' -O ' + filename], shell=True)
                     self.proc.wait()
                     if self.proc.returncode == 0:
-                        if subdown.downSub(filename, self.option) == -1:
+                        if subdown.downSub(self.episode, self.option) == -1:
                             raise NoSubFound()
                     else:
                         raise Abort()
                 else:    
                     self.emit(SIGNAL("downStart()"))
                     urllib.urlretrieve(link, filename, reporthook=self.downInfo)
-                    if subdown.downSub(filename, self.option) == -1:
+                    if subdown.downSub(self.episode, self.option) == -1:
                         raise NoSubFound()
             else:
                 raise NoLinkFound()

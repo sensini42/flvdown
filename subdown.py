@@ -7,9 +7,9 @@ from zipfile import ZipFile
 import sys
 import re
 import tempfile
+from episodetv import episodeTV
 
-
-def downSub(videoname, options=""):
+def downSubVid(videoname, options=""):
     """ down subtitle """
 
     interact = 0
@@ -22,8 +22,6 @@ def downSub(videoname, options=""):
         if ("v" in options):
             verbose = 1
 
-    subname = ".".join(videoname.split('.')[:-1]) + ".srt"
-
     query = videoname.split('/')[-1].split('.')[0]
 
     tvshow = re.search('[a-z _&]*', query).group(0)
@@ -33,7 +31,32 @@ def downSub(videoname, options=""):
     if verbose:
         print tvshow, "season", season, "episode", episode
 
-    tvshow = tvshow.replace('_', ' ')
+    epi = episodeTV(tvshow, season, episode)
+    return downSub(epi, options)
+    
+def downSub(episode, options=""):
+    """ down subtitle """
+
+    interact = 0
+    verbose = 0
+    ##process arguments
+    if (options):
+        if ("i" in options):
+            interact = 1
+            verbose = 2
+        if ("v" in options):
+            verbose = 1
+
+    tvshow = episode.tvshow_
+    season = episode.strSeason
+    episode = episode.strEpi
+    
+    subname = episode.getSrtName()
+    if verbose:
+        print tvshow, "season", season, "episode", episode
+
+    tvshow = episode.tvshowSpace
+    
     ##search page
     urlbase = 'http://www.tvsubtitles.net/'
     urlsearch = urlbase + 'search.php'
@@ -184,7 +207,7 @@ if __name__ == "__main__":
     if (len(sys.argv)>2):
         option = sys.argv[2] 
 
-    downSub(_videoname, option)  
+    downSubVid(_videoname, option)  
 
 
 

@@ -26,7 +26,7 @@ class episodeTV():
 
     def getBaseName(self):
         """ return foo101 """
-        return self.tvshow_ + self.strSeason + self.strEpisode
+        return self.tvshow_ + "_" + self.strSeason + self.strEpisode
 
     def getSrtName(self):
         """ return the name of the srt file (once downloaded) """
