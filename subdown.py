@@ -2,12 +2,25 @@
 """ download subtitles"""
 
 from urllib2 import Request, urlopen
-from urllib import urlencode
 from zipfile import ZipFile
 import sys
 import re
 import tempfile
 from episodetv import episodeTV
+
+def getPage(link, splitting = '\n'):
+    """ return the lines list of the page link """
+    try:
+        response = urlopen(link)
+    except IOError:
+        print '\033[1;31mlink not found\033[0m (url:' + link + ')'
+        return -1
+    else:
+        the_page = response.read()
+        return the_page.split(splitting)
+
+
+
 
 def downSubVid(videoname, options=""):
     """ down subtitle """
@@ -22,21 +35,16 @@ def downSubVid(videoname, options=""):
         if ("v" in options):
             verbose = 1
 
-    query = videoname.split('/')[-1].split('.')[0]
-
-    tvshow = re.search('[a-z _&]*', query).group(0)
-    season = re.search('(?<=0)?[0-9]{1,2}(?=[0-9]{2})', query).group(0)
-    episode = re.search('[0-9]{2}$', query).group(0)
-
-    if verbose:
-        print tvshow, "season", season, "episode", episode
+    query = videoname.split('/')[-1].split('.')[0].split('_')
+    tvshow = '_'.join(query[:-1])
+    season = query[-1][:-2]
+    episode = query[-1][-2:]
 
     epi = episodeTV(tvshow, season, episode)
     return downSub(epi, options)
     
 def downSub(episode, options=""):
     """ down subtitle """
-
     interact = 0
     verbose = 0
     ##process arguments
@@ -47,68 +55,47 @@ def downSub(episode, options=""):
         if ("v" in options):
             verbose = 1
 
-    tvshow = episode.tvshow_
+    tvshow = episode.tvshowSpace
     season = episode.strSeason
-    episode = episode.strEpi
-    
+    numepi = episode.strEpisode
     subname = episode.getSrtName()
     if verbose:
-        print tvshow, "season", season, "episode", episode
+        print tvshow, "season", season, "episode", numepi
 
-    tvshow = episode.tvshowSpace
-    
+    tvCap = episode.tvshowCapital
+
     ##search page
     urlbase = 'http://www.tvsubtitles.net/'
-    urlsearch = urlbase + 'search.php'
+    urlsearch = urlbase + 'tvshows.html'
     lang = "en"
 
-    values = {"q" : tvshow } 
+    src = getPage(urlsearch)
 
-    req = Request(urlsearch, urlencode(values))
-    response = urlopen(req)
-    the_page = response.read().lower()
-
-    src = the_page.split('\n')
-
-    possible = None
+    alink = ""
     for i in src:
-        if tvshow + " (" in i:
-            alink = i.split('<div')
-            possible = [ j.split('<')[1] for j in alink if tvshow in j ]
+        if ("<b>" + tvCap + "</b>") in i:
+            alink = i.split('"')[3]
 
-    if not possible:
-        print '\033[1;31m('+subname+') show not found\033[0m'
+    if not alink:
+        print '\033[1;31m('+subname+" "+tvCap+') show not found\033[0m'
         return -1
         
-    couple = [ (i.split('"')[1], i.split('>')[1]) for i in possible ]
- 
-    if verbose:
-        print 'possible tvshows matching ' + tvshow + ':'
-        for (i, (url, name)) in enumerate(couple):
-            print i, '-', name
-
-    choice = 0
-    if interact:
-        choice = int(raw_input('enter your choice\n'))
-    #tvshow = couple[choice]
-    urltv = urlbase +  couple[choice][0].replace('.','-' + season +'.')
-
+    
+    #alink : last season
+    #ie tvshow-58-7.html
+    nshow = alink.split('-')[1]
+    reallink = "tvshow-" + nshow + "-" + season + ".html"
+    urltv = urlbase + reallink
     if verbose :    
-        print '\ndownloading from ' + couple[choice][1]
-        if verbose > 1:
-            print "url tv show:", urltv
+        print '\ndownloading from ' + urltv
 
 
     ##tvshow page
-    req = Request(urltv, urlencode(values))
-    response = urlopen(req)
-    the_page = response.read().lower()
-
-    src = the_page.split('<tr')
+    src = getPage(urltv, '<tr')
 
     urlsub = ''
     for i in src:
-        if (season + 'x' + episode) in i:
+        if (season + 'x' + numepi) in i:
             for j in i.split("<a"):
                 if 'flags/' + lang + '.gif' in j:
                     urlsub = urlbase + j.split('"')[1]
@@ -125,11 +112,7 @@ def downSub(episode, options=""):
         urlepi = urlsub
 
         ##episode page
-        req = Request(urlepi, urlencode(values))
-        response = urlopen(req)
-        the_page = response.read().lower()
-
-        src = the_page.split('<a href="/subtitle-')
+        src = getPage(urlepi, '<a href="/subtitle-')
 
         possible = []
         for i in src:
@@ -157,12 +140,7 @@ def downSub(episode, options=""):
  
 
     ##subtitle page
-
-    req = Request(urlsub, urlencode(values))
-    response = urlopen(req)
-    the_page = response.read().lower()
-
-    src = the_page.split('\n')
+    src = getPage(urlsub, '\n')
 
     link = urlbase + [ i.split('"')[1] for i in src if 'download-' in i][0]
 

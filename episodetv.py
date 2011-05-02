@@ -13,7 +13,10 @@ class episodeTV():
     def __init__(self, tvshow, season, episode, ids=None):
         self.tvshow = tvshow.lower()
         self.tvshow_ = "_".join(self.tvshow.split(" "))
-        self.tvshowSpace = " ".join(self.tvshow.split("_"))
+        self.listName = self.tvshow_.split("_")
+        self.tvshowSpace = " ".join(self.listName)
+        self.tvshowCapital = " ".join([i.capitalize() for i in self.listName])
+        self.tvshowCapital_ = "_".join([i.capitalize() for i in self.listName])
         self.numSeason = int(season)
         self.numEpisode = int(episode)
         self.strSeason = str(self.numSeason)
