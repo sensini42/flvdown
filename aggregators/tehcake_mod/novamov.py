@@ -9,7 +9,7 @@ def getFlv(link, verbose):
     src = getPage(link)
     novamovlink = ''
     for i in src:
-        if ("src='http://www.novamov.com/embed" in i):
+        if ("src='http://embed.novamov.com/embed" in i):
             novamovlink = i.split("'")[3]
 
     if not novamovlink:
