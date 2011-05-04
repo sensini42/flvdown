@@ -71,7 +71,7 @@ class Playing(Display):
         episode = self.info[self.episode_cb.currentIndex()]
         videoName = episode.getVideoName()
         if episode.getSrtName() == "":
-            subdown.downSub(videoName)
+            subdown.downSub(episode)
             if episode.getSrtName() == "":
                 reply = QtGui.QMessageBox.question(self, 'Message', \
                    "srt file missing. continue?", QtGui.QMessageBox.Yes | \
