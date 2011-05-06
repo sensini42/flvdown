@@ -16,6 +16,7 @@ from operator import attrgetter
 
 chgcs = re.compile("changeCurrentSeason\('(.*)', '(.*)', '(.*)', '(.*)', '(.*)', .*\)")
 rmve = re.compile("removeEpisode\('(.*)', '(.*)', '(.*)', '(.*)', .*\)")
+stop = re.compile("\('(.*)', '(.*)', '(.*)', .*\)")
 
 class NextEpisode():
     """ class to deal with next-episode.net """
@@ -38,7 +39,7 @@ class NextEpisode():
         install_opener(opener)
         
         self.__connect()
-        self.update(dict_bug)
+        #self.update(dict_bug)
 
 
     def __getSrcPage(self, url, txdata=None):
@@ -90,10 +91,10 @@ class NextEpisode():
         
         for i in src[1:]:
             lines = i.split('\n')
-            lids = lines[0].split("'")
-            idshow = lids[1]
-            iduser = lids[3]
-            tv_name = lids[5].lower()
+            resul = stop.search(lines[0])
+            idshow = resul.group(1)
+            iduser = resul.group(2)
+            tv_name = resul.group(3).lower()
             if tv_name in self.dict_bug:
                 tv_name = self.dict_bug[tv_name]
             for i in lines:
