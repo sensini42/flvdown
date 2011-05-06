@@ -81,37 +81,31 @@ class NextEpisode():
 
     def __getListEpisode(self):
         """ get list episode from next-episode """
-        source = self.__getSrcPage('track/')
+        source = self.__getSrcPage('track/?mode=Tree')
         if not source:
             return []
-        
-        src = source.split('showName">')
-        
+
+        src = source.split('stopTracking')
         listep = set()
         
         for i in src[1:]:
             lines = i.split('\n')
-            if lines[0].endswith("</a>"):
-                #else: tvshow not tracked
-                tv_name = lines[0][:-4].lower()
-                if tv_name in self.dict_bug:
-                    tv_name = self.dict_bug[tv_name]
-                for i in lines:
-                    if "removeEpisode" in i:
-                        resul = rmve.search(i)
-                        ids = [x for x in resul.group(1, 2, 3, 4)]
-                        epitv = episodeTV(tv_name, ids[2], ids[3], ids)
+            lids = lines[0].split("'")
+            idshow = lids[1]
+            iduser = lids[3]
+            tv_name = lids[5].lower()
+            if tv_name in self.dict_bug:
+                tv_name = self.dict_bug[tv_name]
+            for i in lines:
+                if ("hiddenValues_" + idshow) in i:
+                    lepi = i.split('"')[3].split(',')[:-1]
+                    for sxe in lepi:
+                        idseason, idepisode = sxe.split('x')
+                        epitv = episodeTV(tv_name, idseason, idepisode, \
+                                          (idshow, iduser, idseason, idepisode))
                         listep.add(epitv)
-                    elif "changeCurrentSeason" in i:
-                        resul = chgcs.search(i)
-                        tableId, movieId, userId, seasonId, ids = \
-                            resul.group(1, 2, 3, 4, 5)
-                        listtmp = self.__nextSeason(tv_name, movieId, userId, \
-                                  seasonId, ids, tableId)
-                        for epitv in listtmp:
-                            listep.add(epitv)
-
         listep = sorted(listep, key=attrgetter('tvshow_', 'strSeason', 'strEpisode'))
+
         return listep
 
     def addShow(self, title):
