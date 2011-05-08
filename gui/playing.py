@@ -83,7 +83,6 @@ class Playing(Display):
     def markClicked(self):
         """ when a button_mark is clicked """
         episode = self.info[self.episode_cb.currentIndex()]
-        #print "mark", (movieId, userId, seasonId, episodeId)
         self.nextep.markAsRead(*(episode.ids))
         self.removeEpisode(episode)
 

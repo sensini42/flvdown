@@ -16,7 +16,7 @@ from gui.downloading import Downloading
 from gui.options import Options
 from gui.siteorder import Siteorder
 from gui.dictbug import Dictbug
-from gui.progress import Progress
+#from gui.progress import Progress
 
 
 class Flvgui(QtGui.QWidget):
@@ -43,8 +43,8 @@ class Flvgui(QtGui.QWidget):
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
         self.playing = Playing(self.nextep)
-        self.progress = Progress(self.list_site, parent=self)
-        self.downloading = Downloading(self.nextep, self.progress, parent=self)
+        #self.progress = Progress(self.list_site, parent=self)
+        self.downloading = Downloading(self.nextep, self.list_site, parent=self)
         self.options = Options(self.conf, parent=self)
         self.siteorder = Siteorder(self.list_site, parent=self)
         self.dictbug = Dictbug(self.dict_bug, parent=self)
@@ -106,7 +106,7 @@ class Flvgui(QtGui.QWidget):
         tab_widget.addTab(self.options, "Options")
         tab_widget.addTab(self.siteorder, "Site order")
         tab_widget.addTab(self.dictbug, "Dict Bug")
-        tab_widget.addTab(self.progress, "Progress")
+        #tab_widget.addTab(self.progress, "Progress")
 
         tab_widget.setCurrentIndex(1)
         self.update()
@@ -168,12 +168,12 @@ class Flvgui(QtGui.QWidget):
         self.nextep.update(self.dict_bug, self.conf['login'], \
                self.conf['password'])
         self.playing.update(self.conf['player'])
-        self.downloading.update()
-        self.progress.update(self.list_site)
+        self.downloading.update(self.list_site)
+        #self.progress.update(self.list_site)
 
     def closeEvent(self, event):
         """ call when close_button is clicked """
-        if self.progress.isInProgress():
+        if self.downloading.isInProgress():
             reply = QtGui.QMessageBox.question(self, 'Message', \
                   "Are you sure to quit?", QtGui.QMessageBox.Yes | \
                   QtGui.QMessageBox.No, QtGui.QMessageBox.No)

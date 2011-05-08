@@ -119,18 +119,40 @@ class Display(QtGui.QWidget):
 
     def removeEpisode(self, episode):
         """ delete an entry """
-        self.info.remove(episode)
-        index = self.episode_cb.findText(episode.strEpisode, \
-                      flags=Qt.MatchExactly)
-        self.episode_cb.removeItem(index)
-        if self.episode_cb.count() == 0:
-            index = self.season_cb.findText(episode.strSeason, \
+        if episode in self.info:
+            self.info.remove(episode)
+            index = self.episode_cb.findText(episode.strEpisode, \
                           flags=Qt.MatchExactly)
-            self.season_cb.removeItem(index)
-            if self.season_cb.count() == 0:
-                index = self.show_cb.findText(episode.tvshowSpace, \
+            self.episode_cb.removeItem(index)
+            if self.episode_cb.count() == 0:
+                index = self.season_cb.findText(episode.strSeason, \
                               flags=Qt.MatchExactly)
-                self.show_cb.removeItem(index)
-                if self.show_cb.count() == 0:
-                    self.displayButtons(False)
+                self.season_cb.removeItem(index)
+                if self.season_cb.count() == 0:
+                    index = self.show_cb.findText(episode.tvshowSpace, \
+                                  flags=Qt.MatchExactly)
+                    self.show_cb.removeItem(index)
+                    if self.show_cb.count() == 0:
+                        self.displayButtons(False)
+            if self.condition: ##playing
+                self.list_ep.remove(episode)
 
+    def addEpisode(self, episode):
+        """ add an entry """
+        if not episode.isOnDisk: #update during downloading
+            episode.isOnDisk = True
+            if (self.show_cb.findText(episode.tvshowSpace) == -1):
+                self.show_cb.addItem(episode.tvshowSpace)
+                if self.show_cb.count() == 1:
+                    self.changeShow()
+                    self.displayButtons(True)
+                else:
+                    self.displayButtons(False)
+            elif self.show_cb.currentText() == episode.tvshowSpace:
+                if self.season_cb.findText(episode.strSeason) == -1:
+                    self.season_cb.addItem(episode.strSeason)
+                elif self.season_cb.currentText() == episode.strSeason:
+                    self.episode_cb.addItem(episode.strEpisode)
+                    self.info.append(episode)
+
+    

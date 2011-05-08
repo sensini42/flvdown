@@ -69,16 +69,21 @@ class Down(QThread):
             else:
                 raise NoLinkFound()
         except NoSubFound:
-            self.emit(SIGNAL("downFinish(QString)"), "no sub found")
+            self.emit(SIGNAL("downFinish(PyQt_PyObject, QString)"), \
+                        True, "no sub found")
         except NoLinkFound:
-            self.emit(SIGNAL("downFinish(QString)"), "no link found")
+            self.emit(SIGNAL("downFinish(PyQt_PyObject, QString)"), \
+                        False, "no link found")
         except Abort:
-            self.emit(SIGNAL("downFinish(QString)"), "download aborted")
+            self.emit(SIGNAL("downFinish(PyQt_PyObject, QString)"), \
+                        False, "download aborted")
         except:
             traceback.print_exc()
-            self.emit(SIGNAL("downFinish(QString)"), "download error")
+            self.emit(SIGNAL("downFinish(PyQt_PyObject, QString)"), \
+                        False, "download error")
         else:
-            self.emit(SIGNAL("downFinish(QString)"), "download finished")
+            self.emit(SIGNAL("downFinish(PyQt_PyObject, QString)"), \
+                        True, "download finished")
 
     def stopDown(self):
         """ stop """
