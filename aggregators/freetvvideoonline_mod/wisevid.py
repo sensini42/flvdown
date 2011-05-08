@@ -1,6 +1,7 @@
 """ get wisevid links from free-tv-..."""
 from .. import getPage
 import os
+import re
 from tempfile import NamedTemporaryFile
 
 ### js functions from wisevid ###
@@ -79,6 +80,8 @@ def getF(str):
 
 ### end js functions ###
 
+linkre = re.compile("(http://www.wisevid.com/play\?v=[^'\"]*)")
+
 def getFlv(link, verbose):
     """ return the url of the file from wisevid """
     ### episod page
@@ -86,7 +89,7 @@ def getFlv(link, verbose):
     wisevidlink = ''
     for i in src:
         if "wisevid.com/play" in i:
-            wisevidlink = i.split("'")[1]
+            wisevidlink = linkre.search(i).group(1)
 
     if not wisevidlink:
         if verbose:
