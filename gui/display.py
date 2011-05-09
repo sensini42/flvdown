@@ -146,8 +146,6 @@ class Display(QtGui.QWidget):
                 if self.show_cb.count() == 1:
                     self.changeShow()
                     self.displayButtons(True)
-                else:
-                    self.displayButtons(False)
             elif self.show_cb.currentText() == episode.tvshowSpace:
                 if self.season_cb.findText(episode.strSeason) == -1:
                     self.season_cb.addItem(episode.strSeason)
