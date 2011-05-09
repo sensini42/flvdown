@@ -131,3 +131,19 @@ class Video(QThread):
         """ play in the background """
         ossystem(self.cmd)
 
+
+class ToolTip(QThread):
+    """ progress of wget downloading """
+
+    def __init__(self, trayIcon, downloading, parent=None):
+        """ initialisation """
+        QThread.__init__(self, parent)
+        self.trayIcon = trayIcon
+        self.downloading = downloading
+        
+    def run(self):
+        """ play in the background """
+        while True:
+            time.sleep(5)
+            self.trayIcon.setToolTip(self.downloading.getToolTip())
+

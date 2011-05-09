@@ -50,6 +50,10 @@ class InfoDown(QtGui.QWidget):
         self.running = True
         self.down.start()
 
+    def getToolTip(self):
+        """ return tooltip """
+        return self.episode.getBaseName()+" "+str(self.barre.value())+"%"
+
     def isRunning(self):
         """ check if downloading is running """
         return self.running
@@ -226,6 +230,16 @@ class Downloading(Display):
         self.stackedWidget.removeWidget(infoline)
         if self.stackedWidget.count() < 2:
             self.nextbutton.hide()
+
+    def getToolTip(self):
+        """ return down infos """
+        tooltip = 'Flvgui\n------------\n'
+        if self.stackedWidget.count() == 0:
+            tooltip += 'no active download' 
+        else:
+            for i in range(self.stackedWidget.count()):
+                tooltip += self.stackedWidget.widget(i).getToolTip() + '\n'
+        return tooltip
 
     def endThread(self, down, episode, message):
         """ when a down is finished """

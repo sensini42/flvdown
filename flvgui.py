@@ -18,6 +18,7 @@ from gui.siteorder import Siteorder
 from gui.dictbug import Dictbug
 #from gui.progress import Progress
 
+from threads import ToolTip
 
 class Flvgui(QtGui.QWidget):
     """ Gui for flvdown"""
@@ -36,9 +37,9 @@ class Flvgui(QtGui.QWidget):
         
         self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
             self)
-        self.trayIcon.activated.connect(self.toggle)
+        self.connect(self.trayIcon,
+        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.activated)
         self.trayIcon.show()
-
 
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
@@ -50,6 +51,9 @@ class Flvgui(QtGui.QWidget):
         self.dictbug = Dictbug(self.dict_bug, parent=self)
 
         self.populate()
+        self.tooltip = ToolTip(self.trayIcon, self.downloading)
+        self.tooltip.start()
+
 
     def checkConfigFile(self):
         """ read config file """
@@ -121,14 +125,11 @@ class Flvgui(QtGui.QWidget):
 
         self.setLayout(mainLayout)
 
+    def activated(self, reason):
+        """ call when trayIcon is activated """
+        if reason == QtGui.QSystemTrayIcon.Trigger:
+            self.setVisible(not self.isVisible())
         
-    def toggle(self):
-        """ toggle main frame """
-        if self.isVisible(): 
-            self.hide()
-        else: 
-            self.show()
-
     def showMessage(self, title, message):
         """ tray icon notification """
         self.trayIcon.showMessage(title, message)
