@@ -19,14 +19,21 @@ class Actions(QtGui.QWidget):
         self.listActions.append(("&Options", self.listActionsPref))
         
         # Define actions
+        # Options
         self.addActionToList("&Settings", self.listActionsPref, self.setApp, 
                 "Open settings window.", QKeySequence.Preferences) 
 
         self.addActionToList("Site O&rder", self.listActionsPref, self.sortApp,
                 "Define which site to download from first")
+        
+        self.addActionToList("&Interactive", self.listActionsPref, self.intApp,
+                "If checked, user is asked some things")
+        self.listActionsPref[len(self.listActionsPref) - 1].setCheckable(True)
 
+        # File
         self.addActionToList("&Update", self.listActionsFile, self.refreshApp,
                 "Update from nextep.", QKeySequence.Refresh)
+        
         separator = QAction(self.parent)
         separator.setSeparator(True)
         self.listActionsFile.append(separator)
@@ -74,3 +81,10 @@ class Actions(QtGui.QWidget):
     def refreshApp(self):
         """ refresh """
         self.parent.centralWidget.update()
+
+    def intApp(self):
+        """ interactive download """
+        if self.listActionsPref[len(self.listActionsPref) - 1].isChecked():
+            print "interactive download checked"
+        else:
+            print "interactive download unchecked"

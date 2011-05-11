@@ -178,7 +178,7 @@ class FlvguiMain(QtGui.QWidget):
         """ call when close_button is clicked """
         if self.downloading.isInProgress():
             reply = QtGui.QMessageBox.question(self, 'Message', \
-                  "Are you sure to quit?", QtGui.QMessageBox.Yes | \
+                  "Are you sure you want to quit?", QtGui.QMessageBox.Yes | \
                   QtGui.QMessageBox.No, QtGui.QMessageBox.No)
             if reply == QtGui.QMessageBox.No:
                 event.ignore()
