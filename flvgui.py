@@ -16,17 +16,19 @@ from gui.downloading import Downloading
 from gui.options import Options
 from gui.siteorder import Siteorder
 from gui.dictbug import Dictbug
+from gui.menu import Menu
+from gui.actions import Actions
 #from gui.progress import Progress
 
 from threads import ToolTip
 
-class Flvgui(QtGui.QWidget):
-    """ Gui for flvdown"""
+class FlvguiMain(QtGui.QWidget):
+    """ Main Widget for flvdown"""
         
-    def __init__(self):
+    def __init__(self, parent=None):
         """ nothing special here"""
-        super(Flvgui, self).__init__()
-        self.setWindowTitle('flvgui')
+        super(FlvguiMain, self).__init__()
+        self.parent = parent
 
         ## pylint warning
         self.conf = None
@@ -184,16 +186,41 @@ class Flvgui(QtGui.QWidget):
                 event.accept()
         else:
             event.accept()
-    
 
-def main():
+
+from PyQt4.QtCore import SIGNAL, SLOT
+class Flvgui(QtGui.QMainWindow):
+    """ Gui for flvdown"""
+        
+    def __init__(self, *args):
+        """ nothing special here"""
+        apply(QtGui.QMainWindow.__init__, (self,) + args)
+
+        self.centralWidget = FlvguiMain(self)
+        self.actions = Actions(parent=self)
+        self.menu = Menu(self.actions, parent=self)
+        self.setCentralWidget(self.centralWidget)
+
+
+        self.setWindowTitle('flvgui')
+
+        self.statusBar()
+
+        menubar = self.menuBar()
+        actionMenu = []
+        for i in self.menu.menus:
+            actionMenu.append(menubar.addMenu(i))
+
+
+import sys
+def main(args):
     """ main """
-    app = QtGui.QApplication([])
+    app = QtGui.QApplication(args)
     flv = Flvgui()
     flv.show()
     app.exec_()    
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
 
