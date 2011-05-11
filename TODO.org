@@ -3,7 +3,7 @@
 ** TODO faire des passes pylint
 ** TODO Autre
    
-* TODO Modules
+* TODO Site - Modules
 ** DONE passer les sites en tant que module
 ** DONE revoir links.py et le mettre a la place de flvdown2
 ** DONE debugguer links.py (les variables globales ont normalement disparues)
@@ -12,18 +12,61 @@
 *** TODO putlocker
 *** DONE integrer sidereel
     cherche parmi les pages de résultats
-**** TODO mettre des modules
+*** TODO en ajouter d'autres
+*** TODO modifier sidereel (cf search.js&...)
 ** DONE tri des sites
-    mais peut mieux faire   
+** TODO revoir l'organisation des modules
+   par exemple:
+   1 module loombo qui fonctionnerait pour tous les sites,
+   on passe les découpages en paramètres.
+   Utiliser des classes?
 
-* TODO Icone dans le systray
-** TODO mettre une icone 
-** TODO fonction downFinished qui affiche la notification (avec pykde ?)
+
+* DONE Icone dans le systray
+** DONE mettre une icone 
+** DONE fonction downFinished qui affiche la notification
 
 
-* TODO ajouter dicobug à l'interface
-  dans les options ou un nouvel onglet
-  et donc dans le fichier de config
+* TODO dicobug
+** DONE ajouter dicobug à l'interface
+   dans les options ou un nouvel onglet
+   et donc dans le fichier de config
 
-* TODO Bugs
-** TODO bug thread si pas de lien
+** TODO dico dans episodetv
+   un episode a un dico (site (potentiellement subtitles), nom_sur_le_site)
+
+** TODO modifier l'interface
+   par exemple:
+   combo episode + combo module/sub + textinput
+
+
+* DONE Bugs
+** DONE bug thread si pas de lien
+
+
+* TODO Menu
+
+** TODO Remplir le menu
+
+*** TODO ajouter les onglets autres que playing et downloading dans Options
+
+*** TODO virer les onglets autres que playing et downloading
+    Attention aux fonctions d'update notamment (getOption...)
+
+*** TODO ? ajouter down all dans menu file 
+    bon, en l'écrivant ça me parait nul finalement...
+
+*** TODO 2 item à checker interactive/verbose
+
+* TODO Actions
+** DONE fonction d'ajout d'actions
+** TODO actions n'a rien d'un widget... un objet?
+
+
+* TODO Flvgui principal
+
+** TODO passer central widget dans un autre fichier? dans gui/? 
+
+** TODO bouton close lié à l'action close de gui/actions
+
+** TODO passer un verbose en ligne de commande qui affiche les temps de construction des classes, d'exécution des fonctions...
