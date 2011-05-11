@@ -32,10 +32,8 @@
 ** DONE ajouter dicobug à l'interface
    dans les options ou un nouvel onglet
    et donc dans le fichier de config
-
 ** TODO dico dans episodetv
    un episode a un dico (site (potentiellement subtitles), nom_sur_le_site)
-
 ** TODO modifier l'interface
    par exemple:
    combo episode + combo module/sub + textinput
@@ -46,19 +44,13 @@
 
 
 * TODO Menu
-
 ** TODO Remplir le menu
-
 *** TODO ajouter les onglets autres que playing et downloading dans Options
-
 *** TODO virer les onglets autres que playing et downloading
     Attention aux fonctions d'update notamment (getOption...)
-
 *** TODO ? ajouter down all dans menu file 
     bon, en l'écrivant ça me parait nul finalement...
-
 *** TODO 2 item à checker interactive/verbose
-
 *** TODO ajouter track/untrack/remove/add tvshow
     (pour l'instant, juste par série, pas par épisode)
     Faire une fenetre à la next-episode avec 3 boutons
@@ -71,12 +63,14 @@
 
 
 * TODO Flvgui principal
-
 ** TODO passer central widget dans un autre fichier? dans gui/? 
-
-** TODO bouton close lié à l'action close de gui/actions
-
+** TODO mettre dans le flvgui principal les choses de l'ancien flvgui qui n'ont plus lieu d'être
+   (old)flvgui contient le layout pour les onglets
+   mainflvgui contient le reste:
+*** TODO bouton close lié à l'action close de gui/actions
+*** TODO systray icon 
+*** TODO appel a nextepisode
+*** TODO site_order, conf...
 ** TODO passer un verbose en ligne de commande qui affiche les temps de construction des classes, d'exécution des fonctions...
-
 ** TODO revoir la fonction de sauvegarde une fois les menus ok pour sauver que le nécessaire
    utiliser pickle pour aller plus vite, sauvegarder des choses plus complexes ? (par exemple une liste de dicobug pour les episodetv décrits plus haut)
