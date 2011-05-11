@@ -18,8 +18,9 @@
 ** TODO revoir l'organisation des modules
    par exemple:
    1 module loombo qui fonctionnerait pour tous les sites,
-   on passe les découpages en paramètres.
-   Utiliser des classes?
+   on passe les découpages en paramètres de la fonction.
+   Utiliser des classes? (videoweed et novamov sont quasi identique par exemple)
+   Possibilité d'ajouter des modules via l'interface (à la dicobug)
 
 
 * DONE Icone dans le systray
@@ -58,6 +59,12 @@
 
 *** TODO 2 item à checker interactive/verbose
 
+*** TODO ajouter track/untrack/remove/add tvshow
+    (pour l'instant, juste par série, pas par épisode)
+    Faire une fenetre à la next-episode avec 3 boutons
+    Sinon, encore avec combobox
+    +une ligne pour ajouter une série
+
 * TODO Actions
 ** DONE fonction d'ajout d'actions
 ** TODO actions n'a rien d'un widget... un objet?
@@ -70,3 +77,6 @@
 ** TODO bouton close lié à l'action close de gui/actions
 
 ** TODO passer un verbose en ligne de commande qui affiche les temps de construction des classes, d'exécution des fonctions...
+
+** TODO revoir la fonction de sauvegarde une fois les menus ok pour sauver que le nécessaire
+   utiliser pickle pour aller plus vite, sauvegarder des choses plus complexes ? (par exemple une liste de dicobug pour les episodetv décrits plus haut)
