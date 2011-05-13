@@ -45,6 +45,7 @@ class SiteOrder(QtGui.QDialog):
         button_cancel = QtGui.QPushButton("Cancel")
         button_cancel.clicked.connect(self.reject)
         mainLayout.addWidget(button_cancel, 5, 1)
+        
     def moveUp(self):
         """ up is clicked """
         cur_row = self.list_site.currentRow()
@@ -63,6 +64,9 @@ class SiteOrder(QtGui.QDialog):
         
     def saveClicked(self):
         """ save button clicked """
-        self.parent.updateConf()
-        super(Settings, self).accept()
+        list_site = []
+        for i in range(self.list_site.count()):
+            list_site.append(str(self.list_site.item(i).text()))
+        self.parent.updateListSite(list_site)
+        super(SiteOrder, self).accept()
    

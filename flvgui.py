@@ -13,9 +13,9 @@ from os import chdir as oschdir
 
 from gui.playing import Playing
 from gui.downloading import Downloading
-from gui.options import Options
-from gui.siteorder import Siteorder
-from gui.dictbug import Dictbug
+#from gui.options import Options
+#from gui.siteorder import Siteorder
+#from gui.dictbug import Dictbug
 from gui.menu import Menu
 from gui.actions import Actions
 #from gui.progress import Progress
@@ -48,9 +48,9 @@ class FlvguiMain(QtGui.QWidget):
         self.playing = Playing(self.nextep)
         #self.progress = Progress(self.list_site, parent=self)
         self.downloading = Downloading(self.nextep, self.list_site, parent=self)
-        self.options = Options(self.conf, parent=self)
-        self.siteorder = Siteorder(self.list_site, parent=self)
-        self.dictbug = Dictbug(self.dict_bug, parent=self)
+#        self.options = Options(self.conf, parent=self)
+#        self.siteorder = Siteorder(self.list_site, parent=self)
+#        self.dictbug = Dictbug(self.dict_bug, parent=self)
 
         self.populate()
         self.tooltip = ToolTip(self.trayIcon, self.downloading)
@@ -109,9 +109,9 @@ class FlvguiMain(QtGui.QWidget):
 
         tab_widget.addTab(self.playing, "Playing")
         tab_widget.addTab(self.downloading, "Downloading")
-        tab_widget.addTab(self.options, "Options")
-        tab_widget.addTab(self.siteorder, "Site order")
-        tab_widget.addTab(self.dictbug, "Dict Bug")
+#        tab_widget.addTab(self.options, "Options")
+#        tab_widget.addTab(self.siteorder, "Site order")
+#        tab_widget.addTab(self.dictbug, "Dict Bug")
         #tab_widget.addTab(self.progress, "Progress")
 
         tab_widget.setCurrentIndex(1)
@@ -136,12 +136,21 @@ class FlvguiMain(QtGui.QWidget):
         """ tray icon notification """
         self.trayIcon.showMessage(title, message)
 
-    def updateConf(self):
+    def updateOptions(self, opt):
         """ update the config"""
-        self.conf.update(self.options.getOptions())
-        self.list_site = self.siteorder.getListSite()
+        self.conf.update(opt)
+        self.saveConf()
+        self.update()
+        
+    def updateListSite(self, listSite):
+        """ update the config"""
+        self.list_site = listSite
+        self.saveConf()
+        
+    def updateDict(self, dico):
+        """ update the config"""
         self.dict_bug = {}
-        self.dict_bug.update(self.dictbug.getListDictBug())
+        self.dict_bug.update(dico)
         self.saveConf()
         self.update()
 

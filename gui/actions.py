@@ -6,6 +6,7 @@ from PyQt4.QtCore import SIGNAL
 from PyQt4.Qt import QKeySequence
 from gui.menusettings import Settings
 from gui.menusiteorder import SiteOrder
+from gui.menudictbug import Dictbug
 class Actions(QtGui.QWidget):
     """ info about down """
 
@@ -25,6 +26,9 @@ class Actions(QtGui.QWidget):
 
         self.addActionToList("Site O&rder", self.listActionsPref, self.sortApp,
                 "Define which site to download from first")
+        
+        self.addActionToList("&Dict bug", self.listActionsPref, self.dictApp,
+                "Dictbug")
         
         self.addActionToList("&Interactive", self.listActionsPref, self.intApp,
                 "If checked, user is asked some things")
@@ -88,3 +92,13 @@ class Actions(QtGui.QWidget):
             print "interactive download checked"
         else:
             print "interactive download unchecked"
+
+
+    def dictApp(self):
+        """ open dictbug windows """
+        dict_bug = self.parent.centralWidget.dict_bug
+        dictDialog = Dictbug(dict_bug, self.parent.centralWidget)
+        returnValue = dictDialog.exec_()
+        if returnValue:
+            print 'dict saved' #dans systray/status
+    

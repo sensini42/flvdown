@@ -44,6 +44,9 @@ class Settings(QtGui.QDialog):
 
     def saveClicked(self):
         """ save the config"""
-        self.parent.updateConf()
+        options = {} 
+        for (key, line) in self.list_edit:
+            options[key] = str(line.text())
+        self.parent.updateOptions(options)
         super(Settings, self).accept()
-
+  
