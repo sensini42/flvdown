@@ -115,6 +115,7 @@ class Actions(QtGui.QWidget):
         (tvshow, ok) = QtGui.QInputDialog.getText (self.parent.centralWidget, \
                       "add a tv show", "Which show do you want to track ?")
         if (ok and tvshow):
+            self.parent.centralWidget.nextep.addShow(str(tvshow))
             print "should add", tvshow, " :p"
 
     
