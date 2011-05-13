@@ -40,6 +40,9 @@ class Actions(QtGui.QWidget):
         self.addActionToList("&Add a show", self.listActionsMT, self.addApp,
                 "To track a new show.")
         
+        self.addActionToList("&Untrack a show", self.listActionsMT, self.delApp,
+                "To Untrack a show.")
+        
 
         # File
         self.addActionToList("&Update", self.listActionsFile, self.refreshApp,
@@ -111,11 +114,15 @@ class Actions(QtGui.QWidget):
     
 
     def addApp(self):
-        """ open dictbug windows """
+        """ popup to add a show"""
         (tvshow, ok) = QtGui.QInputDialog.getText (self.parent.centralWidget, \
                       "add a tv show", "Which show do you want to track ?")
         if (ok and tvshow):
             self.parent.centralWidget.nextep.addShow(str(tvshow))
             print "should add", tvshow, " :p"
 
+    
+    def delApp(self):
+        """ popup to del a show """
+        pass
     

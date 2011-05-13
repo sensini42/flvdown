@@ -185,15 +185,6 @@ class Downloading(Display):
         self.mainLayout.addWidget(self.button_downall, 4, 3, 1, 2)
         self.button_downall.clicked.connect(self.downallClicked)
 
-        ## add tvshows
-        ed_addShow = QtGui.QLineEdit()
-        self.mainLayout.addWidget(ed_addShow, 5, 0, 1, 3)
-        button_addShow = QtGui.QPushButton("Add tvshow")
-        self.mainLayout.addWidget(button_addShow, 5, 3, 1, 2)
-        btn_callbackAddShow = (lambda data = (ed_addShow): \
-                                  self.addShow(data))
-        self.connect(button_addShow, SIGNAL("clicked()"), btn_callbackAddShow)
-
         ## info down
         self.stackedWidget = QtGui.QStackedWidget()
         self.mainLayout.addWidget(self.stackedWidget, 6, 0, 1, 4)
@@ -213,10 +204,6 @@ class Downloading(Display):
         self.button_all.setVisible(value)
         self.button_downall.setVisible(value)
         super(Downloading, self).displayButtons(value)
-
-    def addShow(self, data):
-        """ when we want to add a tvshow """
-        self.nextep.addShow(str(data.text()))
 
     def nextstacked(self):
         """ view next downloading """
