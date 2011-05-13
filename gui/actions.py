@@ -18,6 +18,8 @@ class Actions(QtGui.QWidget):
         self.listActions.append(("&File", self.listActionsFile))
         self.listActionsPref = []
         self.listActions.append(("&Options", self.listActionsPref))
+        self.listActionsMT = []
+        self.listActions.append(("&Manage TvShow", self.listActionsMT))
         
         # Define actions
         # Options
@@ -33,6 +35,11 @@ class Actions(QtGui.QWidget):
         self.addActionToList("&Interactive", self.listActionsPref, self.intApp,
                 "If checked, user is asked some things")
         self.listActionsPref[len(self.listActionsPref) - 1].setCheckable(True)
+
+        # Manage TvShow
+        self.addActionToList("&Add a show", self.listActionsMT, self.addApp,
+                "To track a new show.")
+        
 
         # File
         self.addActionToList("&Update", self.listActionsFile, self.refreshApp,
@@ -101,4 +108,13 @@ class Actions(QtGui.QWidget):
         returnValue = dictDialog.exec_()
         if returnValue:
             print 'dict saved' #dans systray/status
+    
+
+    def addApp(self):
+        """ open dictbug windows """
+        (tvshow, ok) = QtGui.QInputDialog.getText (self.parent.centralWidget, \
+                      "add a tv show", "Which show do you want to track ?")
+        if (ok and tvshow):
+            print "should add", tvshow, " :p"
+
     

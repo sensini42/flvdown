@@ -22,12 +22,12 @@ from gui.actions import Actions
 
 from threads import ToolTip
 
-class FlvguiMain(QtGui.QWidget):
+class FlvMain(QtGui.QWidget):
     """ Main Widget for flvdown"""
         
     def __init__(self, parent=None):
         """ nothing special here"""
-        super(FlvguiMain, self).__init__()
+        super(FlvMain, self).__init__()
         self.parent = parent
 
         ## pylint warning
@@ -121,7 +121,7 @@ class FlvguiMain(QtGui.QWidget):
         mainLayout.addWidget(button_refresh, 1, 0)
         self.connect(button_refresh, SIGNAL("clicked()"), self.update)
                 
-        button_close = QtGui.QPushButton("Close")
+        button_close = QtGui.QPushButton("Close mainwidget...")
         mainLayout.addWidget(button_close, 1, 1)
         button_close.clicked.connect(self.close)
 
@@ -205,7 +205,7 @@ class Flvgui(QtGui.QMainWindow):
         """ nothing special here"""
         apply(QtGui.QMainWindow.__init__, (self,) + args)
 
-        self.centralWidget = FlvguiMain(self)
+        self.centralWidget = FlvMain(self)
         self.actions = Actions(parent=self)
         self.menu = Menu(self.actions, parent=self)
         self.setCentralWidget(self.centralWidget)
