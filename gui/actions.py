@@ -7,12 +7,14 @@ from PyQt4.Qt import QKeySequence
 from gui.menusettings import Settings
 from gui.menusiteorder import SiteOrder
 from gui.menudictbug import Dictbug
+from gui.DisplayShowOnly import DisplayShowOnly
 class Actions(QtGui.QWidget):
-    """ info about down """
+    """ actions for gui """
 
-    def __init__(self, parent=None):
+    def __init__(self, nextep, parent=None):
         """ initialisation """
         self.parent = parent
+        self.nextep = nextep
         self.listActions = []
         self.listActionsFile = []
         self.listActions.append(("&File", self.listActionsFile))
@@ -40,7 +42,13 @@ class Actions(QtGui.QWidget):
         self.addActionToList("&Add a show", self.listActionsMT, self.addApp,
                 "To track a new show.")
         
-        self.addActionToList("&Untrack a show", self.listActionsMT, self.delApp,
+        self.addActionToList("&Remove a show", self.listActionsMT, self.delApp,
+                "Remove a show from watching list.")
+        
+        self.addActionToList("&Track a show", self.listActionsMT, self.trackS,
+                "To track a show.")
+        
+        self.addActionToList("&Untrack", self.listActionsMT, self.untrackS,
                 "To Untrack a show.")
         
 
@@ -121,8 +129,33 @@ class Actions(QtGui.QWidget):
             self.parent.centralWidget.nextep.addShow(str(tvshow))
             print "should add", tvshow, " :p"
 
-    
+
     def delApp(self):
         """ popup to del a show """
-        pass
-    
+        ltracked = self.nextep.getTracked() #tv, ids, idu
+        luntracked = self.nextep.getUntracked()#tv, ids
+        lShows = []
+        #removeShow needs tvname only
+        for i in (ltracked + luntracked):
+            lShows.append([i[0], i[0]])
+        lShows.sort()
+
+        delDisplay = DisplayShowOnly(lShows, self.nextep.removeShow, 'delete')
+        returnValue = delDisplay.exec_()
+  
+
+    def trackS(self):
+        """ popup to trakc a show """
+        luntracked = self.nextep.getUntracked()#tv, ids
+        #track needs ids only
+        tDisplay = DisplayShowOnly(luntracked, self.nextep.trackShow, 'track')
+        returnValue = tDisplay.exec_()
+      
+
+    def untrackS(self):
+        """ popup to untrack a show """
+        ltracked = self.nextep.getTracked()#tv, ids, idu
+        #untrack needs ids and idu only
+        uDisplay = DisplayShowOnly(ltracked, self.nextep.untrackShow, 'untrack')
+        returnValue = uDisplay.exec_()
+      

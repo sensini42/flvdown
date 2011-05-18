@@ -45,18 +45,20 @@
 
 * TODO Menu
 ** TODO Remplir le menu
-*** TODO ajouter les onglets autres que playing et downloading dans Options
-*** TODO virer les onglets autres que playing et downloading
+*** DONE ajouter les onglets autres que playing et downloading dans Options
+*** DONE virer les onglets autres que playing et downloading
     Attention aux fonctions d'update notamment (getOption...)
 *** TODO ? ajouter down all dans menu file 
     bon, en l'écrivant ça me parait nul finalement...
 *** TODO 2 item à checker interactive/verbose
-*** TODO ajouter track/untrack/remove/add tvshow
+*** DONE ajouter track/untrack/remove/add tvshow
     (pour l'instant, juste par série, pas par épisode)
     Faire une fenetre à la next-episode avec 3 boutons
     Sinon, encore avec combobox
     +une ligne pour ajouter une série
 
+*** TODO remove: doit regarder next-episode.net/track?section=manageEpisodes 
+    Pour l'instant fusionne tracked et untracked seulement...
 * TODO Actions
 ** DONE fonction d'ajout d'actions
 ** TODO actions n'a rien d'un widget... un objet?
@@ -76,5 +78,4 @@
    utiliser pickle pour aller plus vite, sauvegarder des choses plus complexes ? (par exemple une liste de dicobug pour les episodetv décrits plus haut)
 
 * TODO links
-
 ** TODO passer le download interactif en gui

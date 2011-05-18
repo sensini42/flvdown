@@ -57,27 +57,27 @@ class NextEpisode():
         except:
             raise Exception('Connect Error')
         
-    def __nextSeason(self, tv_name, movieId, userId, seasonId, ids, tableId):
-        """ mark the episode as read"""
-        url = 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'
-        txdata = urlencode({"showCat": "changeSeason", \
-                            "movieId": movieId, \
-                            "userId": userId, \
-                            "seasonId": seasonId, \
-                            "page": "changeActiveSeason", \
-                            "ids": ids, \
-                            "allCollapsed": "expanded", \
-                            "tableId": tableId})
-        src = self.__getSrcPage(url, txdata)
-        listep = set()
-        lines = src.split('\n')
-        for i in lines:
-            if "removeEpisode" in i:
-                resul = rmve.search(i)
-                ids = [x for x in resul.group(1, 2, 3, 4)]
-                epitv = episodeTV(tv_name, ids[2], ids[3], ids)
-                listep.add(epitv)
-        return listep
+    ## def __nextSeason(self, tv_name, movieId, userId, seasonId, ids, tableId):
+    ##     """ mark the episode as read"""
+    ##     url = 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'
+    ##     txdata = urlencode({"showCat": "changeSeason", \
+    ##                         "movieId": movieId, \
+    ##                         "userId": userId, \
+    ##                         "seasonId": seasonId, \
+    ##                         "page": "changeActiveSeason", \
+    ##                         "ids": ids, \
+    ##                         "allCollapsed": "expanded", \
+    ##                         "tableId": tableId})
+    ##     src = self.__getSrcPage(url, txdata)
+    ##     listep = set()
+    ##     lines = src.split('\n')
+    ##     for i in lines:
+    ##         if "removeEpisode" in i:
+    ##             resul = rmve.search(i)
+    ##             ids = [x for x in resul.group(1, 2, 3, 4)]
+    ##             epitv = episodeTV(tv_name, ids[2], ids[3], ids)
+    ##             listep.add(epitv)
+    ##     return listep
 
 
     def __getListEpisode(self):
@@ -109,6 +109,49 @@ class NextEpisode():
 
         return listep
 
+    def getTracked(self):
+        """ get list of tracked tv shows"""
+        source = self.__getSrcPage('track/?mode=Tree')
+        if not source:
+            return []
+
+        src = source.split('stopTracking')
+        listS = []
+        
+        for i in src[1::2]:
+            lines = i.split('\n')
+            resul = stop.search(lines[0])
+            idshow = resul.group(1)
+            iduser = resul.group(2)
+            tv_name = resul.group(3).lower()
+            if tv_name in self.dict_bug:
+                tv_name = self.dict_bug[tv_name]
+            listS.append([tv_name, idshow, iduser])
+
+        listS.sort()
+
+        return listS
+    
+    def getUntracked(self):
+        """ get list of untracked tv shows"""
+        source = self.__getSrcPage('track/?mode=Tree')
+        if not source:
+            return []
+
+        src = source.split('?startTracking=')
+        listS = []
+        
+        for i in src[1:]:
+            lines = i.split('\n')
+            idshow = lines[0].split('"')[0]
+            tv_name = lines[0].split('class="showName">')[1][:-10]
+            if tv_name in self.dict_bug:
+                tv_name = self.dict_bug[tv_name]
+            listS.append([tv_name, idshow])
+        listS.sort()
+
+        return listS
+    
     def addShow(self, title):
         """ add the _title_ show to watchlist """
         src = self.__getSrcPage('-'.join(title.split(' ')))

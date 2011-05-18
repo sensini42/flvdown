@@ -5,27 +5,26 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
+from PyQt4.QtCore import SIGNAL
 
 
-
-class DisplayShowOnly(QtGui.QWidget):
+class DisplayShowOnly(QtGui.QDialog):
     """ display list """
 
-    def __init__(self, nextep, functionCalled):
+    def __init__(self, listS, functionCalled, todo):
         """ initialisation """
-        super(Display, self).__init__()
+        super(DisplayShowOnly, self).__init__()
 
         self.mainLayout = QtGui.QGridLayout(self)
         self.setLayout(self.mainLayout)
 
         # pylint warning
-        self.list_ep = None
         self.show_cb = None
         self.btn_func = None
         self.info = None
         self.nothingtodo = None
-
-        self.nextep = nextep
+        self.todo = todo
+        self.listS = listS
         self.functionCalled = functionCalled
         self.populate()
 
@@ -33,39 +32,40 @@ class DisplayShowOnly(QtGui.QWidget):
         """ create layout """
 
         ## nothingtodo
-        self.nothingtodo = QtGui.QLabel('Nothing to do')
+        self.nothingtodo = QtGui.QLabel('Nothing to ' + self.todo)
         self.nothingtodo.setAlignment(Qt.AlignHCenter)
         self.mainLayout.addWidget(self.nothingtodo, 1, 0, 1, 6)
 
         ## combo show
         self.show_cb = QtGui.QComboBox()
+        for i in self.listS:
+            self.show_cb.addItem(i[0])
         self.mainLayout.addWidget(self.show_cb, 1, 0)
-
+        
         ## btn doing something useful
-        self.btn_func = QtGui.QPushButton("do something")
-        self.mainLayout.addWidget(self.show_cb, 1, 0)
-        btn_callback = (lambda data = (self.show_cb.currentText): \
-                        self.functionCalled(data))
-        self.connect(button_edit, SIGNAL("clicked()"), btn_edit_callback)
+        self.btn_func = QtGui.QPushButton(self.todo)
+        self.mainLayout.addWidget(self.btn_func, 1, 1)
+        self.connect(self.btn_func, SIGNAL("clicked()"), self.btn_pushed)
         self.displayButtons(False)
-
+        self.update()
+        
     def displayButtons(self, value):
         """ display or not Buttons """
         self.show_cb.setVisible(value)
         self.nothingtodo.setVisible(not value)
 
+    def btn_pushed(self):
+        i = self.show_cb.currentIndex()
+        self.show_cb.removeItem(i)
+        tv_name = self.listS[i][0]
+        others = self.listS[i][1:]
+        self.functionCalled(*others)
+        del(self.listS[i])
+        
+        self.update()
+        
     def update(self):
-        """ update """
-        list_ep = self.nextep.getList()
-        if list_ep:
-            self.list_ep = list_ep
-            self.show_cb.clear()
-            for episode in self.list_ep:
-                self.show_cb.addItem(episode.tvshowSpace)
-            if self.show_cb.count() > 0:
-                self.changeShow()
-                self.displayButtons(True)
-            else:
-                self.displayButtons(False)
-            
-    
+        if len(self.listS)>0:
+            self.displayButtons(True)
+        else:
+            self.displayButtons(False)

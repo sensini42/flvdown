@@ -206,7 +206,7 @@ class Flvgui(QtGui.QMainWindow):
         apply(QtGui.QMainWindow.__init__, (self,) + args)
 
         self.centralWidget = FlvMain(self)
-        self.actions = Actions(parent=self)
+        self.actions = Actions(self.centralWidget.nextep, parent=self)
         self.menu = Menu(self.actions, parent=self)
         self.setCentralWidget(self.centralWidget)
 
