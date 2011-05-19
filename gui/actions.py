@@ -24,6 +24,9 @@ class Actions(QtGui.QWidget):
         self.listActionsMT = []
         self.listActions.append(("&Manage TvShow", self.listActionsMT))
         
+        separator = QAction(self.parent)
+        separator.setSeparator(True)
+
         # Define actions
         # Options
         self.addActionToList("&Settings", self.listActionsPref, self.setApp, 
@@ -35,6 +38,8 @@ class Actions(QtGui.QWidget):
         self.addActionToList("&Dict bug", self.listActionsPref, self.dictApp,
                 "Dictbug")
         
+        self.listActionsPref.append(separator)
+
         self.addActionToList("&Interactive", self.listActionsPref, self.intApp,
                 "If checked, user is asked some things")
         self.listActionsPref[len(self.listActionsPref) - 1].setCheckable(True)
@@ -57,8 +62,6 @@ class Actions(QtGui.QWidget):
         self.addActionToList("&Update", self.listActionsFile, self.refreshApp,
                 "Update from nextep.", QKeySequence.Refresh)
         
-        separator = QAction(self.parent)
-        separator.setSeparator(True)
         self.listActionsFile.append(separator)
 
         self.addActionToList("&Quit", self.listActionsFile, self.quitApp,
@@ -124,8 +127,14 @@ class Actions(QtGui.QWidget):
 
     def addApp(self):
         """ popup to add a show"""
+        listsuggest = self.nextep.getSuggestions()
+        label = 'Which show do you want to track?\n\n' + \
+                'Next-Epsiode.Net suggest:\n'
+        while listsuggest:
+            label += listsuggest.pop()[0] + '\t' + listsuggest.pop()[0] + '\n'
+            
         (tvshow, ok) = QtGui.QInputDialog.getText (self.parent.centralWidget, \
-                      "add a tv show", "Which show do you want to track ?")
+                      "add a tv show", label)
         if (ok and tvshow):
             self.parent.centralWidget.nextep.addShow(str(tvshow))
             print "should add", tvshow, " :p"

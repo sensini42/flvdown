@@ -46,12 +46,13 @@ class DisplayShowOnly(QtGui.QDialog):
         self.btn_func = QtGui.QPushButton(self.todo)
         self.mainLayout.addWidget(self.btn_func, 1, 1)
         self.connect(self.btn_func, SIGNAL("clicked()"), self.btn_pushed)
-        self.displayButtons(False)
+        
         self.update()
         
     def displayButtons(self, value):
         """ display or not Buttons """
         self.show_cb.setVisible(value)
+        self.btn_func.setVisible(value)
         self.nothingtodo.setVisible(not value)
 
     def btn_pushed(self):
