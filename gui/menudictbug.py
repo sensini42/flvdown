@@ -62,11 +62,15 @@ class Dictbug(QtGui.QDialog):
         ## save button
         button_save = QtGui.QPushButton("Save config file")
         button_save.clicked.connect(self.saveClicked)
-        self.mainLayout.addWidget(button_save, 5, 0)
+        self.mainLayout.addWidget(button_save, 1000, 0)
 
         button_cancel = QtGui.QPushButton("Cancel")
         button_cancel.clicked.connect(self.reject)
-        self.mainLayout.addWidget(button_cancel, 5, 1)
+        self.mainLayout.addWidget(button_cancel, 1000, 1)
+
+        ## better display
+        self.mainLayout.addWidget(QtGui.QStackedWidget(), 1001, 0, 1, 4)
+
 
 
     def saveClicked(self):

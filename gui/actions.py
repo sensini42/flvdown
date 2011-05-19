@@ -13,6 +13,7 @@ class Actions(QtGui.QWidget):
 
     def __init__(self, nextep, parent=None):
         """ initialisation """
+        super(Actions, self).__init__()
         self.parent = parent
         self.nextep = nextep
         self.listActions = []
