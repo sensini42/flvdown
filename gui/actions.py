@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ actions for flvdown """
 from PyQt4 import QtGui
+from PyQt4.QtCore import QStringList
 from PyQt4.Qt import QAction
 from PyQt4.QtCore import SIGNAL
 from PyQt4.Qt import QKeySequence
@@ -128,13 +129,12 @@ class Actions(QtGui.QWidget):
     def addApp(self):
         """ popup to add a show"""
         listsuggest = self.nextep.getSuggestions()
-        label = 'Which show do you want to track?\n\n' + \
-                'Next-Epsiode.Net suggest:\n'
-        while listsuggest:
-            label += listsuggest.pop()[0] + '\t' + listsuggest.pop()[0] + '\n'
-            
-        (tvshow, ok) = QtGui.QInputDialog.getText (self.parent.centralWidget, \
-                      "add a tv show", label)
+        listsug = QStringList()
+        for i in listsuggest:
+            listsug.append(i[0])
+        (tvshow, ok) = QtGui.QInputDialog.getItem (self.parent.centralWidget, \
+                      "add a tv show", 'Which show do you want to track?', \
+                      listsug, editable = True)
         if (ok and tvshow):
             self.parent.centralWidget.nextep.addShow(str(tvshow))
             print "should add", tvshow, " :p"
