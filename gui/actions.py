@@ -85,8 +85,8 @@ class Actions(QtGui.QWidget):
         
     def quitApp(self):
         """ close the app (check if downloads are running)"""
-        if self.parent.centralWidget.close():
-            self.parent.close()
+        #if self.parent.centralWidget.close():
+        self.parent.close()
     
         
     def setApp(self):

@@ -37,12 +37,6 @@ class FlvMain(QtGui.QWidget):
 
         self.checkConfigFile()
         
-        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
-            self)
-        self.connect(self.trayIcon,
-        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.activated)
-        self.trayIcon.show()
-
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
         self.playing = Playing(self.nextep)
@@ -53,8 +47,6 @@ class FlvMain(QtGui.QWidget):
 #        self.dictbug = Dictbug(self.dict_bug, parent=self)
 
         self.populate()
-        self.tooltip = ToolTip(self.trayIcon, self.downloading)
-        self.tooltip.start()
 
 
     def checkConfigFile(self):
@@ -123,18 +115,13 @@ class FlvMain(QtGui.QWidget):
                 
         button_close = QtGui.QPushButton("Close mainwidget...")
         mainLayout.addWidget(button_close, 1, 1)
-        button_close.clicked.connect(self.close)
+        button_close.clicked.connect(self.parent.close)
 
         self.setLayout(mainLayout)
 
-    def activated(self, reason):
-        """ call when trayIcon is activated """
-        if reason == QtGui.QSystemTrayIcon.Trigger:
-            self.setVisible(not self.isVisible())
-        
     def showMessage(self, title, message):
         """ tray icon notification """
-        self.trayIcon.showMessage(title, message)
+        self.parent.trayIcon.showMessage(title, message)
 
     def updateOptions(self, opt):
         """ update the config"""
@@ -183,19 +170,6 @@ class FlvMain(QtGui.QWidget):
         self.downloading.update(self.list_site)
         #self.progress.update(self.list_site)
 
-    def closeEvent(self, event):
-        """ call when close_button is clicked """
-        if self.downloading.isInProgress():
-            reply = QtGui.QMessageBox.question(self, 'Message', \
-                  "Are you sure you want to quit?", QtGui.QMessageBox.Yes | \
-                  QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-            if reply == QtGui.QMessageBox.No:
-                event.ignore()
-            else:
-                event.accept()
-        else:
-            event.accept()
-
 
 from PyQt4.QtCore import SIGNAL, SLOT
 class Flvgui(QtGui.QMainWindow):
@@ -205,20 +179,49 @@ class Flvgui(QtGui.QMainWindow):
         """ nothing special here"""
         apply(QtGui.QMainWindow.__init__, (self,) + args)
 
-        self.centralWidget = FlvMain(self)
-        self.actions = Actions(self.centralWidget.nextep, parent=self)
-        self.menu = Menu(self.actions, parent=self)
+        # central widget
+        self.centralWidget = FlvMain(parent=self)
         self.setCentralWidget(self.centralWidget)
 
 
         self.setWindowTitle('flvgui')
-
         self.statusBar()
 
+        # menu 
+        self.actions = Actions(self.centralWidget.nextep, parent=self)
+        self.menu = Menu(self.actions, parent=self)
         menubar = self.menuBar()
         actionMenu = []
         for i in self.menu.menus:
             actionMenu.append(menubar.addMenu(i))
+
+        # tray icon
+        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
+            self)
+        self.connect(self.trayIcon,
+        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.activated)
+        self.trayIcon.show()
+        self.tooltip = ToolTip(self.trayIcon, self.centralWidget.downloading)
+        self.tooltip.start()
+
+
+    def activated(self, reason):
+        """ call when trayIcon is activated """
+        if reason == QtGui.QSystemTrayIcon.Trigger:
+            self.setVisible(not self.isVisible())
+        
+    def closeEvent(self, event):
+        """ call when close_button is clicked """
+        if self.centralWidget.downloading.isInProgress():
+            reply = QtGui.QMessageBox.question(self, 'Message', \
+                  "Are you sure you want to quit?", QtGui.QMessageBox.Yes | \
+                  QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.No:
+                event.ignore()
+            else:
+                event.accept()
+        else:
+            event.accept()
 
 
 import sys
