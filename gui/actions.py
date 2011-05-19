@@ -142,12 +142,13 @@ class Actions(QtGui.QWidget):
 
     def delApp(self):
         """ popup to del a show """
-        ltracked = self.nextep.getTracked() #tv, ids, idu
-        luntracked = self.nextep.getUntracked()#tv, ids
+        #ltracked = self.nextep.getTracked() #tv, ids, idu
+        #luntracked = self.nextep.getUntracked()#tv, ids
+        listShow = self.nextep.getListShow() #tv
         lShows = []
         #removeShow needs tvname only
-        for i in (ltracked + luntracked):
-            lShows.append([i[0], i[0]])
+        for i in listShow:
+            lShows.append([i, i])
         lShows.sort()
 
         delDisplay = DisplayShowOnly(lShows, self.nextep.removeShow, 'delete')

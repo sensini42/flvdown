@@ -217,12 +217,33 @@ class NextEpisode():
                             "parsedString": 0})
         self.__getSrcPage(url, txdata)
 
+    def getListShow(self):
+        """
+        return the list of current show
+        """
+        source = self.__getSrcPage('settings?action=manageWL')
+        if not source:
+            return []
+        src = source.split('\n')
+        show = []
+        for i in src:
+            if 'addedShows[' in i:
+                res = findall('"([^_]*)_', i)
+                tv_name = res[0]
+                if tv_name in self.dict_bug:
+                    tv_name = self.dict_bug[tv_name]
+                show.append(tv_name)
+        return show
+
     def getSuggestions(self):
         """
         return the list of suggestion
         in format (tvshow, movieid)
         """
-        src = self.__getSrcPage('we_suggest/').split('\n')
+        source = self.__getSrcPage('we_suggest/')
+        if not source:
+            return []
+        src = source.split('\n')
         sugges = []
         for i in src:
             if 'hideid' in i:
