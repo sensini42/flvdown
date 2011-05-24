@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """ gui for flvdown """
 from PyQt4 import QtGui
-from PyQt4.QtCore import SIGNAL
 
 class Menu(QtGui.QWidget):
     """ info about down """

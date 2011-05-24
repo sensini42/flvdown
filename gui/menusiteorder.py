@@ -13,11 +13,11 @@ class SiteOrder(QtGui.QDialog):
         super(SiteOrder, self).__init__()
 
         self.parent = parent
-        self.resize(400,300)
+        self.resize(400, 300)
         ## pylint warning
-        self.list_site = None
+        self.list_site = list_site
 
-        self.populate(list_site)
+        self.populate(self.list_site)
 
     def populate(self, list_site):
         """ create layout """

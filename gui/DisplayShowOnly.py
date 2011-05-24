@@ -56,9 +56,10 @@ class DisplayShowOnly(QtGui.QDialog):
         self.nothingtodo.setVisible(not value)
 
     def btn_pushed(self):
+        """ When the button is pushed """
         i = self.show_cb.currentIndex()
         self.show_cb.removeItem(i)
-        tv_name = self.listS[i][0]
+        _tv_name = self.listS[i][0]
         others = self.listS[i][1:]
         self.functionCalled(*others)
         del(self.listS[i])
@@ -66,6 +67,7 @@ class DisplayShowOnly(QtGui.QDialog):
         self.update()
         
     def update(self):
+        """ show buttons? """
         if len(self.listS)>0:
             self.displayButtons(True)
         else:

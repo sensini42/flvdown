@@ -25,7 +25,7 @@ class NextEpisode():
         # save parameters
         self.__login = login
         self.__pwd = password
-        self.dict_bug = None
+        self.dict_bug = dict_bug
 
         # misc
         self.__txheaders = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 5.5; WinNT)'}

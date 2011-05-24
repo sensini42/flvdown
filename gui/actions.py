@@ -71,14 +71,11 @@ class Actions(QtGui.QWidget):
 
     def addActionToList(self, txtMenu, whichList, fctnCalled,
                         status="", shortkey=""):
-        
+        """ add an action to 'whichList' """
 
         theAction = QAction(txtMenu, self.parent)
-        #theAction.setToolTip(toolTip)
-        #theAction.setWhatsThis(what)
         theAction.setStatusTip(status)
         theAction.setShortcut(shortkey)
-        #theAction.setIconSet(QIconSet(QPixmap(closeIcon)))
         self.connect(theAction, SIGNAL("triggered()"),
                      fctnCalled)
         whichList.append(theAction)
@@ -132,10 +129,10 @@ class Actions(QtGui.QWidget):
         listsug = QStringList()
         for i in listsuggest:
             listsug.append(i[0])
-        (tvshow, ok) = QtGui.QInputDialog.getItem (self.parent, \
+        (tvshow, isok) = QtGui.QInputDialog.getItem (self.parent, \
                       "add a tv show", 'Which show do you want to track?', \
                       listsug, editable = True)
-        if (ok and tvshow):
+        if (isok and tvshow):
             self.parent.nextep.addShow(str(tvshow))
             print "should add", tvshow, " :p"
 
@@ -152,7 +149,7 @@ class Actions(QtGui.QWidget):
         lShows.sort()
 
         delDisplay = DisplayShowOnly(lShows, self.nextep.removeShow, 'delete')
-        returnValue = delDisplay.exec_()
+        _returnValue = delDisplay.exec_()
   
 
     def trackS(self):
@@ -160,7 +157,7 @@ class Actions(QtGui.QWidget):
         luntracked = self.nextep.getUntracked()#tv, ids
         #track needs ids only
         tDisplay = DisplayShowOnly(luntracked, self.nextep.trackShow, 'track')
-        returnValue = tDisplay.exec_()
+        _returnValue = tDisplay.exec_()
       
 
     def untrackS(self):
@@ -168,5 +165,5 @@ class Actions(QtGui.QWidget):
         ltracked = self.nextep.getTracked()#tv, ids, idu
         #untrack needs ids and idu only
         uDisplay = DisplayShowOnly(ltracked, self.nextep.untrackShow, 'untrack')
-        returnValue = uDisplay.exec_()
+        _returnValue = uDisplay.exec_()
       

@@ -14,7 +14,7 @@ class Dictbug(QtGui.QDialog):
         super(Dictbug, self).__init__()
 
         self.parent = parent
-        self.resize(400,300)
+        self.resize(400, 300)
         ## pylint warning
         self.mainLayout = None
         self.lineedit_ne = None

@@ -79,3 +79,6 @@
 
 * TODO links
 ** TODO passer le download interactif en gui
+
+
+* TODO certaines fonctions ont (avaient) toto en arg, et self.toto = None dans le init...

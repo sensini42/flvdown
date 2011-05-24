@@ -4,9 +4,6 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 
-from nextepisode import NextEpisode
-
-
 from os import path as ospath
 from os import mkdir as osmkdir
 from os import chdir as oschdir
@@ -15,11 +12,11 @@ from gui.central import CentralWidget
 from gui.menu import Menu
 from gui.actions import Actions
 
+from nextepisode import NextEpisode
 
 from threads import ToolTip
 
 
-from PyQt4.QtCore import SIGNAL, SLOT
 class Flvgui(QtGui.QMainWindow):
     """ Gui for flvdown"""
         
@@ -36,7 +33,6 @@ class Flvgui(QtGui.QMainWindow):
         self.checkConfigFile()
 
         #nextep
-        
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
 
@@ -100,7 +96,6 @@ class Flvgui(QtGui.QMainWindow):
     @classmethod
     def getSites(cls):
         """ check modules to populate list_site"""
-        import sys
         import aggregators
         list_site = []
         for i in aggregators.__all__:

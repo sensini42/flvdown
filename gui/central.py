@@ -17,7 +17,8 @@ class CentralWidget(QtGui.QWidget):
         self.nextep = nextep
         self.playing = Playing(self.nextep)
 
-        self.downloading = Downloading(self.nextep, self.parent.list_site, parent=self)
+        self.downloading = Downloading(self.nextep, self.parent.list_site, \
+                                       parent=self)
 
 
         self.populate()

@@ -69,7 +69,6 @@ class Playing(Display):
     def playClicked(self):
         """ when a button_play is clicked """
         episode = self.info[self.episode_cb.currentIndex()]
-        videoName = episode.getVideoName()
         if episode.getSrtName() == "":
             subdown.downSub(episode)
             if episode.getSrtName() == "":

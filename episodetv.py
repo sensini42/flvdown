@@ -10,7 +10,7 @@ from os import listdir as oslistdir
 
 class episodeTV():
     """ one instance for one episode """
-    def __init__(self, tvshow, season, episode, ids=None):
+    def __init__(self, tvshow, season, episode, ids=None, dictTV=None):
         self.tvshow = tvshow.lower()
         self.tvshow_ = "_".join(self.tvshow.split(" "))
         self.listName = self.tvshow_.split("_")
@@ -25,6 +25,7 @@ class episodeTV():
         else:
             self.strEpisode = str(self.numEpisode)
         self.ids = ids
+        self.dictTV = dictTV
         self.isOnDisk = (self.existFile() != [])
 
     def getBaseName(self):
