@@ -11,42 +11,61 @@ from os import path as ospath
 from os import mkdir as osmkdir
 from os import chdir as oschdir
 
-from gui.playing import Playing
-from gui.downloading import Downloading
-#from gui.options import Options
-#from gui.siteorder import Siteorder
-#from gui.dictbug import Dictbug
+from gui.central import CentralWidget
 from gui.menu import Menu
 from gui.actions import Actions
-#from gui.progress import Progress
+
 
 from threads import ToolTip
 
-class FlvMain(QtGui.QWidget):
-    """ Main Widget for flvdown"""
-        
-    def __init__(self, parent=None):
-        """ nothing special here"""
-        super(FlvMain, self).__init__()
-        self.parent = parent
 
-        ## pylint warning
+from PyQt4.QtCore import SIGNAL, SLOT
+class Flvgui(QtGui.QMainWindow):
+    """ Gui for flvdown"""
+        
+    def __init__(self, *args):
+        """ nothing special here"""
+        apply(QtGui.QMainWindow.__init__, (self,) + args)
+        
+        
+        #config
         self.conf = None
         self.list_site = None
         self.dict_bug = None
 
         self.checkConfigFile()
+
+        #nextep
         
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
-        self.playing = Playing(self.nextep)
-        #self.progress = Progress(self.list_site, parent=self)
-        self.downloading = Downloading(self.nextep, self.list_site, parent=self)
-#        self.options = Options(self.conf, parent=self)
-#        self.siteorder = Siteorder(self.list_site, parent=self)
-#        self.dictbug = Dictbug(self.dict_bug, parent=self)
 
-        self.populate()
+        
+        # central widget
+        self.centralWidget = CentralWidget(self.nextep, parent=self)
+        self.setCentralWidget(self.centralWidget)
+        self.update()
+
+
+        self.setWindowTitle('flvgui')
+        self.statusBar()
+
+        # menu 
+        self.actions = Actions(self.nextep, parent=self)
+        self.menu = Menu(self.actions, parent=self)
+        menubar = self.menuBar()
+        actionMenu = []
+        for i in self.menu.menus:
+            actionMenu.append(menubar.addMenu(i))
+
+        # tray icon
+        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
+            self)
+        self.connect(self.trayIcon,
+        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.activated)
+        self.trayIcon.show()
+        self.tooltip = ToolTip(self.trayIcon, self.centralWidget.downloading)
+        self.tooltip.start()
 
 
     def checkConfigFile(self):
@@ -92,36 +111,6 @@ class FlvMain(QtGui.QWidget):
                 list_site.append(subsite)
         return list_site
         
-    def populate(self):
-        """ define the main layout"""
-        mainLayout = QtGui.QGridLayout(self)
-
-        tab_widget = QtGui.QTabWidget()
-        mainLayout.addWidget(tab_widget, 0, 0, 1, 2)
-
-        tab_widget.addTab(self.playing, "Playing")
-        tab_widget.addTab(self.downloading, "Downloading")
-#        tab_widget.addTab(self.options, "Options")
-#        tab_widget.addTab(self.siteorder, "Site order")
-#        tab_widget.addTab(self.dictbug, "Dict Bug")
-        #tab_widget.addTab(self.progress, "Progress")
-
-        tab_widget.setCurrentIndex(1)
-        self.update()
-
-        button_refresh = QtGui.QPushButton("Refresh")
-        mainLayout.addWidget(button_refresh, 1, 0)
-        self.connect(button_refresh, SIGNAL("clicked()"), self.update)
-                
-        button_close = QtGui.QPushButton("Close mainwidget...")
-        mainLayout.addWidget(button_close, 1, 1)
-        button_close.clicked.connect(self.parent.close)
-
-        self.setLayout(mainLayout)
-
-    def showMessage(self, title, message):
-        """ tray icon notification """
-        self.parent.trayIcon.showMessage(title, message)
 
     def updateOptions(self, opt):
         """ update the config"""
@@ -166,43 +155,9 @@ class FlvMain(QtGui.QWidget):
         oschdir(self.conf['base_directory'])
         self.nextep.update(self.dict_bug, self.conf['login'], \
                self.conf['password'])
-        self.playing.update(self.conf['player'])
-        self.downloading.update(self.list_site)
+        self.centralWidget.playing.update(self.conf['player'])
+        self.centralWidget.downloading.update(self.list_site)
         #self.progress.update(self.list_site)
-
-
-from PyQt4.QtCore import SIGNAL, SLOT
-class Flvgui(QtGui.QMainWindow):
-    """ Gui for flvdown"""
-        
-    def __init__(self, *args):
-        """ nothing special here"""
-        apply(QtGui.QMainWindow.__init__, (self,) + args)
-
-        # central widget
-        self.centralWidget = FlvMain(parent=self)
-        self.setCentralWidget(self.centralWidget)
-
-
-        self.setWindowTitle('flvgui')
-        self.statusBar()
-
-        # menu 
-        self.actions = Actions(self.centralWidget.nextep, parent=self)
-        self.menu = Menu(self.actions, parent=self)
-        menubar = self.menuBar()
-        actionMenu = []
-        for i in self.menu.menus:
-            actionMenu.append(menubar.addMenu(i))
-
-        # tray icon
-        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
-            self)
-        self.connect(self.trayIcon,
-        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.activated)
-        self.trayIcon.show()
-        self.tooltip = ToolTip(self.trayIcon, self.centralWidget.downloading)
-        self.tooltip.start()
 
 
     def activated(self, reason):

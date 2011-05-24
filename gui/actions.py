@@ -85,29 +85,29 @@ class Actions(QtGui.QWidget):
         
     def quitApp(self):
         """ close the app (check if downloads are running)"""
-        #if self.parent.centralWidget.close():
+        #if self.parent.close():
         self.parent.close()
     
         
     def setApp(self):
         """ open settings windows """
-        conf = self.parent.centralWidget.conf
-        settDialog = Settings(conf, self.parent.centralWidget)
+        conf = self.parent.conf
+        settDialog = Settings(conf, self.parent)
         returnValue = settDialog.exec_()
         if returnValue:
             print 'conf saved' #dans systray/status
         
     def sortApp(self):
         """ open settings windows """
-        list_site = self.parent.centralWidget.list_site
-        settDialog = SiteOrder(list_site, self.parent.centralWidget)
+        list_site = self.parent.list_site
+        settDialog = SiteOrder(list_site, self.parent)
         returnValue = settDialog.exec_()
         if returnValue:
             print 'list order saved' #dans systray/status
     
     def refreshApp(self):
         """ refresh """
-        self.parent.centralWidget.update()
+        self.parent.update()
 
     def intApp(self):
         """ interactive download """
@@ -119,8 +119,8 @@ class Actions(QtGui.QWidget):
 
     def dictApp(self):
         """ open dictbug windows """
-        dict_bug = self.parent.centralWidget.dict_bug
-        dictDialog = Dictbug(dict_bug, self.parent.centralWidget)
+        dict_bug = self.parent.dict_bug
+        dictDialog = Dictbug(dict_bug, self.parent)
         returnValue = dictDialog.exec_()
         if returnValue:
             print 'dict saved' #dans systray/status
@@ -132,11 +132,11 @@ class Actions(QtGui.QWidget):
         listsug = QStringList()
         for i in listsuggest:
             listsug.append(i[0])
-        (tvshow, ok) = QtGui.QInputDialog.getItem (self.parent.centralWidget, \
+        (tvshow, ok) = QtGui.QInputDialog.getItem (self.parent, \
                       "add a tv show", 'Which show do you want to track?', \
                       listsug, editable = True)
         if (ok and tvshow):
-            self.parent.centralWidget.nextep.addShow(str(tvshow))
+            self.parent.nextep.addShow(str(tvshow))
             print "should add", tvshow, " :p"
 
 

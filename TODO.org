@@ -69,10 +69,10 @@
 ** TODO mettre dans le flvgui principal les choses de l'ancien flvgui qui n'ont plus lieu d'être
    (old)flvgui contient le layout pour les onglets
    mainflvgui contient le reste:
-*** TODO bouton close lié à l'action close de gui/actions
+*** DONE bouton close lié à l'action close de gui/actions
 *** TODO systray icon 
-*** TODO appel a nextepisode
-*** TODO site_order, conf...
+*** DONE appel a nextepisode
+*** DONE site_order, conf...
 ** TODO passer un verbose en ligne de commande qui affiche les temps de construction des classes, d'exécution des fonctions...
 ** TODO revoir la fonction de sauvegarde une fois les menus ok pour sauver que le nécessaire
    utiliser pickle pour aller plus vite, sauvegarder des choses plus complexes ? (par exemple une liste de dicobug pour les episodetv décrits plus haut)
