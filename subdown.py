@@ -54,8 +54,10 @@ def downSub(episode, options=""):
             verbose = 2
         if ("v" in options):
             verbose = 1
-
+    
     tvshow = episode.tvshowSpace
+    if 'tvsubtitles' in episode.dictTv:
+        tvshow = episode.dictTv['tvsubtitles']
     season = episode.strSeason
     numepi = episode.strEpisode
     subname = episode.getVideoName().split('.')[0] + ".srt"

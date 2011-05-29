@@ -48,14 +48,19 @@ def flvdown(episode, options, list_site = None):
             verbose = 1
 
     possible_links = []
+    dictbug = episode.dictTV
     if interact or not list_site:
         #check all site
         for i in aggregators.__all__:
             #        if verbose:
             print "checking", i
             __import__("aggregators." + i)
+            if i in dictbug:
+                name = dictbug[i]
+            else:
+                name = dictbug['default']
             possible_links += sys.modules["aggregators."+i].getLinks( \
-                episode.tvshow_, episode.strSeason, \
+                name, episode.strSeason, \
                 str(int(episode.strEpisode)))
         print "done"
         if possible_links == []:
@@ -83,8 +88,14 @@ def flvdown(episode, options, list_site = None):
                 i = "aggregators." + hmod
                 __import__(i)
                 modulesChecked.append(hmod)
+                
+                if hmod in dictbug:
+                    name = dictbug[hmod]
+                else:
+                    name = dictbug['default']
+                
                 possible_links += sys.modules[i].getLinks( \
-                    episode.tvshow_, episode.strSeason, \
+                    name, episode.strSeason, \
                     str(int(episode.strEpisode)))
             links_for_sites = [l for l in possible_links \
                               if hmod + "_mod." + hsite in l]

@@ -26,7 +26,7 @@ class NextEpisode():
         self.__login = login
         self.__pwd = password
         self.dict_bug = dict_bug
-
+        
         # misc
         self.__txheaders = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 5.5; WinNT)'}
         self.__urlbase = 'http://next-episode.net/'
@@ -57,28 +57,6 @@ class NextEpisode():
         except:
             raise Exception('Connect Error')
         
-    ## def __nextSeason(self, tv_name, movieId, userId, seasonId, ids, tableId):
-    ##     """ mark the episode as read"""
-    ##     url = 'PAGES/stufftowatch_files/ajax/ajax_requests_stuff.php'
-    ##     txdata = urlencode({"showCat": "changeSeason", \
-    ##                         "movieId": movieId, \
-    ##                         "userId": userId, \
-    ##                         "seasonId": seasonId, \
-    ##                         "page": "changeActiveSeason", \
-    ##                         "ids": ids, \
-    ##                         "allCollapsed": "expanded", \
-    ##                         "tableId": tableId})
-    ##     src = self.__getSrcPage(url, txdata)
-    ##     listep = set()
-    ##     lines = src.split('\n')
-    ##     for i in lines:
-    ##         if "removeEpisode" in i:
-    ##             resul = rmve.search(i)
-    ##             ids = [x for x in resul.group(1, 2, 3, 4)]
-    ##             epitv = episodeTV(tv_name, ids[2], ids[3], ids)
-    ##             listep.add(epitv)
-    ##     return listep
-
 
     def __getListEpisode(self):
         """ get list episode from next-episode """
@@ -95,15 +73,18 @@ class NextEpisode():
             idshow = resul.group(1)
             iduser = resul.group(2)
             tv_name = resul.group(3).lower()
-            if tv_name in self.dict_bug:
-                tv_name = self.dict_bug[tv_name]
+            if tv_name not in self.dict_bug:
+                self.dict_bug[tv_name] = {}
+                name = '_'.join(tv_name.split(' ')).lower()
+                self.dict_bug[tv_name]['default'] = name
             for i in lines:
                 if ("hiddenValues_" + idshow) in i:
                     lepi = i.split('"')[3].split(',')[:-1]
                     for sxe in lepi:
                         idseason, idepisode = sxe.split('x')
                         epitv = episodeTV(tv_name, idseason, idepisode, \
-                                          (idshow, iduser, idseason, idepisode))
+                                     (idshow, iduser, idseason, idepisode), \
+                                     self.dict_bug[tv_name])
                         listep.add(epitv)
         listep = sorted(listep, key=attrgetter('tvshow_', 'strSeason', 'strEpisode'))
 
@@ -125,7 +106,7 @@ class NextEpisode():
             iduser = resul.group(2)
             tv_name = resul.group(3).lower()
             if tv_name in self.dict_bug:
-                tv_name = self.dict_bug[tv_name]
+                tv_name = self.dict_bug[tv_name]['default']
             listS.append([tv_name, idshow, iduser])
 
         listS.sort()
@@ -146,7 +127,7 @@ class NextEpisode():
             idshow = lines[0].split('"')[0]
             tv_name = lines[0].split('class="showName">')[1][:-10]
             if tv_name in self.dict_bug:
-                tv_name = self.dict_bug[tv_name]
+                tv_name = self.dict_bug[tv_name]['default']
             listS.append([tv_name, idshow])
         listS.sort()
 
@@ -229,9 +210,9 @@ class NextEpisode():
         for i in src:
             if 'addedShows[' in i:
                 res = findall('"([^_]*)_', i)
-                tv_name = res[0]
+                tv_name = res[0].lower()
                 if tv_name in self.dict_bug:
-                    tv_name = self.dict_bug[tv_name]
+                    tv_name = self.dict_bug[tv_name]['default']
                 show.append(tv_name)
         return show
 

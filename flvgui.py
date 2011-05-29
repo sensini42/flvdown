@@ -28,14 +28,19 @@ class Flvgui(QtGui.QMainWindow):
         #config
         self.conf = None
         self.list_site = None
-        self.dict_bug = None
+        self.dict_bug = {}
 
         self.checkConfigFile()
 
         #nextep
         self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
                                   self.dict_bug)
-
+        listShows = self.nextep.getListShow()
+        for show in listShows:
+            if show not in self.dict_bug:
+                self.dict_bug[show] = {}
+                name = '_'.join(show.split(' ')).lower()
+                self.dict_bug[show]['default'] = name
         
         # central widget
         self.centralWidget = CentralWidget(self.nextep, parent=self)
@@ -81,9 +86,7 @@ class Flvgui(QtGui.QMainWindow):
                         self.list_site.remove(site.strip())
                         self.list_site.insert(i, site.strip())
                 elif tmp[0] == 'dict_bug':
-                    list_dict = tmp[1].replace('"', '').split(',')[:-1]
-                    self.dict_bug = dict(map(str.strip, i.split(':')) \
-                                         for i in list_dict)
+                    self.dict_bug = eval(tmp[1])
                 else:
                     self.conf[tmp[0]] = tmp[1].replace('"','')[:-1]
             fileconf.close()
@@ -137,10 +140,19 @@ class Flvgui(QtGui.QMainWindow):
         for elt in self.list_site:
             fileconf.write(elt + ', ')
         fileconf.write('"\n')
-        fileconf.write('dict_bug="')
-        for key in self.dict_bug:
-            fileconf.write(key + ' : ' + self.dict_bug[key] + ', ')
-        fileconf.write('"\n')
+        fileconf.write('dict_bug=')
+#short dict
+#        short_dict = {}
+#        for i in self.dict_bug:
+#            if (len(self.dict_bug[i]) > 1):
+#                short_dict[i] = self.dict_bug[i]
+#            else:
+#                name = '_'.join(i.split(" "))
+#                if self.dict_bug[i]['default'] != name :
+#                    short_dict[i] = self.dict_bug[i]
+#        fileconf.write(repr(short_dict))
+        fileconf.write(repr(self.dict_bug))
+        fileconf.write('\n')
         
         fileconf.close()
 

@@ -5,6 +5,7 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import Qt
+import aggregators
 
 class Dictbug(QtGui.QDialog):
     """ display dict bug """
@@ -14,18 +15,19 @@ class Dictbug(QtGui.QDialog):
         super(Dictbug, self).__init__()
 
         self.parent = parent
-        self.resize(400, 300)
+        self.resize(600, 200)
         ## pylint warning
         self.mainLayout = None
-        self.lineedit_ne = None
-        self.lineedit_d = None
+        self.show_cb = None
+        self.site_cb = None
+        self.lineedit = None
 
         self.parent = parent
 
-        self.list_dictbug = dict_bug
-        self.eltdictbug = []
+        self.dict_bug = dict_bug
 
         self.populate()
+        self.changeCB()
 
     def populate(self):
         """ create layout """
@@ -36,33 +38,38 @@ class Dictbug(QtGui.QDialog):
         self.mainLayout.addWidget(QtGui.QStackedWidget(), 0, 0, 1, 4)
 
         ## title
-        self.mainLayout.addWidget(QtGui.QLabel('Next-episode'), 1, 0)
-        arrowlabelt = QtGui.QLabel(u"→")
-        arrowlabelt.setAlignment(Qt.AlignHCenter)
-        self.mainLayout.addWidget(arrowlabelt, 1, 1)
-        self.mainLayout.addWidget(QtGui.QLabel('Down'), 1, 2)
+        self.mainLayout.addWidget(QtGui.QLabel('The show:'), 1, 0)
+        self.mainLayout.addWidget(QtGui.QLabel('on the site:'), 1, 1)
+        self.mainLayout.addWidget(QtGui.QLabel('is named:'), 1, 2)
+       
+        ## comboboxes
+        listS = self.dict_bug.keys()
+        listS.sort()
+        self.show_cb = QtGui.QComboBox()
+        for i in listS:
+            self.show_cb.addItem(i)
+        self.show_cb.currentIndexChanged.connect(self.changeCB)
+        self.mainLayout.addWidget(self.show_cb, 2, 0)
+        
+        self.site_cb = QtGui.QComboBox()
+        self.site_cb.addItem('default')
+        self.site_cb.addItem('tvsubtitles')
+        ## mettre dans un update
+        for i in aggregators.__all__:
+            self.site_cb.addItem(i)
+        self.site_cb.currentIndexChanged.connect(self.changeCB)
+        self.mainLayout.addWidget(self.site_cb, 2, 1)
 
-        ## add line
-        self.lineedit_ne = QtGui.QLineEdit()
-        arrowlabel = QtGui.QLabel(u"→")
-        arrowlabel.setAlignment(Qt.AlignHCenter)
-        self.lineedit_d = QtGui.QLineEdit()
-        button_add = QtGui.QPushButton("Add dict bug")
-        button_add.connect(button_add, SIGNAL("clicked()"), self.addDictBug)
-        self.mainLayout.addWidget(self.lineedit_ne, 2, 0)
-        self.mainLayout.addWidget(arrowlabel, 2, 1)
-        self.mainLayout.addWidget(self.lineedit_d, 2, 2)
-        self.mainLayout.addWidget(button_add, 2, 3)
+        self.lineedit = QtGui.QLineEdit()
+        self.connect(self.lineedit, SIGNAL("textEdited(QString)"), self.updateDict,)
 
-        ## data 
-        for key in self.list_dictbug.keys():
-            value = self.list_dictbug[key]
-            self.addEntry(key, value)
+        self.mainLayout.addWidget(self.lineedit, 2, 2)
 
+        
         ## save button
-        button_save = QtGui.QPushButton("Save config file")
-        button_save.clicked.connect(self.saveClicked)
-        self.mainLayout.addWidget(button_save, 1000, 0)
+        button_saveConf = QtGui.QPushButton("Save config file")
+        button_saveConf.clicked.connect(self.saveClicked)
+        self.mainLayout.addWidget(button_saveConf, 1000, 0)
 
         button_cancel = QtGui.QPushButton("Cancel")
         button_cancel.clicked.connect(self.reject)
@@ -73,40 +80,23 @@ class Dictbug(QtGui.QDialog):
 
 
 
+    def updateDict(self, txt):
+        """ dict is updated """
+        show = str(self.show_cb.currentText())
+        site = str(self.site_cb.currentText())
+        self.dict_bug[show][site] = str(txt)
+
     def saveClicked(self):
-        """ save button clicked """
-        self.parent.updateDict(self.list_dictbug)
+        """ saveConf button clicked """
+        self.parent.updateDict(self.dict_bug)
         super(Dictbug, self).accept()
-   
 
-    def addDictBug(self):
-        """ add an entry in dictbug"""
-        key, value = str(self.lineedit_ne.text()).strip().lower(), \
-                     str(self.lineedit_d.text()).strip().lower()
-        self.list_dictbug[key] = value
-        self.addEntry(key, value)
-
-    def removeDictBug(self, data):
-        """ remove an entry in dictbug"""
-        del self.list_dictbug[data[1]]
-        for i in range(4):
-            self.eltdictbug[data[0]][i].hide()
-
-    def addEntry(self, key, value):
-        """ display the entry"""
-        ind = len(self.eltdictbug)
-        button = QtGui.QPushButton("Remove")
-        button_callback = (lambda data = [ind, key]: \
-            self.removeDictBug(data))
-        button.connect(button, SIGNAL("clicked()"), button_callback)
-        labelkey = QtGui.QLabel(key)
-        labelarrow = QtGui.QLabel(u"→")
-        labelarrow.setAlignment(Qt.AlignHCenter)
-        labelvalue = QtGui.QLabel(value)
-        self.eltdictbug.append([labelkey, labelarrow, labelvalue, button])
-        self.mainLayout.addWidget(labelkey, 3 + ind, 0)
-        self.mainLayout.addWidget(labelarrow, 3 + ind, 1)
-        self.mainLayout.addWidget(labelvalue, 3 + ind, 2)
-        self.mainLayout.addWidget(button, 3 + ind, 3)
-
-
+    def changeCB(self):
+        """ when a combo box is changed """
+        show = str(self.show_cb.currentText())
+        site = str(self.site_cb.currentText())
+        if site in self.dict_bug[show]:
+            name = self.dict_bug[show][site]
+        else:
+            name = ""
+        self.lineedit.setText(name)
