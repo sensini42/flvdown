@@ -88,7 +88,7 @@ class Actions(QtGui.QWidget):
         
     def setApp(self):
         """ open settings windows """
-        conf = self.parent.conf
+        conf = self.parent.options.conf
         settDialog = Settings(conf, self.parent)
         returnValue = settDialog.exec_()
         if returnValue:
@@ -96,7 +96,7 @@ class Actions(QtGui.QWidget):
         
     def sortApp(self):
         """ open settings windows """
-        list_site = self.parent.list_site
+        list_site = self.parent.options.list_site
         settDialog = SiteOrder(list_site, self.parent)
         returnValue = settDialog.exec_()
         if returnValue:
@@ -116,7 +116,7 @@ class Actions(QtGui.QWidget):
 
     def dictApp(self):
         """ open dictbug windows """
-        dict_bug = self.parent.dict_bug
+        dict_bug = self.parent.options.dict_bug
         dictDialog = Dictbug(dict_bug, self.parent)
         returnValue = dictDialog.exec_()
         if returnValue:

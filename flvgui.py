@@ -17,57 +17,15 @@ from nextepisode import NextEpisode
 from threads import ToolTip
 
 
-class Flvgui(QtGui.QMainWindow):
-    """ Gui for flvdown"""
-        
-    def __init__(self, *args):
-        """ nothing special here"""
-        apply(QtGui.QMainWindow.__init__, (self,) + args)
-        
-        
-        #config
+class Options():
+    """ manage options """
+
+    def __init__(self):
+
         self.conf = None
         self.list_site = None
         self.dict_bug = {}
-
         self.checkConfigFile()
-
-        #nextep
-        self.nextep = NextEpisode(self.conf['login'], self.conf['password'], \
-                                  self.dict_bug)
-        listShows = self.nextep.getListShow()
-        for show in listShows:
-            if show not in self.dict_bug:
-                self.dict_bug[show] = {}
-                name = '_'.join(show.split(' ')).lower()
-                self.dict_bug[show]['default'] = name
-        
-        # central widget
-        self.centralWidget = CentralWidget(self.nextep, parent=self)
-        self.setCentralWidget(self.centralWidget)
-        self.update()
-
-
-        self.setWindowTitle('flvgui')
-        self.statusBar()
-
-        # menu 
-        self.actions = Actions(self.nextep, parent=self)
-        self.menu = Menu(self.actions, parent=self)
-        menubar = self.menuBar()
-        actionMenu = []
-        for i in self.menu.menus:
-            actionMenu.append(menubar.addMenu(i))
-
-        # tray icon
-        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
-            self)
-        self.connect(self.trayIcon,
-        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.activated)
-        self.trayIcon.show()
-        self.tooltip = ToolTip(self.trayIcon, self.centralWidget.downloading)
-        self.tooltip.start()
-
 
     def checkConfigFile(self):
         """ read config file """
@@ -109,25 +67,6 @@ class Flvgui(QtGui.QMainWindow):
                 list_site.append(subsite)
         return list_site
         
-
-    def updateOptions(self, opt):
-        """ update the config"""
-        self.conf.update(opt)
-        self.saveConf()
-        self.update()
-        
-    def updateListSite(self, listSite):
-        """ update the config"""
-        self.list_site = listSite
-        self.saveConf()
-        
-    def updateDict(self, dico):
-        """ update the config"""
-        self.dict_bug = {}
-        self.dict_bug.update(dico)
-        self.saveConf()
-        self.update()
-
     def saveConf(self):
         """ save the config"""
         if (not ospath.exists(ospath.expanduser('~') + "/.config/flvdown/")):
@@ -141,31 +80,83 @@ class Flvgui(QtGui.QMainWindow):
             fileconf.write(elt + ', ')
         fileconf.write('"\n')
         fileconf.write('dict_bug=')
-#short dict
-#        short_dict = {}
-#        for i in self.dict_bug:
-#            if (len(self.dict_bug[i]) > 1):
-#                short_dict[i] = self.dict_bug[i]
-#            else:
-#                name = '_'.join(i.split(" "))
-#                if self.dict_bug[i]['default'] != name :
-#                    short_dict[i] = self.dict_bug[i]
-#        fileconf.write(repr(short_dict))
         fileconf.write(repr(self.dict_bug))
         fileconf.write('\n')
         
         fileconf.close()
 
 
+
+class Flvgui(QtGui.QMainWindow):
+    """ Gui for flvdown"""
+        
+    def __init__(self, options, nextep):
+        """ nothing special here"""
+        super(Flvgui, self).__init__()
+
+        self.options = options
+        self.nextep = nextep
+        
+        #add unknown show
+        listShows = self.nextep.getListShow()
+        for show in listShows:
+            if show not in self.options.dict_bug:
+                self.options.dict_bug[show] = {}
+                name = '_'.join(show.split(' ')).lower()
+                self.options.dict_bug[show]['default'] = name
+        
+        # central widget
+        self.centralWidget = CentralWidget(self.nextep, parent=self)
+        self.setCentralWidget(self.centralWidget)
+        self.update()
+
+        self.setWindowTitle('flvgui')
+        self.statusBar()
+
+        # menu 
+        self.actions = Actions(self.nextep, parent=self)
+        self.menu = Menu(self.actions, parent=self)
+        menubar = self.menuBar()
+        actionMenu = []
+        for i in self.menu.menus:
+            actionMenu.append(menubar.addMenu(i))
+
+        # tray icon
+        self.trayIcon = QtGui.QSystemTrayIcon(QtGui.QIcon('icon/flvgui.xpm'), \
+            self)
+        self.connect(self.trayIcon,
+        SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.activated)
+        self.trayIcon.show()
+        self.tooltip = ToolTip(self.trayIcon, self.centralWidget.downloading)
+        self.tooltip.start()
+
+
+    def updateOptions(self, opt):
+        """ update the config"""
+        self.options.conf.update(opt)
+        self.options.saveConf()
+        self.update()
+        
+    def updateListSite(self, listSite):
+        """ update the config"""
+        self.options.list_site = listSite
+        self.options.saveConf()
+        
+    def updateDict(self, dico):
+        """ update the config"""
+        self.options.dict_bug = {}
+        self.options.dict_bug.update(dico)
+        self.options.saveConf()
+        self.update()
+
+
     def update(self):
         """ update tab """
-        oschdir(self.conf['base_directory'])
-        self.nextep.update(self.dict_bug, self.conf['login'], \
-               self.conf['password'])
-        self.centralWidget.playing.update(self.conf['player'])
-        self.centralWidget.downloading.update(self.list_site)
-        #self.progress.update(self.list_site)
-
+        oschdir(self.options.conf['base_directory'])
+        self.nextep.update(self.options.dict_bug, self.options.conf['login'], \
+               self.options.conf['password'])
+        self.centralWidget.playing.update(self.options.conf['player'])
+        self.centralWidget.downloading.update(self.options.list_site)
 
     def activated(self, reason):
         """ call when trayIcon is activated """
@@ -187,12 +178,24 @@ class Flvgui(QtGui.QMainWindow):
 
 
 import sys
+from flvcurse import Curse
 def main(args):
     """ main """
-    app = QtGui.QApplication(args)
-    flv = Flvgui()
-    flv.show()
-    app.exec_()    
+
+    #config
+    options = Options()
+
+    #nextep
+    nextep = NextEpisode(options.conf['login'], options.conf['password'], \
+                options.dict_bug)
+    
+    if len(args) == 2:
+        Curse(options, nextep)
+    else:
+        app = QtGui.QApplication(args)
+        flv = Flvgui(options, nextep)
+        flv.show()
+        app.exec_()    
 
 
 if __name__ == '__main__':
