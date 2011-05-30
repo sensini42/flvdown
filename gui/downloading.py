@@ -254,7 +254,11 @@ class Downloading(Display):
 
     def isInProgress(self):
         """ check if there is some download in progress """
-        return self.stackedWidget.count() > 0
+        for i in range(self.stackedWidget.count()):
+            if self.stackedWidget.widget(i).isRunning():
+                return True
+        return False
+        #return self.stackedWidget.count() > 0
 
     def downFreeClicked(self, data):
         """ when down from form """
