@@ -10,7 +10,7 @@ class Settings(QtGui.QDialog):
 
     def __init__(self, conf, parent=None):
         """ initialisation """
-        super(Settings, self).__init__()
+        super(Settings, self).__init__(parent)
 
         self.parent = parent
 

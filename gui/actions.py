@@ -148,7 +148,8 @@ class Actions(QtGui.QWidget):
             lShows.append([i, i])
         lShows.sort()
 
-        delDisplay = DisplayShowOnly(lShows, self.nextep.removeShow, 'delete')
+        delDisplay = DisplayShowOnly(lShows, self.nextep.removeShow, \
+                      'delete', parent=self.parent)
         _returnValue = delDisplay.exec_()
   
 
@@ -156,7 +157,8 @@ class Actions(QtGui.QWidget):
         """ popup to trakc a show """
         luntracked = self.nextep.getUntracked()#tv, ids
         #track needs ids only
-        tDisplay = DisplayShowOnly(luntracked, self.nextep.trackShow, 'track')
+        tDisplay = DisplayShowOnly(luntracked, self.nextep.trackShow, \
+                    'track', parent=self.parent)
         _returnValue = tDisplay.exec_()
       
 
@@ -164,6 +166,7 @@ class Actions(QtGui.QWidget):
         """ popup to untrack a show """
         ltracked = self.nextep.getTracked()#tv, ids, idu
         #untrack needs ids and idu only
-        uDisplay = DisplayShowOnly(ltracked, self.nextep.untrackShow, 'untrack')
+        uDisplay = DisplayShowOnly(ltracked, self.nextep.untrackShow, \
+                    'untrack', parent=self.parent)
         _returnValue = uDisplay.exec_()
       

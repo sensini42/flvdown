@@ -12,7 +12,7 @@ class Dictbug(QtGui.QDialog):
 
     def __init__(self, dict_bug, parent=None):
         """ initialisation """
-        super(Dictbug, self).__init__()
+        super(Dictbug, self).__init__(parent)
 
         self.parent = parent
         self.resize(600, 200)

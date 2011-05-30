@@ -10,7 +10,7 @@ class SiteOrder(QtGui.QDialog):
 
     def __init__(self, list_site, parent=None):
         """ initialisation """
-        super(SiteOrder, self).__init__()
+        super(SiteOrder, self).__init__(parent)
 
         self.parent = parent
         self.resize(400, 300)

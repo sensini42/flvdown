@@ -11,9 +11,9 @@ from PyQt4.QtCore import SIGNAL
 class DisplayShowOnly(QtGui.QDialog):
     """ display list """
 
-    def __init__(self, listS, functionCalled, todo):
+    def __init__(self, listS, functionCalled, todo, parent=None):
         """ initialisation """
-        super(DisplayShowOnly, self).__init__()
+        super(DisplayShowOnly, self).__init__(parent)
 
         self.mainLayout = QtGui.QGridLayout(self)
         self.setLayout(self.mainLayout)

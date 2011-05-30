@@ -77,19 +77,18 @@ class Display(QtGui.QWidget):
 
     def update(self):
         """ update """
-        list_ep = self.nextep.getList()
-        if list_ep:
-            self.list_ep = list_ep
-            self.show_cb.clear()
+        self.list_ep = self.nextep.getList()
+        self.show_cb.clear()
+        if self.list_ep:
             for episode in self.list_ep:
                 if (episode.isOnDisk == self.condition) and \
                      (self.show_cb.findText(episode.tvshowSpace) == -1):
                     self.show_cb.addItem(episode.tvshowSpace)
-            if self.show_cb.count() > 0:
-                self.changeShow()
-                self.displayButtons(True)
-            else:
-                self.displayButtons(False)
+        if self.show_cb.count() > 0:
+            self.changeShow()
+            self.displayButtons(True)
+        else:
+            self.displayButtons(False)
             
     def changeShow(self):
         """ when show_cb is changed """
