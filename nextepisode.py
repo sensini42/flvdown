@@ -72,7 +72,7 @@ class NextEpisode():
             resul = stop.search(lines[0])
             idshow = resul.group(1)
             iduser = resul.group(2)
-            tv_name = resul.group(3).lower()
+            tv_name = resul.group(3).lower().replace('\\','')
             if tv_name not in self.dict_bug:
                 self.dict_bug[tv_name] = {}
                 name = '_'.join(tv_name.split(' ')).lower()
@@ -211,8 +211,6 @@ class NextEpisode():
             if 'addedShows[' in i:
                 res = findall('"([^_]*)_', i)
                 tv_name = res[0].lower()
-                if tv_name in self.dict_bug:
-                    tv_name = self.dict_bug[tv_name]['default']
                 show.append(tv_name)
         return show
 

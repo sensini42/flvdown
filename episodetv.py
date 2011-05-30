@@ -11,12 +11,13 @@ from os import listdir as oslistdir
 class episodeTV():
     """ one instance for one episode """
     def __init__(self, tvshow, season, episode, ids=None, dictTV=None):
-        self.tvshow = tvshow.lower()
+        if dictTV:
+            self.tvshow = dictTV['default'].lower()
+        else:  
+            self.tvshow = tvshow.lower()
         self.tvshow_ = "_".join(self.tvshow.split(" "))
         self.listName = self.tvshow_.split("_")
         self.tvshowSpace = " ".join(self.listName)
-        self.tvshowCapital = " ".join([i.capitalize() for i in self.listName])
-        self.tvshowCapital_ = "_".join([i.capitalize() for i in self.listName])
         self.numSeason = int(season)
         self.numEpisode = int(episode)
         self.strSeason = str(self.numSeason)
@@ -29,7 +30,7 @@ class episodeTV():
         self.isOnDisk = (self.existFile() != [])
 
     def getBaseName(self):
-        """ return foo101 """
+        """ return foo_101 """
         return self.tvshow_ + "_" + self.strSeason + self.strEpisode
 
     def getSrtName(self):
@@ -49,7 +50,7 @@ class episodeTV():
             
     
     def removeFile(self):
-        """ delete the file """
+        """ delete the files """
         ossystem("rm " + self.tvshow_ + "/" + self.getBaseName() + ".*")
     
     

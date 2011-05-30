@@ -56,15 +56,13 @@ def downSub(episode, options=""):
             verbose = 1
     
     tvshow = episode.tvshowSpace
-    if 'tvsubtitles' in episode.dictTv:
-        tvshow = episode.dictTv['tvsubtitles']
+    if 'tvsubtitles' in episode.dictTV:
+        tvshow = episode.dictTV['tvsubtitles']
     season = episode.strSeason
     numepi = episode.strEpisode
     subname = episode.getVideoName().split('.')[0] + ".srt"
     if verbose:
         print tvshow, "season", season, "episode", numepi
-
-    tvCap = episode.tvshowCapital
 
     ##search page
     urlbase = 'http://www.tvsubtitles.net/'
@@ -75,11 +73,12 @@ def downSub(episode, options=""):
 
     alink = ""
     for i in src:
-        if ("<b>" + tvCap + "</b>") in i:
+        if ("<b>" + tvshow + "</b>") in i.lower():
             alink = i.split('"')[3]
+            break
 
     if not alink:
-        print '\033[1;31m('+subname+" "+tvCap+') show not found\033[0m'
+        print '\033[1;31m('+subname+" "+tvshow+') show not found\033[0m'
         return -1
         
     
