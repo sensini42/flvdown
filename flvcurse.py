@@ -22,10 +22,9 @@ class Curse():
         self.screen = curses.initscr()
         action = 0
         while action != ord('6'):
-            titre = "Please enter a number..."
             choices = [ "Play a show", "Download a show", "Options", \
                 "Manage TvShow", "Update", "Exit"]
-            action = self.printChoices(titre, choices)
+            action = self.printChoices(choices)
 
             if action == ord('1'):
                 self.play()
@@ -47,19 +46,19 @@ class Curse():
             self.options.conf['login'], self.options.conf['password'])
         self.list_ep = self.nextep.getList()
         
-    def printChoices(self, titre, choices):
+    def printChoices(self, choices):
         """ print list choices """
         self.screen.clear()
         self.screen.border(0)
-        self.screen.addstr(2, 2, titre)
+        self.screen.addstr(2, 2, 'Please enter a number...')
         for i in range(len(choices)):
             self.screen.addstr(4+i, 4, str(i+1) + " - " + choices[i])
-        self.screen.addstr(2, 3+len(titre), "")
+        self.screen.addstr(2, 27, "")
         self.screen.refresh()
         return self.screen.getch()
 
 
-    def populate(self, titre, condition):
+    def printEpisodes(self, titre, condition):
         """ print list """
         self.screen.clear()
         self.screen.border(0)
@@ -80,7 +79,7 @@ class Curse():
     def play(self):
         """ play a show """
         # print list
-        setEpisodes = self.populate('Play a show...', True)
+        setEpisodes = self.printEpisodes('Play a show...', True)
         try:
             num = int(self.screen.getstr(2, 18, 2))-1
         except: 
@@ -96,9 +95,8 @@ class Curse():
 
                 # actions 
                 self.screen = curses.initscr()
-                titre = "Please enter a number..."
                 choices = [ "Mark as read", "Mark and Delete", "Back"]
-                action = self.printChoices(titre, choices)
+                action = self.printChoices(choices)
 
                 if action == ord('1'):
                     self.nextep.markAsRead(*(episode.ids))
@@ -111,7 +109,7 @@ class Curse():
 
     def down(self):
         """ down a show """
-        setEpisodes = self.populate('Down a show...', False)
+        setEpisodes = self.printEpisodes('Down a show...', False)
         try:
             num = int(self.screen.getstr(2, 18, 2))-1
         except: 
@@ -136,7 +134,7 @@ class Curse():
         """ options list """
         pass
 
-    def display(self, titre, listelt, action, user=False):
+    def printShows(self, titre, listelt, action, user=False):
         """ display list """
         ####
         ## bug : check COLUMNS and LINES
@@ -179,31 +177,30 @@ class Curse():
 
     def manageTvShow(self):
         """ manage TvShow """
-        titre = "Please enter a number..."
         choices = [ "Add a show", "Remove a show", "Track a show", \
             "Untrack a show", "Back"]
-        action = self.printChoices(titre, choices)
+        action = self.printChoices(choices)
 
         if action == ord('1'):
             titre = choices[0] + '...'
             lsuggest = self.nextep.getSuggestions()
             action = self.nextep.addShow
-            self.display(titre, lsuggest, action, True)
+            self.printShows(titre, lsuggest, action, True)
         elif action == ord('2'):
             titre = choices[1] + '...'
             lshow = self.nextep.getListShow()
             action = self.nextep.removeShow
-            self.display(titre, lshow, action)
+            self.printShows(titre, lshow, action)
         elif action == ord('3'):
             titre = choices[2] + '...'
             luntracked = self.nextep.getUntracked()
             action = self.nextep.trackShow
-            self.display(titre, luntracked, action)
+            self.printShows(titre, luntracked, action)
         elif action == ord('4'):
             titre = choices[3] + '...'
             ltracked = self.nextep.getTracked()
             action = self.nextep.untrackShow
-            self.display(titre, ltracked, action)
+            self.printShows(titre, ltracked, action)
 
 
 
