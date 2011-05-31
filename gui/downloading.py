@@ -112,9 +112,8 @@ class InfoDown(QtGui.QWidget):
             try:
                 speed = float(bloc*taille) / float(time.time()-self.time_begin)
                 time_left = float(total-bloc*taille) / speed
-                self.msg = str("time_left: %s:%02d:%02d" \
-                  %(int(time_left/3600.0), (time_left%3600)/60.0, \
-                  (time_left%3600)%60)) 
+                self.msg = str("%s:%02d:%02d" %(int(time_left/3600.0), \
+                  (time_left%3600)/60.0, (time_left%3600)%60)) 
                 self.infodown.setText( str("%.2f ko/s " %float(speed/1024)) + \
                    str("time_left: %s" %(self.msg)) )
             except ZeroDivisionError:
