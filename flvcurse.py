@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 """ curses version """
 
+from os import chdir as oschdir
+from os import system as ossystem
 import curses
+import threads, links
 
 class Curse():
     """ curse version """
@@ -11,8 +14,10 @@ class Curse():
         """ nothing special here """
 
         self.options = options
+        oschdir(self.options.conf['base_directory'])
         self.nextep = nextep
         self.nextep.update(self.options.dict_bug)
+        self.list_ep = self.nextep.getList()
 
         self.screen = curses.initscr()
         action = 0
@@ -41,29 +46,89 @@ class Curse():
 
         curses.endwin()
 
+    def populate(self, condition):
+        """ print list """
+        setShows = []
+        setEpisodes = []
+        if self.list_ep:
+            for episode in self.list_ep:
+                if episode.isOnDisk == condition and \
+                  episode.tvshowSpace not in setShows:
+                    self.screen.addstr(4 + len(setShows), 4, \
+                      str(len(setShows)+1) + ' - ' + episode.getBaseName())
+                    setShows.append(episode.tvshowSpace)
+                    setEpisodes.append(episode)
+        return setEpisodes
 
     def play(self):
         """ play a show """
+        # print list
         self.screen.clear()
         self.screen.border(0)
         self.screen.addstr(2, 2, "Play a show...")
-        setShow = []
-        list_ep = self.nextep.getList()
-        if list_ep:
-            for episode in list_ep:
-                if episode.isOnDisk == True: #and episode.tvshowSpace not in setShow:
-                    self.screen.addstr(4 + len(setShow), 4, \
-                      str(len(setShow)+1) + ' - ' + episode.tvshowSpace + \
-                      ' season ' + episode.strSeason + \
-                      ' episode ' + episode.strEpisode)
-                    setShow.append(episode.tvshowSpace)
-                    break
+        setEpisodes = self.populate(True)
         self.screen.refresh()
-        self.screen.getstr(2, 18, 2)
+        try:
+            num = int(self.screen.getstr(2, 18, 2))-1
+        except: 
+            pass
+        else:
+            # play episode
+            if num >= 0 and num < len(setEpisodes):
+                episode = setEpisodes[num]
+
+                curses.endwin()
+                ossystem(self.options.conf['player'] + " " + \
+                    episode.getVideoName())
+
+                # actions 
+                self.screen = curses.initscr()
+                self.screen.clear()
+                self.screen.border(0)
+                self.screen.addstr(2, 2, "Please enter a number...")
+                self.screen.addstr(4, 4, "1 - Mark as read")
+                self.screen.addstr(5, 4, "2 - Mark and Delete")
+                self.screen.addstr(6, 4, "3 - Pass")
+                self.screen.addstr(2, 26, "")
+                self.screen.refresh()
+
+                action = self.screen.getch()
+
+                if action == ord('1'):
+                    self.nextep.markAsRead(*(episode.ids))
+                    self.list_ep.remove(episode)
+                elif action == ord('2'):
+                    self.nextep.markAsRead(*(episode.ids))
+                    episode.removeFile()
+                    self.list_ep.remove(episode)
+
 
     def down(self):
         """ down a show """
-        pass
+        self.screen.clear()
+        self.screen.border(0)
+        self.screen.addstr(2, 2, "Down a show...")
+        setEpisodes = self.populate(False)
+        self.screen.refresh()
+        try:
+            num = int(self.screen.getstr(2, 18, 2))-1
+        except: 
+            pass
+        else:
+            # play episode
+            if num >= 0 and num < len(setEpisodes):
+                episode = setEpisodes[num]
+
+                curses.endwin()
+                url, dest, cook = links.flvdown(episode, "vi")
+                if url:
+                    try:
+                        links.getFile(url, dest, cook)
+                    except:
+                        pass
+                    else:
+                        episode.isOnDisk = True
+
     
     def chgoptions(self):
         """ options list """
