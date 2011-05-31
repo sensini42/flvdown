@@ -21,19 +21,11 @@ class Curse():
 
         self.screen = curses.initscr()
         action = 0
-        while action != ord('5'):
-            self.screen.clear()
-            self.screen.border(0)
-            self.screen.addstr(2, 2, "Please enter a number...")
-            self.screen.addstr(4, 4, "1 - Play a show")
-            self.screen.addstr(5, 4, "2 - Download a show")
-            self.screen.addstr(6, 4, "3 - Options")
-            self.screen.addstr(7, 4, "4 - Manage TvShow")
-            self.screen.addstr(8, 4, "5 - Exit")
-            self.screen.addstr(2, 26, "")
-            self.screen.refresh()
-
-            action = self.screen.getch()
+        while action != ord('6'):
+            titre = "Please enter a number..."
+            choices = [ "Play a show", "Download a show", "Options", \
+                "Manage TvShow", "Update", "Exit"]
+            action = self.printChoices(titre, choices)
 
             if action == ord('1'):
                 self.play()
@@ -43,11 +35,35 @@ class Curse():
                 self.chgoptions()
             elif action == ord('4'):
                 self.manageTvShow()
+            elif action == ord('5'):
+                self.update()
 
         curses.endwin()
 
-    def populate(self, condition):
+    def update(self):
+        """ update """
+        oschdir(self.options.conf['base_directory'])
+        self.nextep.update(self.options.dict_bug, \
+            self.options.conf['login'], self.options.conf['password'])
+        self.list_ep = self.nextep.getList()
+        
+    def printChoices(self, titre, choices):
+        """ print list choices """
+        self.screen.clear()
+        self.screen.border(0)
+        self.screen.addstr(2, 2, titre)
+        for i in range(len(choices)):
+            self.screen.addstr(4+i, 4, str(i+1) + " - " + choices[i])
+        self.screen.addstr(2, 3+len(titre), "")
+        self.screen.refresh()
+        return self.screen.getch()
+
+
+    def populate(self, titre, condition):
         """ print list """
+        self.screen.clear()
+        self.screen.border(0)
+        self.screen.addstr(2, 2, titre)
         setShows = []
         setEpisodes = []
         if self.list_ep:
@@ -58,16 +74,13 @@ class Curse():
                       str(len(setShows)+1) + ' - ' + episode.getBaseName())
                     setShows.append(episode.tvshowSpace)
                     setEpisodes.append(episode)
+        self.screen.refresh()
         return setEpisodes
 
     def play(self):
         """ play a show """
         # print list
-        self.screen.clear()
-        self.screen.border(0)
-        self.screen.addstr(2, 2, "Play a show...")
-        setEpisodes = self.populate(True)
-        self.screen.refresh()
+        setEpisodes = self.populate('Play a show...', True)
         try:
             num = int(self.screen.getstr(2, 18, 2))-1
         except: 
@@ -83,16 +96,9 @@ class Curse():
 
                 # actions 
                 self.screen = curses.initscr()
-                self.screen.clear()
-                self.screen.border(0)
-                self.screen.addstr(2, 2, "Please enter a number...")
-                self.screen.addstr(4, 4, "1 - Mark as read")
-                self.screen.addstr(5, 4, "2 - Mark and Delete")
-                self.screen.addstr(6, 4, "3 - Pass")
-                self.screen.addstr(2, 26, "")
-                self.screen.refresh()
-
-                action = self.screen.getch()
+                titre = "Please enter a number..."
+                choices = [ "Mark as read", "Mark and Delete", "Back"]
+                action = self.printChoices(titre, choices)
 
                 if action == ord('1'):
                     self.nextep.markAsRead(*(episode.ids))
@@ -105,11 +111,7 @@ class Curse():
 
     def down(self):
         """ down a show """
-        self.screen.clear()
-        self.screen.border(0)
-        self.screen.addstr(2, 2, "Down a show...")
-        setEpisodes = self.populate(False)
-        self.screen.refresh()
+        setEpisodes = self.populate('Down a show...', False)
         try:
             num = int(self.screen.getstr(2, 18, 2))-1
         except: 
@@ -134,9 +136,74 @@ class Curse():
         """ options list """
         pass
 
+    def display(self, titre, listelt, action, user=False):
+        """ display list """
+        ####
+        ## bug : check COLUMNS and LINES
+        ###
+        self.screen.clear()
+        self.screen.border(0)
+        self.screen.addstr(2, 2, titre)
+        for i in range(len(listelt)):
+            if type(listelt[i]) == str:
+                elt = listelt[i]
+            else:
+                elt = listelt[i][0]
+            self.screen.addstr(4+i, 4, str(i+1) + ' - ' + elt)
+        if user:
+            self.screen.addstr(6+i, 4, str(i+2) + ' - other')
+        self.screen.addstr(2, 3+len(titre), "")
+        self.screen.refresh()
+        try:
+            num = int(self.screen.getstr(2, 3+len(titre), 2))-1
+        except: 
+            pass
+        else:
+            if num >= 0 and num < len(listelt):
+                if type(listelt[num]) == list:
+                    elt = listelt[num][1:]
+                elif type(listelt[num]) == str:
+                    elt = [listelt[num]]
+                else:
+                    elt = [listelt[num][0]]
+                action(*elt)
+                self.update()
+            elif user and num == len(listelt):
+                self.screen.clear()
+                self.screen.border(0)
+                self.screen.addstr(2, 2, 'Enter a name:')
+                elt = self.screen.getstr(4, 4, 100)
+                action(elt)
+                self.update()
+
+
     def manageTvShow(self):
         """ manage TvShow """
-        pass
+        titre = "Please enter a number..."
+        choices = [ "Add a show", "Remove a show", "Track a show", \
+            "Untrack a show", "Back"]
+        action = self.printChoices(titre, choices)
+
+        if action == ord('1'):
+            titre = choices[0] + '...'
+            lsuggest = self.nextep.getSuggestions()
+            action = self.nextep.addShow
+            self.display(titre, lsuggest, action, True)
+        elif action == ord('2'):
+            titre = choices[1] + '...'
+            lshow = self.nextep.getListShow()
+            action = self.nextep.removeShow
+            self.display(titre, lshow, action)
+        elif action == ord('3'):
+            titre = choices[2] + '...'
+            luntracked = self.nextep.getUntracked()
+            action = self.nextep.trackShow
+            self.display(titre, luntracked, action)
+        elif action == ord('4'):
+            titre = choices[3] + '...'
+            ltracked = self.nextep.getTracked()
+            action = self.nextep.untrackShow
+            self.display(titre, ltracked, action)
 
 
 
