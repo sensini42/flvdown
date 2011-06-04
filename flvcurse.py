@@ -4,8 +4,13 @@
 
 from os import chdir as oschdir
 from os import system as ossystem
+
+from nextepisode import NextEpisode
+from options import Options
+
 import curses
-import threads, links, aggregators
+import links, aggregators, options
+
 
 class Curse():
     """ curse version """
@@ -138,6 +143,9 @@ class Curse():
     def settings(self):
         """ settings pane """
         listkeys = self.options.conf.keys()
+	opt = {}
+        for key in listkeys:
+            opt[key] = self.options.conf[key]
 
         action = '0'
         while action != ord('2') and action != ord('3'):
@@ -146,12 +154,10 @@ class Curse():
             self.screen.border(0)
             self.screen.addstr(2, 2, 'Settings')
             num = 0
-            opt = {}
             for key in listkeys:
-                opt[key] = self.options.conf[key]
                 self.screen.addstr(4+num, 6, key)
                 if key != 'password':
-                    self.screen.addstr(4+num, 21, self.options.conf[key])
+                    self.screen.addstr(4+num, 21, opt[key])
                 else:
                     self.screen.addstr(4+num, 21, "******")
                 num += 1
@@ -392,5 +398,22 @@ class Curse():
                 action = self.nextep.untrackShow
                 self.printShows(titre, ltracked, action)
 
+import sys
+def main(args):
+    """ main """
 
+    #config
+    options = Options()
+    if options.error:
+        print "check config"
+
+    #nextep
+    nextep = NextEpisode(options.conf['login'], options.conf['password'], \
+                options.dict_bug)
+
+    Curse(options, nextep)
+
+
+if __name__ == '__main__':
+    main(sys.argv)
 

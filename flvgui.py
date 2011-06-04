@@ -4,8 +4,6 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 
-from os import path as ospath
-from os import mkdir as osmkdir
 from os import chdir as oschdir
 
 from gui.central import CentralWidget
@@ -13,78 +11,9 @@ from gui.menu import Menu
 from gui.actions import Actions
 
 from nextepisode import NextEpisode
+from options import Options
 
 from threads import ToolTip
-
-
-class Options():
-    """ manage options """
-
-    def __init__(self):
-
-        self.conf = None
-        self.list_site = None
-        self.dict_bug = {}
-        self.checkConfigFile()
-
-    def checkConfigFile(self):
-        """ read config file """
-        self.list_site = self.getSites()
-        self.conf = {'login':'login', 'password':'password', \
-            'player':'mplayer', 'base_directory':'/tmp'}
-        self.dict_bug = {}
-        try:
-            fileconf = open(ospath.expanduser('~') + \
-                    "/.config/flvdown/flv.conf", "rb", 0)
-            for line in fileconf:
-                tmp = line.split("=")
-                if tmp[0] == 'order':
-                    list_order = tmp[1].replace('"', '').split(',')[:-1]
-                    for (i, site) in enumerate(list_order):
-                        self.list_site.remove(site.strip())
-                        self.list_site.insert(i, site.strip())
-                elif tmp[0] == 'dict_bug':
-                    self.dict_bug = eval(tmp[1])
-                else:
-                    self.conf[tmp[0]] = tmp[1].replace('"','')[:-1]
-            fileconf.close()
-        except IOError:
-            print "check config"
-            QtGui.QMessageBox.warning(self, 'Config File', \
-                'Please check config', \
-                QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
-
-    @classmethod
-    def getSites(cls):
-        """ check modules to populate list_site"""
-        import aggregators
-        list_site = []
-        for i in aggregators.__all__:
-            site = "aggregators." + i + "_mod"
-            __import__(site)
-            for j in sys.modules[site].__all__:
-                subsite = i + " : " + j
-                list_site.append(subsite)
-        return list_site
-        
-    def saveConf(self):
-        """ save the config"""
-        if (not ospath.exists(ospath.expanduser('~') + "/.config/flvdown/")):
-            osmkdir(ospath.expanduser('~') + "/.config/flvdown/")
-        fileconf = open(ospath.expanduser('~') + \
-            "/.config/flvdown/flv.conf", "w", 0)
-        for key in self.conf.keys():
-            fileconf.write(key + '="' + self.conf[key] + '\"\n')
-        fileconf.write('order="')
-        for elt in self.list_site:
-            fileconf.write(elt + ', ')
-        fileconf.write('"\n')
-        fileconf.write('dict_bug=')
-        fileconf.write(repr(self.dict_bug))
-        fileconf.write('\n')
-        
-        fileconf.close()
-
 
 
 class Flvgui(QtGui.QMainWindow):
@@ -178,24 +107,24 @@ class Flvgui(QtGui.QMainWindow):
 
 
 import sys
-from flvcurse import Curse
 def main(args):
     """ main """
 
     #config
     options = Options()
+    if options.error:
+       QtGui.QMessageBox.warning(self, 'Config File', \
+           'Please check config', \
+           QtGui.QMessageBox.StandardButton(QtGui.QMessageBox.Ok))
 
     #nextep
     nextep = NextEpisode(options.conf['login'], options.conf['password'], \
                 options.dict_bug)
     
-    if len(args) == 2:
-        Curse(options, nextep)
-    else:
-        app = QtGui.QApplication(args)
-        flv = Flvgui(options, nextep)
-        flv.show()
-        app.exec_()    
+    app = QtGui.QApplication(args)
+    flv = Flvgui(options, nextep)
+    flv.show()
+    app.exec_()    
 
 
 if __name__ == '__main__':
