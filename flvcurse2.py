@@ -3,7 +3,8 @@
 
 import curses
 
-from curse.menu_gen import Entry, Menu
+from curse.menu_gen import MenuEntry, Menu
+from curse.tab_gen import TabEntry, Tab
 
 
 class Curse():
@@ -22,29 +23,54 @@ class Curse():
         menu = self.makemenu()
         menu.display()
 
+        tabs = self.maketabs()
+        tabs.display()
+
         while not self.close:
             c = self.scr.getkey()
-            self.scr.addstr(10, 10, c)
-            self.scr.refresh()
-            menu.action(c)
+            if not menu.action(c):
+                if c == '@':
+                    tabs.next()
+                
+
+    def maketabs(self):
+        """ create tab """
+        playing_tab = TabEntry('Playing', self.dispplay)
+        downloading_tab = TabEntry('Downloading', self.dispdown)
+        
+        tabs = Tab(self.scr)
+        tabs.addTab(playing_tab)
+        tabs.addTab(downloading_tab)
+        return tabs
+
+    def dispplay(self, screen):
+        """ display play list """
+        screen.addstr(1, 1, 'coucou')
+
+    def dispdown(self, screen):
+        """ display down list """
+        screen.addstr(6, 6, 'bouh')
 
     def makemenu(self):
         """ create menu """
-        file_menu = Entry('File')
-        file_menu.addSubEntry(Entry('Update', action=self.update))
+        file_menu = MenuEntry('File')
+        file_menu.addSubEntry(MenuEntry('Update', action=self.update))
         file_menu.addSeparator()
-        file_menu.addSubEntry(Entry('Quit', action=self.quit))
-        option_menu = Entry('Options')
-        option_menu.addSubEntry(Entry('Settings', action=self.setting))
-        option_menu.addSubEntry(Entry('Site order', 6, self.siteorder))
-        option_menu.addSubEntry(Entry('Dict bug', action=self.dictbug))
-        manage_menu = Entry('Manage TvShow')
-        manage_menu.addSubEntry(Entry('Add a show', action=self.add))
-        manage_menu.addSubEntry(Entry('Remove a show', action=self.remove))
-        manage_menu.addSubEntry(Entry('Track a show', action=self.track))
-        manage_menu.addSubEntry(Entry('Untrack a show', action=self.untrack))
+        file_menu.addSubEntry(MenuEntry('Quit', action=self.quit))
 
-        menu = Menu(self.scr, '>>>>> Flvcurse <<<<<')
+        option_menu = MenuEntry('Options')
+        option_menu.addSubEntry(MenuEntry('Settings', action=self.setting))
+        option_menu.addSubEntry(MenuEntry('Site order', 6, self.siteorder))
+        option_menu.addSubEntry(MenuEntry('Dict bug', action=self.dictbug))
+
+        manage_menu = MenuEntry('Manage TvShow')
+        manage_menu.addSubEntry(MenuEntry('Add a show', action=self.add))
+        manage_menu.addSubEntry(MenuEntry('Remove a show', action=self.remove))
+        manage_menu.addSubEntry(MenuEntry('Track a show', action=self.track))
+        manage_menu.addSubEntry(MenuEntry('Untrack a show', \
+                action=self.untrack))
+
+        menu = Menu(self.scr, ' >>>>> Flvcurse <<<<< ')
         menu.addEntry(file_menu)
         menu.addEntry(option_menu)
         menu.addEntry(manage_menu)

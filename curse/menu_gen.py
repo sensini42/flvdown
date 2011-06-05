@@ -14,7 +14,7 @@ def max(x, y):
     else:
         return y
 
-class Entry():
+class MenuEntry():
     """ create a new entry """
 
     def __init__(self, name, hotkey_pos=0, action=None):
@@ -111,5 +111,6 @@ class Menu():
         for entry in self.setentry:
             if entry.isActive(key):
                 entry.activate(self.screen)
-                break
+                return True
+        return False
 
