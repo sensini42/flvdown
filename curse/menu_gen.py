@@ -45,7 +45,8 @@ class MenuEntry():
     def isActive(self, key):
         """ look if key is hotkey """
         import string
-        return string.upper(key) == string.upper(self.hotkey)
+        return key == ord(string.upper(self.hotkey)) or \
+            key == ord(string.lower(self.hotkey))
 
     def display(self, screen, upper_pos, left_pos):
         """ print entry in menu """
@@ -59,7 +60,7 @@ class MenuEntry():
             self.name[self.hotkey_pos+1:], menu_attr)
         return left_pos+len(self.name)
     
-    def activate(self, screen):
+    def activate(self, screen, scr=None):
         """ open the submenu if exists or call action """
         if self.setsubentry != []:
             s = curses.newwin(self.height+2, self.width+4, self.upper_pos+1, \
@@ -73,16 +74,18 @@ class MenuEntry():
                     subentry.display(s, i, 2)
                 i += 1
             s.refresh()
-            c = s.getkey()
+            c = s.getch()
             ok = False
             for subentry in self.setsubentry:
                 if subentry != SEPARATOR and subentry.isActive(c):
-                    subentry.activate(screen)
+                    subentry.activate(screen, s)
                     ok = True
                     break
-            s.erase()
             screen.refresh()
         elif self.action:
+            if scr:
+                scr.erase()
+            screen.refresh()
             self.action()
 
 
