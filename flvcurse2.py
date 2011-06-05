@@ -45,18 +45,35 @@ class Curse():
 
     def dispplay(self, screen):
         """ display play list """
+        self.action_menu.removeAllEntries()
+        self.action_menu.addSubEntry(MenuEntry('Play', action=self.play))
+        self.action_menu.addSubEntry(MenuEntry('Mark as read', \
+                action=self.mark))
+        self.action_menu.addSubEntry(MenuEntry('Mark and Delete', 9, \
+                action=self.delete))
         screen.addstr(1, 1, 'coucou')
+
+    def delete(self):
+        pass
+
+    def mark(self):
+        pass
+
+    def play(self):
+        pass
 
     def dispdown(self, screen):
         """ display down list """
+        self.action_menu.removeAllEntries()
+        self.action_menu.addSubEntry(MenuEntry('Down', action=self.down))
         screen.addstr(6, 6, 'bouh')
+
+    def down(self):
+        pass
 
     def makemenu(self):
         """ create menu """
-        file_menu = MenuEntry('File')
-        file_menu.addSubEntry(MenuEntry('Update', action=self.update))
-        file_menu.addSeparator()
-        file_menu.addSubEntry(MenuEntry('Quit', action=self.quit))
+        self.action_menu = MenuEntry('Actions')
 
         option_menu = MenuEntry('Options')
         option_menu.addSubEntry(MenuEntry('Settings', action=self.setting))
@@ -70,10 +87,15 @@ class Curse():
         manage_menu.addSubEntry(MenuEntry('Untrack a show', \
                 action=self.untrack))
 
+        update_menu = MenuEntry('Update', action=self.update)
+        quit_menu = MenuEntry('Quit', action=self.quit)
+
         menu = Menu(self.scr, ' >>>>> Flvcurse <<<<< ')
-        menu.addEntry(file_menu)
+        menu.addEntry(self.action_menu)
         menu.addEntry(option_menu)
         menu.addEntry(manage_menu)
+        menu.addEntry(update_menu)
+        menu.addEntry(quit_menu)
         return menu
 
     def untrack(self):

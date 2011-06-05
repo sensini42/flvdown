@@ -26,6 +26,11 @@ class MenuEntry():
         self.width, self.height = 0, 0
         self.action = action
 
+    def removeAllEntries(self):
+        """ remove all subentry """
+        self.setsubentry = []
+        self.width, self.height = 0, 0
+
     def addSubEntry(self, subentry):
         """ add subentry """
         self.setsubentry.append(subentry)
@@ -77,7 +82,7 @@ class MenuEntry():
                     break
             s.erase()
             screen.refresh()
-        else:
+        elif self.action:
             self.action()
 
 
