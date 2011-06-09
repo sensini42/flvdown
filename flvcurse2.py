@@ -40,13 +40,14 @@ class Curse():
         self.tabs = self.maketabs()
         self.tabs.display()
 
+        self.scr.keypad(1)
         while not self.close:
             c = self.scr.getch()
             if c == ord('@'):
                 self.tabs.next()
-            elif c == 65:#UP
+            elif c == curses.KEY_UP:
                 self.tabs.getActiveTab().change(0)
-            elif c == 66:#DOWN
+            elif c == curses.KEY_DOWN:
                 self.tabs.getActiveTab().change(1)
             elif c == 10:#ENTER
                 self.action_menu.setsubentry[0].action()

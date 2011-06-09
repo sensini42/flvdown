@@ -42,12 +42,13 @@ class MenuManage(MenuEntry):
         screen.hline(2, 1, curses.ACS_HLINE, max_width-2)
         listdisp = List(screen, list_tmp)
         listdisp.display(2, 4, min(6, len(list_elt)))
-        ok = True
-        while ok:
+        screen.keypad(1)
+        c = 0
+        while c != 27 and c != 10:#ECHAP and ENTER
             c = screen.getch()
-            if c == 65:#UP
+            if c == curses.KEY_UP:#UP
                 listdisp.change(0)
-            elif c == 66:#DOWN
+            elif c == curses.KEY_DOWN:#DOWN
                 listdisp.change(1)
             elif c == 10:#ENTER
                 if len(list_elt) != 0:
@@ -74,9 +75,6 @@ class MenuManage(MenuEntry):
                             elt = [list_elt[listdisp.active][0]]
                         action(*elt)
                         self.parent.update()
-                ok = False
-            elif c == ord('q') or c == ord('Q'):
-                ok = False
         screen.erase()
         self.parent.scr.refresh()
         
