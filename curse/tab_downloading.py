@@ -18,7 +18,7 @@ class TabDownloading(TabEntry):
 
     def __init__(self, parent):
         """ initialisation """
-        TabEntry.__init__(self, 'Downloading', None)
+        TabEntry.__init__(self, 'Downloading')
         self.parent = parent
 
     def display(self):

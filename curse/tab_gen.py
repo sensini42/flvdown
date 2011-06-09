@@ -5,11 +5,10 @@ import curses
 class TabEntry():
     """ create a new entry tab """
 
-    def __init__(self, name, disp):
+    def __init__(self, name):
         """ initialisation """
         self.name = name
         self.screen = None
-        self.disp = disp
         self.visible = None
 
     def setScreen(self, screen):
@@ -19,10 +18,6 @@ class TabEntry():
     def change(self, direction):
         """ change the current active entry """
         self.visible.change(direction)
-
-    def display(self):
-        """ display the tab """
-        self.disp(self.screen)
 
 
 class Tab():

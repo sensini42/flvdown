@@ -2,6 +2,8 @@
 
 from curse.menu_gen import MenuEntry
 from curse.tab_settings import TabSettings
+from curse.tab_siteorder import TabSiteOrder
+from curse.tab_dictbug import TabDictBug
 
 class MenuOptions(MenuEntry):
     """ create options menu """
@@ -16,13 +18,17 @@ class MenuOptions(MenuEntry):
         self.addSubEntry(MenuEntry('Dict bug', action=self.dictbug))
 
     def dictbug(self):
-        self.parent.scr.addstr(6, 6, "dictbug")
+        """ dictbug """
+        self.parent.tabs.addTab(TabDictBug(self.parent))
+        self.parent.tabs.update()
 
     def siteorder(self):
-        self.parent.scr.addstr(6, 6, "siteorder")
+        """ siteorder """
+        self.parent.tabs.addTab(TabSiteOrder(self.parent))
+        self.parent.tabs.update()
 
     def setting(self):
         """ settings """
-        settings_tab = TabSettings(self.parent)
-        self.parent.tabs.addTab(settings_tab)
+        self.parent.tabs.addTab(TabSettings(self.parent))
         self.parent.tabs.update()
+

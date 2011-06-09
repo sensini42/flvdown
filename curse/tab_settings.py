@@ -10,7 +10,7 @@ class TabSettings(TabEntry):
 
     def __init__(self, parent):
         """ initialisation """
-        TabEntry.__init__(self, 'Settings', None)
+        TabEntry.__init__(self, 'Settings')
         self.parent = parent
 
     def display(self):
