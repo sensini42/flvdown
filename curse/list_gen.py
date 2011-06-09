@@ -16,10 +16,11 @@ class List():
         self.isactive = isactive
         self.active = 0
         self.deb = 0
+        self.posend = None
 
     def display(self, left=None, up=None, maxline=None):
         """ display the list """
-        if maxline: self.pos[2] = maxline
+        if maxline: self.pos[2] = min(maxline, self.pos[2])
         if up: self.pos[1] = up
         if left: self.pos[0] = left
         self.active = 0
@@ -29,24 +30,27 @@ class List():
     def update(self):
         """ update """
         i = 0
-        for num_elt in range(self.deb, len(self.list_elt)):
-            if (i == 0 and self.deb != 0) or \
-              (i == self.pos[2]-1 and num_elt != len(self.list_elt)-1):
-                self.screen.addstr(self.pos[1]+i, self.pos[0], '...')
-                clr = ' '*(self.screen.getmaxyx()[1]-5-self.pos[0])
-                self.screen.addstr(self.pos[1]+i, self.pos[0]+3, clr)
-            else:
-                if self.isactive and num_elt == self.active: 
-                    style = curses.A_STANDOUT
-                else: 
-                    style = curses.A_NORMAL
-                elt = self.list_elt[num_elt]
-                clr = ' '*(self.screen.getmaxyx()[1]-2-self.pos[0]-len(elt))
-                self.screen.addstr(self.pos[1]+i, self.pos[0], elt, style)
-                self.screen.addstr(self.pos[1]+i, self.pos[0]+len(elt), clr)
-            i += 1
-            if i == self.pos[2]:
-                break
+        if len(self.list_elt) > 0:
+            clr = ' '*(self.screen.getmaxyx()[1]-2-self.pos[0])
+            for num_elt in range(self.deb, len(self.list_elt)):
+                if (i == 0 and self.deb != 0) or \
+                  (i == self.pos[2]-1 and num_elt != len(self.list_elt)-1):
+                    self.screen.addstr(self.pos[1]+i, self.pos[0], clr)
+                    self.screen.addstr(self.pos[1]+i, self.pos[0], '...')
+                else:
+                    elt = self.list_elt[num_elt]
+                    if self.isactive and num_elt == self.active: 
+                        style = curses.A_STANDOUT
+                        self.posend = (self.pos[1]+i, self.pos[0], len(elt))
+                    else: 
+                        style = curses.A_NORMAL
+                    self.screen.addstr(self.pos[1]+i, self.pos[0], clr)
+                    self.screen.addstr(self.pos[1]+i, self.pos[0], elt, style)
+                i += 1
+                if i == self.pos[2]:
+                    break
+            for j in range(i, self.pos[2]+1):
+                self.screen.addstr(self.pos[1]+j, self.pos[0], clr)
         self.screen.refresh()
 
     def change(self, direction):

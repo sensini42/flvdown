@@ -10,10 +10,15 @@ class TabEntry():
         self.name = name
         self.screen = None
         self.disp = disp
+        self.visible = None
 
     def setScreen(self, screen):
         """ set the screen """
         self.screen = screen
+
+    def change(self, direction):
+        """ change the current active entry """
+        self.visible.change(direction)
 
     def display(self):
         """ display the tab """
@@ -28,17 +33,32 @@ class Tab():
         self.setentry = []
         (height, width) = screen.getmaxyx()
         self.screen = screen.subwin(height-4, width-2, 3, 1)
-        self.subscreen = screen.subwin(height-8, width-4, 5, 2)
+        self.subscreen = screen.subwin(height-9, width-4, 6, 2)
         self.active = None
 
     def addTab(self, tabentry):
         """ add tab """
         self.setentry.append(tabentry)
         tabentry.setScreen(self.subscreen)
+        self.active = len(self.setentry)-1
+
+    def closeTab(self, number):
+        """ close a tab """
+        self.setentry.remove(self.setentry[number])
+        if self.active == len(self.setentry):
+            self.active = 0
+        self.update()
+  
+    def closeActiveTab(self):
+        """ close active tab """
+        self.closeTab(self.active)
+
+    def getActiveTab(self):
+        """ return the active tab """
+        return self.setentry[self.active]
 
     def display(self):
         """ display tabs """
-        self.active = 0
         self.update()
 
     def update(self):
@@ -64,10 +84,14 @@ class Tab():
         
     def next(self):
         """ display nexttab """
-        if self.active == len(self.setentry)-1:
+        if self.active >= len(self.setentry)-1:
             self.active = 0
         else:
             self.active += 1
         self.update()
 
+    def select(self, num):
+        """ select a tab """
+        self.active = num
+        self.update()
 

@@ -52,8 +52,8 @@ def flvdown(episode, options, list_site = None):
     if interact or not list_site:
         #check all site
         for i in aggregators.__all__:
-            #        if verbose:
-            print "checking", i
+            if verbose:
+                print "checking", i
             __import__("aggregators." + i)
             if i in dictbug:
                 name = dictbug[i]
@@ -62,16 +62,19 @@ def flvdown(episode, options, list_site = None):
             possible_links += sys.modules["aggregators."+i].getLinks( \
                 name, episode.strSeason, \
                 str(int(episode.strEpisode)))
-        print "done"
+        if verbose:
+            print "done"
         if possible_links == []:
-            print '\033[1;31mno link\033[0m found'
+            if verbose:
+                print '\033[1;31mno link\033[0m found'
             return None, None, None
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
         __import__("aggregators." + znl)
         final_url, cook = sys.modules["aggregators." + znl].getFlv(link, \
             verbose)
         if not final_url:
-            print '\033[1;31mno link\033[0m found'
+            if verbose:
+                print '\033[1;31mno link\033[0m found'
             return None, None, None
     else:
     ##Sort possible_links
@@ -83,7 +86,8 @@ def flvdown(episode, options, list_site = None):
         modulesChecked = []
         while ((not url_found) and  list_sites):
             hmod, hsite = list_sites.pop(0).split(' : ')
-            print "checking", hmod, hsite
+            if verbose:
+                print "checking", hmod, hsite
             if hmod not in modulesChecked:
                 i = "aggregators." + hmod
                 __import__(i)
@@ -109,7 +113,8 @@ def flvdown(episode, options, list_site = None):
                 else:
                     links_for_sites.remove([link, znl])
         if not url_found:
-            print '\033[1;31mno link\033[0m found'
+            if verbose:
+                print '\033[1;31mno link\033[0m found'
             return None, None, None
 
     ext = "." + final_url.split('.')[-1]
