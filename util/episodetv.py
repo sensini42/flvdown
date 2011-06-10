@@ -13,8 +13,11 @@ class episodeTV():
     def __init__(self, tvshow, season, episode, ids=None, dictTV=None):
         if dictTV:
             self.tvshow = dictTV['default'].lower()
+            self.dictTV = dictTV
         else:  
             self.tvshow = tvshow.lower()
+						self.dictTV = {}
+            self.dictTV['default'] = self.tvshow
         self.tvshow_ = "_".join(self.tvshow.split(" "))
         self.listName = self.tvshow_.split("_")
         self.tvshowSpace = " ".join(self.listName)
@@ -26,7 +29,6 @@ class episodeTV():
         else:
             self.strEpisode = str(self.numEpisode)
         self.ids = ids
-        self.dictTV = dictTV
         self.isOnDisk = (self.existFile() != [])
 
     def getBaseName(self):
