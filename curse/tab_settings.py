@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+    settings tab
+"""
 
 import curses
 from curse.tab_gen import TabEntry
@@ -12,6 +15,7 @@ class TabSettings(TabEntry):
         """ initialisation """
         TabEntry.__init__(self, 'Settings')
         self.parent = parent
+        self.listkeys = None
 
     def display(self):
         """ display the tab """
@@ -20,8 +24,8 @@ class TabSettings(TabEntry):
         listvalues = []
         for key in self.listkeys:
             listvalues.append(self.parent.options.conf[key])
-        self.visible2 = List(self.screen, self.listkeys, False)
-        self.visible2.display(10, 4, 15)
+        visible2 = List(self.screen, self.listkeys, False)
+        visible2.display(10, 4, 15)
         self.visible = List(self.screen, listvalues, True)
         self.visible.display(28, 4, 15)
 
@@ -37,18 +41,19 @@ class TabSettings(TabEntry):
 
     def changevalue(self):
         """ change a setting value """
-        (y, x, l) = self.visible.posend
+        pos = self.visible.posend
         width = self.screen.getmaxyx()[1]-32
-        self.screen.addstr(y, x, ' '*width)
+        self.screen.addstr(pos[0], pos[1], ' '*width)
         curses.curs_set(1)
         curses.nocbreak()
         curses.echo()
-        self.screen.move(y, x)
+        self.screen.move(pos[0], pos[1])
         name = self.screen.getstr()
         curses.noecho()
         curses.curs_set(0)
         curses.cbreak()
-        if name!='': self.visible.list_elt[self.visible.active] = name
+        if name != '': 
+            self.visible.list_elt[self.visible.active] = name
         self.visible.update()
 
     def savesetting(self):

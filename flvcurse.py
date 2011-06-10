@@ -1,7 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+    curse version
+"""
 
 
+import traceback
 from os import chdir as oschdir
 
 from util.nextepisode import NextEpisode
@@ -30,10 +34,11 @@ class Curse():
         self.nextep.update(self.options.dict_bug)
         self.list_ep = self.nextep.getList()
 
-        (y, x) = screen.getmaxyx()
-        self.scr = screen.subwin(y, x, 0, 0)
+        (height, width) = screen.getmaxyx()
+        self.scr = screen.subwin(height, width, 0, 0)
         self.scr.box()
 
+        self.action_menu = None
         menu = self.makemenu()
         menu.display()
 
@@ -42,17 +47,17 @@ class Curse():
 
         self.scr.keypad(1)
         while not self.close:
-            c = self.scr.getch()
-            if c == ord('@'):
+            char = self.scr.getch()
+            if char == ord('@'):
                 self.tabs.next()
-            elif c == curses.KEY_UP:
+            elif char == curses.KEY_UP:
                 self.tabs.getActiveTab().change(0)
-            elif c == curses.KEY_DOWN:
+            elif char == curses.KEY_DOWN:
                 self.tabs.getActiveTab().change(1)
-            elif c == 10:#ENTER
+            elif char == 10:#ENTER
                 self.action_menu.setsubentry[0].action()
             else:
-                menu.action(c)
+                menu.action(char)
 
     def maketabs(self):
         """ create tab """
@@ -81,6 +86,7 @@ class Curse():
         self.tabs.update()
 
     def quit(self):
+        """ quit the application """
         self.close = True
     
 
@@ -111,7 +117,6 @@ def main():
         curses.nocbreak()
         curses.curs_set(1)
         curses.endwin()
-        import traceback
         traceback.print_exc()
 
 

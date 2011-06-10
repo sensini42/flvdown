@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+    downloading tab
+"""
 
 from os import path as ospath
 from os import mkdir as osmkdir
@@ -19,9 +22,9 @@ def episodes(list_ep, condition):
     setEpisodes = []
     for episode in list_ep:
         if episode.isOnDisk == condition and \
-            episode.tvshowSpace not in setShows:
-              setShows.append(episode.tvshowSpace)
-              setEpisodes.append(episode)
+          episode.tvshowSpace not in setShows:
+            setShows.append(episode.tvshowSpace)
+            setEpisodes.append(episode)
     return setEpisodes
 
 class TabDownloading(TabEntry):
@@ -31,6 +34,7 @@ class TabDownloading(TabEntry):
         """ initialisation """
         TabEntry.__init__(self, 'Downloading')
         self.parent = parent
+        self.setEpi = None
 
     def display(self):
         """ display the tab """
@@ -61,20 +65,21 @@ class TabDownloading(TabEntry):
 
     def downepi(self, episode):
         """ down a show """
-        (y, x, l) = self.visible.posend
+        pos = self.visible.posend
         url, dest, cook = links.flvdown(episode, "")
         if url:
             try:
                 if (not ospath.isdir(dest.split('/')[0])):
                     osmkdir(dest.split('/')[0])
                 cmd = "wget -c " + url + " -O " + dest
-                p = subpopen(cmd, shell=True, stderr=PIPE, stdout=PIPE)
-                while p.poll() is None:
-                    li = p.stderr.readline()
-                    self.screen.addstr(y, x+l, li.split('.'))
+                proc = subpopen(cmd, shell=True, stderr=PIPE, stdout=PIPE)
+                while proc.poll() is None:
+                    line = proc.stderr.readline()
+                    self.screen.addstr(pos[0], pos[1]+pos[2], \
+                          line.split('.')[-1])
                     self.screen.refresh()
             except:
-                p.kill()
+                proc.kill()
                 self.error(episode.getBaseName() + ': down error')
             else:
                 self.error(episode.getBaseName() + ': down finish')

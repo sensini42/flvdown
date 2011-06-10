@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+    playing tab
+"""
 
 from subprocess import Popen as subpopen
 from subprocess import PIPE
@@ -13,9 +16,9 @@ def episodes(list_ep, condition):
     setEpisodes = []
     for episode in list_ep:
         if episode.isOnDisk == condition and \
-            episode.tvshowSpace not in setShows:
-              setShows.append(episode.tvshowSpace)
-              setEpisodes.append(episode)
+          episode.tvshowSpace not in setShows:
+            setShows.append(episode.tvshowSpace)
+            setEpisodes.append(episode)
     return setEpisodes
 
 
@@ -26,6 +29,7 @@ class TabPlaying(TabEntry):
         """ initialisation """
         TabEntry.__init__(self, 'Playing')
         self.parent = parent
+        self.setEpi = None
 
     def display(self):
         """ display the tab """

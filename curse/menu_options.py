@@ -1,4 +1,7 @@
 # -*- conding: utf-8 -*-
+"""
+    options menu entry
+"""
 
 from curse.menu_gen import MenuEntry
 from curse.tab_settings import TabSettings

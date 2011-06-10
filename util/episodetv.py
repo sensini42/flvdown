@@ -16,7 +16,7 @@ class episodeTV():
             self.dictTV = dictTV
         else:  
             self.tvshow = tvshow.lower()
-						self.dictTV = {}
+            self.dictTV = {}
             self.dictTV['default'] = self.tvshow
         self.tvshow_ = "_".join(self.tvshow.split(" "))
         self.listName = self.tvshow_.split("_")

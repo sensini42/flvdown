@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+    site order tab
+"""
 
 import curses
 from curse.tab_gen import TabEntry
@@ -12,6 +15,7 @@ class TabSiteOrder(TabEntry):
         """ initialisation """
         TabEntry.__init__(self, 'Site Order')
         self.parent = parent
+        self.listsites = None
 
     def display(self):
         """ display the tab """
@@ -33,14 +37,14 @@ class TabSiteOrder(TabEntry):
 
     def changeorder(self):
         """ change a setting value """
-        c = 0
-        while c != 10: #ENTER
-            c = self.parent.scr.getch()
-            if c == curses.KEY_UP:
+        char = 0
+        while char != 10: #ENTER
+            char = self.parent.scr.getch()
+            if char == curses.KEY_UP:
                 self.visible.swap(0)
-            elif c == curses.KEY_DOWN:
+            elif char == curses.KEY_DOWN:
                 self.visible.swap(1)
-            elif c == 10:
+            elif char == 10:
                 self.listsites = self.visible.list_elt
 
     def savesetting(self):

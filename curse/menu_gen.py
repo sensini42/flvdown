@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
+"""
+    generic menu
+"""
 
 import curses
+import string
 
 hotkey_attr = curses.A_BOLD | curses.A_UNDERLINE
 menu_attr = curses.A_NORMAL
 
-SEPARATOR = 1
-
-def max(x, y):
-    """ return max """
-    if x > y:
-        return x
-    else:
-        return y
+_SEPARATOR = 1
 
 class MenuEntry():
     """ create a new entry """
@@ -24,6 +21,7 @@ class MenuEntry():
         self.hotkey = name[hotkey_pos]
         self.setsubentry = []
         self.width, self.height = 0, 0
+        self.upper_pos, self.left_pos = 0, 0
         self.action = action
 
     def removeAllEntries(self):
@@ -40,11 +38,10 @@ class MenuEntry():
     def addSeparator(self):
         """ add a separator """
         self.height += 1
-        self.setsubentry.append(SEPARATOR)
+        self.setsubentry.append(_SEPARATOR)
 
     def isActive(self, key):
         """ look if key is hotkey """
-        import string
         return key == ord(string.upper(self.hotkey)) or \
             key == ord(string.lower(self.hotkey))
 
@@ -63,23 +60,21 @@ class MenuEntry():
     def activate(self, screen, scr=None):
         """ open the submenu if exists or call action """
         if self.setsubentry != []:
-            s = curses.newwin(self.height+2, self.width+4, self.upper_pos+1, \
-                  self.left_pos-1)
-            s.box()
+            newscr = curses.newwin(self.height+2, self.width+4, \
+                        self.upper_pos+1, self.left_pos-1)
+            newscr.box()
             i = 1
             for subentry in self.setsubentry:
-                if subentry == SEPARATOR:
-                    s.hline(2, 1, curses.ACS_HLINE, self.width+2)
+                if subentry == _SEPARATOR:
+                    newscr.hline(2, 1, curses.ACS_HLINE, self.width+2)
                 else:
-                    subentry.display(s, i, 2)
+                    subentry.display(newscr, i, 2)
                 i += 1
-            s.refresh()
-            c = s.getch()
-            ok = False
+            newscr.refresh()
+            char = newscr.getch()
             for subentry in self.setsubentry:
-                if subentry != SEPARATOR and subentry.isActive(c):
-                    subentry.activate(screen, s)
-                    ok = True
+                if subentry != _SEPARATOR and subentry.isActive(char):
+                    subentry.activate(screen, newscr)
                     break
             screen.refresh()
         elif self.action:

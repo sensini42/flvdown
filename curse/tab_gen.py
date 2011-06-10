@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+		generic tab
+"""
 
 import curses
 
@@ -60,7 +63,7 @@ class Tab():
         """ show active tab """
         self.screen.clear()
         self.screen.box()
-        (height, width) = self.screen.getmaxyx()
+        width = self.screen.getmaxyx()[1]
         self.screen.hline(2, 1, curses.ACS_HLINE, width-2)
         left_pos, shift = 2, (width-2)/len(self.setentry)
         for num_entry in range(len(self.setentry)):

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+    generic list
+"""
 
 import curses
-
-UP, DOWN = 0, 1
 
 
 class List():
@@ -18,11 +19,14 @@ class List():
         self.deb = 0
         self.posend = None
 
-    def display(self, left=None, up=None, maxline=None):
+    def display(self, leftpos=None, uppos=None, maxline=None):
         """ display the list """
-        if maxline: self.pos[2] = min(maxline, max(1,self.pos[2]-up))
-        if up: self.pos[1] = up
-        if left: self.pos[0] = left
+        if maxline: 
+            self.pos[2] = min(maxline, max(1, self.pos[2]-uppos))
+        if uppos: 
+            self.pos[1] = uppos
+        if leftpos: 
+            self.pos[0] = leftpos
         self.active = 0
         self.deb = 0
         self.update()
@@ -31,7 +35,7 @@ class List():
         """ update """
         if len(self.list_elt) > 0:
             clr = ' '*(self.screen.getmaxyx()[1]-2-self.pos[0])
-            if self.pos[2]==1:
+            if self.pos[2] == 1:
                 elt = self.list_elt[self.active]
                 if self.isactive:
                     style = curses.A_STANDOUT
@@ -69,17 +73,18 @@ class List():
         if not self.isactive:
             return
         oldpos = self.active
-        if direction == UP:
+        if direction == 0:
             if self.active == 0:
                 self.active = len(self.list_elt)-1
                 self.deb = len(self.list_elt)-self.pos[2]
-                if self.deb < 0: self.deb = 0
+                if self.deb < 0: 
+                    self.deb = 0
             else: 
                 self.active -= 1
                 if self.active == self.deb and \
                   self.active != 0:
                     self.deb -= 1
-        elif direction == DOWN:
+        elif direction == 1:
             if self.active == len(self.list_elt)-1: 
                 self.active = 0
                 self.deb = 0
@@ -96,17 +101,18 @@ class List():
         """ change active elt """
         if not self.isactive:
             return
-        if direction == UP:
+        if direction == 0:
             if self.active == 0:
                 self.active = len(self.list_elt)-1
                 self.deb = len(self.list_elt)-self.pos[2]
-                if self.deb < 0: self.deb = 0
+                if self.deb < 0: 
+                    self.deb = 0
             else: 
                 self.active -= 1
                 if self.active == self.deb and \
                   self.active != 0:
                     self.deb -= 1
-        elif direction == DOWN:
+        elif direction == 1:
             if self.active == len(self.list_elt)-1: 
                 self.active = 0
                 self.deb = 0

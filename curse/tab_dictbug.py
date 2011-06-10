@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+    dict bug tab
+"""
 
 import curses
 from curse.tab_gen import TabEntry
@@ -16,6 +19,7 @@ class TabDictBug(TabEntry):
         self.parent = parent
         self.dictbug = {}
         self.dictbug.update(self.parent.options.dict_bug)
+        self.dico = None
 
     def display(self):
         """ display the tab """
@@ -49,7 +53,7 @@ class TabDictBug(TabEntry):
         self.parent.action_menu.addSubEntry(MenuEntry('Close', \
                 action=self.parent.tabs.closeActiveTab))
 
-    def user(self, listshow, listsite, db, modify):
+    def user(self, listshow, listsite, userentry, modify):
         """ add/modify an entry """
         (genheight, genwidth) = self.parent.scr.getmaxyx()
         width = 0
@@ -63,17 +67,17 @@ class TabDictBug(TabEntry):
         lshow.display(8, 1, 1)
         lsite = List(scr, listsite, False)
         lsite.display(8, 2, 1)
-        scr.addstr(3, 8, db)
+        scr.addstr(3, 8, userentry)
         scr.addstr(5, (width-4)/2, 'save', curses.A_STANDOUT)
         modi = 3
         scr.refresh()
         scr.keypad(1)
         modify.append(3)
-        c = 0
-        ok = True
-        while ok and c != 27:
-            c = scr.getch()
-            if c == 9: #TAB
+        char = 0
+        change = True
+        while change and char != 27:
+            char = scr.getch()
+            if char == 9: #TAB
                 if modi == 3: 
                     scr.addstr(5, (width-4)/2, 'save')
                     if 1 in modify:
@@ -82,20 +86,20 @@ class TabDictBug(TabEntry):
                         modi = 0
                     else:
                         scr.addstr(3, 8, ' '*(width-10))
-                        scr.addstr(3, 8, db, curses.A_STANDOUT)
+                        scr.addstr(3, 8, userentry, curses.A_STANDOUT)
                         scr.move(3, 8)
                         curses.curs_set(1)
                         modi = 2
                 elif modi == 2:
                     curses.curs_set(0)
-                    scr.addstr(3, 8, db)
+                    scr.addstr(3, 8, userentry)
                     modi = 3
                     scr.addstr(5, (width-4)/2, 'save', curses.A_STANDOUT)
                 elif modi == 1:
                     lsite.isactive = False
                     lsite.update()
                     scr.addstr(3, 8, ' '*(width-10))
-                    scr.addstr(3, 8, db, curses.A_STANDOUT)
+                    scr.addstr(3, 8, userentry, curses.A_STANDOUT)
                     scr.move(3, 8)
                     curses.curs_set(1)
                     modi = 2
@@ -105,28 +109,30 @@ class TabDictBug(TabEntry):
                     lsite.isactive = True
                     lsite.update()
                     modi = 1
-            elif c == curses.KEY_UP:
+            elif char == curses.KEY_UP:
                 if modi == 0:
                     lshow.change(0)
                 elif modi == 1:
                     lsite.change(0)
-            elif c == curses.KEY_DOWN:
+            elif char == curses.KEY_DOWN:
                 if modi == 0:
                     lshow.change(1)
                 elif modi == 1:
                     lsite.change(1)
-            elif c == 10:
+            elif char == 10:#ENTER
                 if modi == 3:
                     show = lshow.list_elt[lshow.active]
                     site = lsite.list_elt[lsite.active]
-                    self.dictbug[' '.join(show.split('_'))][site] = db
-                    ok = False
+                    if userentry != "":
+                        self.dictbug[' '.join(show.split('_'))][site] = \
+                                userentry 
+                    change = False
                 elif modi == 2:
                     curses.echo()
                     scr.addstr(3, 8, ' '*(width-10), curses.A_STANDOUT)
-                    db = scr.getstr(3, 8)
+                    userentry = scr.getstr(3, 8)
                     scr.addstr(3, 8, ' '*(width-10))
-                    scr.addstr(3, 8, db, curses.A_STANDOUT)
+                    scr.addstr(3, 8, userentry, curses.A_STANDOUT)
                     curses.noecho()
         curses.curs_set(0)
         scr.erase()

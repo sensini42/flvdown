@@ -1,4 +1,7 @@
 # -*- conding: utf-8 -*-
+"""
+    manage tvshow menu entry
+"""
 
 import curses
 from curse.menu_gen import MenuEntry
@@ -43,14 +46,14 @@ class MenuManage(MenuEntry):
         listdisp = List(screen, list_tmp)
         listdisp.display(2, 4, min(6, len(list_elt)))
         screen.keypad(1)
-        c = 0
-        while c != 27 and c != 10:#ECHAP and ENTER
-            c = screen.getch()
-            if c == curses.KEY_UP:#UP
+        char = 0
+        while char != 27 and char != 10:#ECHAP and ENTER
+            char = screen.getch()
+            if char == curses.KEY_UP:#UP
                 listdisp.change(0)
-            elif c == curses.KEY_DOWN:#DOWN
+            elif char == curses.KEY_DOWN:#DOWN
                 listdisp.change(1)
-            elif c == 10:#ENTER
+            elif char == 10:#ENTER
                 if len(list_elt) != 0:
                     if askuser and listdisp.active == len(list_elt)-1:
                         curses.curs_set(1)
@@ -64,8 +67,8 @@ class MenuManage(MenuEntry):
                         curses.noecho()
                         curses.curs_set(0)
                         curses.cbreak()
-                        if name != "": action(name)
-                        self.update()
+                        if name != "": 
+                            action(name)
                     else:
                         if type(list_elt[listdisp.active]) == list:
                             elt = list_elt[listdisp.active][1:]
@@ -74,30 +77,33 @@ class MenuManage(MenuEntry):
                         else:
                             elt = [list_elt[listdisp.active][0]]
                         action(*elt)
-                        self.parent.update()
         screen.erase()
         self.parent.scr.refresh()
         
 
     def untrack(self):
+        """ untrack a show """
         title = 'untrack'
         list_elt = self.parent.nextep.getTracked()
         action = self.parent.nextep.untrackShow
         self.dialog(title, list_elt, action)
 
     def track(self):
+        """ track a show """
         title = 'track'
         list_elt = self.parent.nextep.getUntracked()
         action = self.parent.nextep.trackShow
         self.dialog(title, list_elt, action)
 
     def remove(self):
+        """ remove a show """
         title = 'remove'
         list_elt = self.parent.nextep.getListShow()
         action = self.parent.nextep.removeShow
         self.dialog(title, list_elt, action)
 
     def add(self):
+        """ add a show """
         title = 'add a show'
         list_elt = self.parent.nextep.getSuggestions()
         action = self.parent.nextep.addShow
