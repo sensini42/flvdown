@@ -133,7 +133,7 @@ class Downloading(Display):
         self.list_site = list_site
 
         # pylint warning
-        self.ed_checkbox = None
+        self.interact = False
         self.button_downall = None
         self.button_down = None
         self.button_all = None
@@ -176,8 +176,8 @@ class Downloading(Display):
         self.button_all.clicked.connect(self.allClicked)
 
         ## checkbox interactive
-        self.ed_checkbox = QtGui.QCheckBox('Interactive download', self)
-        self.mainLayout.addWidget(self.ed_checkbox, 4, 1, 1, 2)
+#        self.ed_checkbox = QtGui.QCheckBox('Interactive download', self)
+#        self.mainLayout.addWidget(self.ed_checkbox, 4, 1, 1, 2)
 
         ## button downall
         self.button_downall = QtGui.QPushButton("Down All")
@@ -240,7 +240,7 @@ class Downloading(Display):
     def runThread(self, episode):
         """ run a download thread """
         option = ""
-        if self.ed_checkbox.isChecked():
+        if self.interact:
             option += "i"
         tmp = InfoDown(episode, option, self.list_site)
         self.connect(tmp, SIGNAL("removeInfodown(PyQt_PyObject)"), \

@@ -109,10 +109,9 @@ class Actions(QtGui.QWidget):
     def intApp(self):
         """ interactive download """
         if self.listActionsPref[len(self.listActionsPref) - 1].isChecked():
-            print "interactive download checked"
+            self.parent.centralWidget.downloading.interact = True
         else:
-            print "interactive download unchecked"
-
+            self.parent.centralWidget.downloading.interact = False
 
     def dictApp(self):
         """ open dictbug windows """

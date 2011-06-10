@@ -2,7 +2,7 @@
 ** DONE variables globales à supprimer
 ** TODO faire des passes pylint
 ** TODO homogénéiser le code
-   
+   notamment le connect des boutons
 * TODO Site - Modules
 ** DONE passer les sites en tant que module
 ** DONE revoir links.py et le mettre a la place de flvdown2
@@ -32,9 +32,9 @@
 ** DONE ajouter dicobug à l'interface
    dans les options ou un nouvel onglet
    et donc dans le fichier de config
-** TODO dico dans episodetv
+** DONE dico dans episodetv
    un episode a un dico (site (potentiellement subtitles), nom_sur_le_site)
-** TODO modifier l'interface
+** DONE modifier l'interface
    par exemple:
    combo episode + combo module/sub + textinput
 
@@ -48,9 +48,7 @@
 *** DONE ajouter les onglets autres que playing et downloading dans Options
 *** DONE virer les onglets autres que playing et downloading
     Attention aux fonctions d'update notamment (getOption...)
-*** TODO ? ajouter down all dans menu file 
-    bon, en l'écrivant ça me parait nul finalement...
-*** TODO 2 item à checker interactive/verbose
+*** DONE item à checker interactive
 *** DONE ajouter track/untrack/remove/add tvshow
     (pour l'instant, juste par série, pas par épisode)
     Faire une fenetre à la next-episode avec 3 boutons
@@ -65,8 +63,8 @@
 ** TODO dico d'actions => attention ordre dans le menu
    utile pour dire l'action close, connaitre état de l'action interactive etc.
 * TODO Flvgui principal/old
-** TODO passer central widget dans un autre fichier? dans gui/? 
-** TODO mettre dans le flvgui principal les choses de l'ancien flvgui qui n'ont plus lieu d'être
+** DONE passer central widget dans un autre fichier? dans gui/? 
+** DONE mettre dans le flvgui principal les choses de l'ancien flvgui qui n'ont plus lieu d'être
    (old)flvgui contient le layout pour les onglets
    mainflvgui contient le reste:
 *** DONE bouton close lié à l'action close de gui/actions
@@ -79,6 +77,8 @@
 
 * TODO links
 ** TODO passer le download interactif en gui
+   problem: "QObject::setParent: Cannot set parent, new parent is in a different thread" -> new mainwindows
 
 
 * TODO certaines fonctions ont (avaient) toto en arg, et self.toto = None dans le init...
+  
