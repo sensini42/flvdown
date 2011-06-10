@@ -6,7 +6,7 @@ from zipfile import ZipFile
 import sys
 import re
 import tempfile
-from episodetv import episodeTV
+from util.episodetv import episodeTV
 
 def getPage(link, splitting = '\n'):
     """ return the lines list of the page link """

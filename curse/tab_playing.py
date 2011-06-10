@@ -3,10 +3,21 @@
 from subprocess import Popen as subpopen
 from subprocess import PIPE
 
-from util import episodes
 from curse.tab_gen import TabEntry
 from curse.menu_gen import MenuEntry
 from curse.list_gen import List 
+
+def episodes(list_ep, condition):
+    """ create a list with episode checking condition """
+    setShows = []
+    setEpisodes = []
+    for episode in list_ep:
+        if episode.isOnDisk == condition and \
+            episode.tvshowSpace not in setShows:
+              setShows.append(episode.tvshowSpace)
+              setEpisodes.append(episode)
+    return setEpisodes
+
 
 class TabPlaying(TabEntry):
     """ playing tab """

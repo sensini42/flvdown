@@ -11,7 +11,7 @@ from tempfile import NamedTemporaryFile
 import re
 from re import findall
 
-from episodetv import episodeTV
+from util.episodetv import episodeTV
 from operator import attrgetter
 
 chgcs = re.compile("changeCurrentSeason\('(.*)', '(.*)', '(.*)', '(.*)', '(.*)', .*\)")

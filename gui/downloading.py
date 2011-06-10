@@ -7,10 +7,10 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import SIGNAL
 from gui.display import Display
 
-import episodetv
+import util.episodetv as episodetv
 
 import time
-from threads import Down, Hook
+from util.threads import Down, Hook
 
 class InfoDown(QtGui.QWidget):
     """ info about down """

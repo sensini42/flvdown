@@ -6,9 +6,9 @@
 from PyQt4 import QtGui
 
 from gui.display import Display
-from threads import Video
+from util.threads import Video
 
-import subdown
+import util.subdown as subdown
 
 
 class Playing(Display):

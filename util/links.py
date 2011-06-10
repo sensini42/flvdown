@@ -6,7 +6,7 @@ import aggregators
 import sys 
 import re
 
-import episodetv
+import util.episodetv as episodetv
 
 def getEpisodeLink(liste, verbose, interact):
     """ return the first link of the list or the user choice"""

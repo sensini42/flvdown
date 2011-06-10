@@ -4,8 +4,8 @@
 
 from os import chdir as oschdir
 
-from nextepisode import NextEpisode
-from options import Options
+from util.nextepisode import NextEpisode
+from util.options import Options
 
 import curses
 from curse.menu_gen import MenuEntry, Menu

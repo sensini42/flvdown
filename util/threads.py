@@ -13,8 +13,8 @@ import time
 import subprocess
 import signal
 
-import links
-import subdown
+import util.links as links
+import util.subdown as subdown
 
 class NoSubFound(Exception):
     """ class exception """

@@ -10,10 +10,9 @@ from gui.central import CentralWidget
 from gui.menu import Menu
 from gui.actions import Actions
 
-from nextepisode import NextEpisode
-from options import Options
-
-from threads import ToolTip
+from util.nextepisode import NextEpisode
+from util.options import Options
+from util.threads import ToolTip
 
 
 class Flvgui(QtGui.QMainWindow):
