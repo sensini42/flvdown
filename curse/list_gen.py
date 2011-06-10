@@ -20,7 +20,7 @@ class List():
 
     def display(self, left=None, up=None, maxline=None):
         """ display the list """
-        if maxline: self.pos[2] = min(maxline, self.pos[2])
+        if maxline: self.pos[2] = min(maxline, max(1,self.pos[2]-up))
         if up: self.pos[1] = up
         if left: self.pos[0] = left
         self.active = 0
