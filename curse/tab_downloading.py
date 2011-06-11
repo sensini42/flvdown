@@ -11,6 +11,7 @@ from subprocess import PIPE
 import curses
 
 import util.links as links
+import util.subdown as subdown
 
 from curse.tab_gen import TabEntry
 from curse.menu_gen import MenuEntry
@@ -78,6 +79,7 @@ class TabDownloading(TabEntry):
                     self.screen.addstr(pos[0], pos[1]+pos[2], \
                           line.split('.')[-1])
                     self.screen.refresh()
+                subdown.downSub(episode, "")
             except:
                 proc.kill()
                 self.error(episode.getBaseName() + ': down error')

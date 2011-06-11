@@ -13,7 +13,7 @@ def getPage(link, splitting = '\n'):
     try:
         response = urlopen(link)
     except IOError:
-        print '\033[1;31mlink not found\033[0m (url:' + link + ')'
+        #print '\033[1;31mlink not found\033[0m (url:' + link + ')'
         return -1
     else:
         the_page = response.read()
@@ -78,7 +78,8 @@ def downSub(episode, options=""):
             break
 
     if not alink:
-        print '\033[1;31m('+subname+" "+tvshow+') show not found\033[0m'
+        if verbose:
+            print '\033[1;31m('+subname+" "+tvshow+') show not found\033[0m'
         return -1
         
     
@@ -102,7 +103,8 @@ def downSub(episode, options=""):
                     urlsub = urlbase + j.split('"')[1]
 
     if not urlsub:
-        print '\033[1;31m('+subname+') sub not found\033[0m \
+        if verbose:
+            print '\033[1;31m('+subname+') sub not found\033[0m \
                  (url tv show:'+urltv+')'
         return -1
 

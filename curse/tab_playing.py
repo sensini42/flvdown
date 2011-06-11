@@ -10,6 +10,8 @@ from curse.tab_gen import TabEntry
 from curse.menu_gen import MenuEntry
 from curse.list_gen import List 
 
+import util.subdown as subdown
+
 def episodes(list_ep, condition):
     """ create a list with episode checking condition """
     setShows = []
@@ -67,6 +69,8 @@ class TabPlaying(TabEntry):
     def play(self):
         """ play a show """
         episode = self.setEpi[self.visible.active]
+        if episode.getSrtName() == "":
+            subdown.downSub(episode, "")
         cmd = self.parent.options.conf['player'] + ' ' + episode.getVideoName()
         subpopen(cmd, shell=True, stderr=PIPE, stdout=PIPE)
 
