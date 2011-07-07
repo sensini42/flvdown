@@ -239,7 +239,7 @@ class Downloading(Display):
 
     def runThread(self, episode):
         """ run a download thread """
-        option = ""
+        option = "v"
         if self.interact:
             option += "i"
         tmp = InfoDown(episode, option, self.list_site)

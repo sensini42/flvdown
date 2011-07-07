@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """ looks for links with submodules """
-import os
-import aggregators
-import sys 
-import re
+import os, sys, re
+try:
+    import aggregators
+except ImportError:
+    sys.path.append(sys.path[0] + '/..')
+    import aggregators
 
 import util.episodetv as episodetv
 
@@ -35,7 +37,7 @@ def flvdown(episode, options, list_site = None):
         print 'there is a file name ' + filename + '...\n'
         choice = raw_input('continue ? (y/n)\n')
         if choice not in 'yYoO':
-            return None, None, None
+            return None, None, '\033[1;31mdownload abord\033[0m'
 
     interact = 0
     verbose = 0
@@ -65,22 +67,14 @@ def flvdown(episode, options, list_site = None):
         if verbose:
             print "done"
         if possible_links == []:
-            if verbose:
-                print '\033[1;31mno link\033[0m found'
-            return None, None, None
+            return None, None, '\033[1;31mno link\033[0m found'
         (link, znl) = getEpisodeLink(possible_links, verbose, interact)
         __import__("aggregators." + znl)
         final_url, cook = sys.modules["aggregators." + znl].getFlv(link, \
             verbose)
         if not final_url:
-            if verbose:
-                print '\033[1;31mno link\033[0m found'
-            return None, None, None
+            return None, None, '\033[1;31mno link\033[0m found'
     else:
-    ##Sort possible_links
-#        prio = dict(zip(['_mod.'.join(i.split(' : ')) \
-#                     for i in list_site], range(len(list_site))))
-#        print prio
         list_sites = list_site[:]
         url_found = False
         modulesChecked = []
@@ -113,9 +107,7 @@ def flvdown(episode, options, list_site = None):
                 else:
                     links_for_sites.remove([link, znl])
         if not url_found:
-            if verbose:
-                print '\033[1;31mno link\033[0m found'
-            return None, None, None
+            return None, None, '\033[1;31mno link\033[0m found'
 
     ext = "." + final_url.split('.')[-1]
 
@@ -147,5 +139,7 @@ if __name__ == "__main__":
         if option:
             print '\ndownloading file', url, 'to', dest
         getFile(url, dest, cook)
+    else:
+        print cook
 
 
