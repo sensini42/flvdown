@@ -11,14 +11,17 @@ def getTvShowUrl(tvshow, season):
 def getLinks(tvshow, season, episode):
     """return all video links"""
     urltv = getTvShowUrl(tvshow, season)
-    src_urltv = getPage(urltv)
+    src_urltv = (''.join(getPage(urltv))).split('</a>')
     possible_links = []
     if (src_urltv == -1):
         return possible_links
     for line in src_urltv:
         for nameModule in freetvvideoonline_mod.__all__:
             if ((nameModule in line) and (('Episode '+episode + '<') in line)):
-                possible_links.append([line.split('"')[1], \
+                href = line.split('href=')
+                link = href[1].split('"')[1]
+                print link
+                possible_links.append([link, \
                     "freetvvideoonline_mod." + nameModule])
     return possible_links
     
