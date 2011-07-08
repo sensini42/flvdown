@@ -8,6 +8,9 @@ from os import mkdir as osmkdir
 from subprocess import Popen as subpopen
 from subprocess import PIPE
 
+import re
+down = re.compile('^.*\. (\d+%) +([^ ]+) ([^ ]+)$')
+
 import curses
 
 import util.links as links
@@ -76,8 +79,11 @@ class TabDownloading(TabEntry):
                 proc = subpopen(cmd, shell=True, stderr=PIPE, stdout=PIPE)
                 while proc.poll() is None:
                     line = proc.stderr.readline()
-                    self.screen.addstr(pos[0], pos[1]+pos[2], \
-                          line.split('.')[-1])
+                    resul = down.search(line[:-1])
+                    if resul:
+                        msg = resul.group(1) + ' ' + resul.group(2) + \
+                                ' ' + resul.group(3)
+                    self.screen.addstr(pos[0], pos[1]+pos[2], msg)
                     self.screen.refresh()
                 subdown.downSub(episode, "")
             except:

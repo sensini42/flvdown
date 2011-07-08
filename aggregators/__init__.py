@@ -16,7 +16,8 @@ def getPage(link, verbose=''):
 def waiting(sec, verbose):
     """ wait sec seconds """
     import time
-    print "waiting " + str(sec) + " sec..."
+    if verbose:
+        print "waiting " + str(sec) + " sec..."
     for i in range (sec + 1):
         time.sleep(1)
         if verbose:
