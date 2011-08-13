@@ -30,9 +30,9 @@ class CentralWidget(QtGui.QWidget):
         mainLayout.addWidget(tab_widget, 0, 0, 1, 2)
 
         tab_widget.addTab(self.playing, "Playing")
-        tab_widget.addTab(self.downloading, "Downloading")
-
-        tab_widget.setCurrentIndex(1)
+        if(self.nextep.connectSuccess):
+            tab_widget.addTab(self.downloading, "Downloading")
+            tab_widget.setCurrentIndex(1)
 
         button_refresh = QtGui.QPushButton("Refresh")
         mainLayout.addWidget(button_refresh, 1, 0)

@@ -38,7 +38,11 @@ class NextEpisode():
         opener = build_opener(HTTPCookieProcessor(self.__cj))
         install_opener(opener)
         
-        self.__connect()
+        try:
+            self.__connect()
+            self.connectSuccess = True
+        except:
+            self.connectSuccess = False
         #self.update(dict_bug)
 
 
@@ -60,7 +64,9 @@ class NextEpisode():
 
     def __getListEpisode(self):
         """ get list episode from next-episode """
-        source = self.__getSrcPage('track/?mode=Tree')
+        source = []
+        if(self.connectSuccess):
+            source = self.__getSrcPage('track/?mode=Tree')
         if not source:
             return []
 
@@ -165,7 +171,8 @@ class NextEpisode():
             self.__pwd = password
             changeLP = True
         if changeLP:
-            self.__connect()
+            if(self.connectSuccess):
+                self.__connect()
         self.__list = self.__getListEpisode()
         
     def getList(self):

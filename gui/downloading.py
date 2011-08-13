@@ -141,7 +141,7 @@ class Downloading(Display):
         self.nextbutton = None
 
         super(Downloading, self).__init__(nextep, False)
-        self.update()
+        #self.update()
 
 
     def populate(self):

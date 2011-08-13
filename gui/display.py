@@ -77,7 +77,10 @@ class Display(QtGui.QWidget):
 
     def update(self):
         """ update """
-        self.list_ep = self.nextep.getList()
+        if(self.nextep.connectSuccess):
+            self.list_ep = self.nextep.getList()
+        else:
+            self.list_ep = self.findEpOnDisk()
         self.show_cb.clear()
         if self.list_ep:
             for episode in self.list_ep:
@@ -153,3 +156,31 @@ class Display(QtGui.QWidget):
                     self.info.append(episode)
 
     
+    def findEpOnDisk(self):
+        """ return episodes from disk """
+        from os import listdir as oslistdir
+        from operator import attrgetter
+        from util.episodetv import episodeTV
+        listep = set()
+        
+        for dirname in oslistdir('.'):
+            try:
+                filesInDir = oslistdir(dirname)
+            except:
+                continue
+                # print dirname, "pas un dossier"
+            for fileEpi in filesInDir:
+                try:
+                    tv_name = '_'.join(fileEpi.split('_')[:-1])
+                    season_epi = fileEpi.split('_')[-1].split('.')[0]
+                    idepi = season_epi[-2:]
+                    idseason = season_epi[:-2]
+                    epitv = episodeTV(tv_name, idseason, idepi)
+                    listep.add(epitv)
+                except:
+                    print "problem with", fileEpi, "not an epi?"
+                
+                
+        listep = sorted(listep, key=attrgetter('tvshow_', 'strSeason', 'strEpisode'))
+        return listep
+        

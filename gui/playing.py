@@ -24,7 +24,7 @@ class Playing(Display):
         self.button_delete = None
 
         super(Playing, self).__init__(nextep, True)
-        self.update(player)
+        #self.update(player)
 
     def populate(self):
         """ create layout """
@@ -37,16 +37,19 @@ class Playing(Display):
         self.mainLayout.addWidget(self.button_play, 2, 3)
         self.button_play.clicked.connect(self.playClicked)
 
-        ## button mark
-        self.button_mark = QtGui.QPushButton("Mark as read")
-        self.mainLayout.addWidget(self.button_mark, 2, 4)
-        self.button_mark.clicked.connect(self.markClicked)
+        if(self.nextep.connectSuccess):            
+            ## button mark
+            self.button_mark = QtGui.QPushButton("Mark as read")
+            self.mainLayout.addWidget(self.button_mark, 2, 4)
+            self.button_mark.clicked.connect(self.markClicked)
 
-        ## button delete
-        self.button_delete = QtGui.QPushButton("Mark and Delete")
-        self.mainLayout.addWidget(self.button_delete, 2, 5)
-        self.button_delete.clicked.connect(self.deleteClicked)
-
+            ## button delete
+            self.button_delete = QtGui.QPushButton("Mark and Delete")
+            self.mainLayout.addWidget(self.button_delete, 2, 5)
+            self.button_delete.clicked.connect(self.deleteClicked)
+        else:
+            pass
+        
         ## better display
         self.mainLayout.addWidget(QtGui.QStackedWidget(), 3, 0, 1, 6)
 
@@ -56,8 +59,9 @@ class Playing(Display):
     def displayButtons(self, value):
         """ display or not Buttons """
         self.button_play.setVisible(value)
-        self.button_mark.setVisible(value)
-        self.button_delete.setVisible(value)
+        if(self.nextep.connectSuccess):  
+            self.button_mark.setVisible(value)
+            self.button_delete.setVisible(value)
         super(Playing, self).displayButtons(value)
 
     def update(self, player=None):

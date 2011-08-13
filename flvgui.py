@@ -24,9 +24,10 @@ class Flvgui(QtGui.QMainWindow):
 
         self.options = options
         self.nextep = nextep
-        
+        listShows = []
         #add unknown show
-        listShows = self.nextep.getListShow()
+        if(self.nextep.connectSuccess):
+            listShows = self.nextep.getListShow()
         for show in listShows:
             if show not in self.options.dict_bug:
                 self.options.dict_bug[show] = {}
@@ -84,7 +85,9 @@ class Flvgui(QtGui.QMainWindow):
         self.nextep.update(self.options.dict_bug, self.options.conf['login'], \
                self.options.conf['password'])
         self.centralWidget.playing.update(self.options.conf['player'])
-        self.centralWidget.downloading.update(self.options.list_site)
+        
+        if(self.nextep.connectSuccess):  
+            self.centralWidget.downloading.update(self.options.list_site)
 
     def activated(self, reason):
         """ call when trayIcon is activated """
