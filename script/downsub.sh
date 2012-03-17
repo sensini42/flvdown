@@ -20,5 +20,14 @@ do
       echo "telechargement"
     fi
     subdown.py $fic $* #1 verbeux, 2 pour encore plus, i pour interactif
+		if [ -e $sub ]
+		then	
+			if [ $1 ]
+			then
+				echo "telechargement reussi"
+			fi	
+		else
+			echo "$sub : telechargement echoue"
+		fi	
   fi
 done
