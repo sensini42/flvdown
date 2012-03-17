@@ -28,7 +28,6 @@ def getEpisodeLink(liste, verbose, interact):
 
 def flvdown(episode, options, list_site = None):
     """ search episode through modules """
-
     filename = episode.tvshow_ + '/' + episode.getBaseName()
         
     ##test if a file with similar name exist
@@ -113,7 +112,8 @@ def flvdown(episode, options, list_site = None):
 
     if re.match("^\d", final_url):
         final_url = 'http://' + final_url 
-    
+    if (len(ext) > 5):
+        ext = ".flv" #ext[:4]
     if verbose:
         print final_url
     
