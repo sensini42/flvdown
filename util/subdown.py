@@ -12,10 +12,13 @@ except ImportError:
     sys.path.append(sys.path[0] + '/..')
     from episodetv import episodeTV
 
-def getPage(link, splitting = '\n'):
+def getPage(link, splitting = '\n', referer = None ):
     """ return the lines list of the page link """
+    request = Request(link)
+    if referer:
+        request.add_header('Referer', referer)
     try:
-        response = urlopen(link)
+        response = urlopen(request)
     except IOError:
         #print '\033[1;31mlink not found\033[0m (url:' + link + ')'
         return -1
@@ -47,7 +50,7 @@ def downSubVid(videoname, options=""):
     epi = episodeTV(tvshow, season, episode)
     return downSub(epi, options)
     
-def downSub(episode, options=""):
+def downSubTVSubtitles(episode, options=""):
     """ down subtitle """
     interact = 0
     verbose = 0
@@ -183,6 +186,80 @@ def downSub(episode, options=""):
             subfile.close()
 
     return 0
+
+
+    
+def downSub(episode, options=""):
+    """ down subtitle """
+    interact = 0
+    verbose = 0
+    ##process arguments
+    if (options):
+        if ("i" in options):
+            interact = 1
+            verbose = 2
+        if ("v" in options):
+            verbose = 1
+    tvshow = "_".join([i.capitalize() for i in episode.tvshow.split('_')])    
+    if 'addicted' in episode.dictTV:
+        tvshow = episode.dictTV['addicted']
+    season = episode.strSeason
+    numepi = episode.strEpisode
+    subname = episode.getVideoName().split('.')[0] + ".srt"
+    if verbose:
+        print tvshow, "season", season, "episode", numepi
+
+    ##search page
+    urlbase = 'http://www.addic7ed.com/'
+    ##en = 1
+    urlsearch = '/'.join([urlbase, 'serie', tvshow, season,\
+                          str(int(numepi)), "1"])
+
+
+    ##episode page
+    src = getPage(urlsearch)
+
+    if verbose > 1:
+        print "url subtitle:", urlsearch
+
+    if len(src) <= 1:
+        if verbose:
+            print '\033[1;31m('+subname+" "+tvshow+') sub not found\033[0m'
+            print 'trying tvsubtitles'
+        return downSubTVSubtitles(episode, options)
+
+
+    possible = []
+    for i in src:
+        if "original" in i:
+            url =  i.split('"')[3]
+            possible += [(url)]
+
+    if verbose:
+        print 'possible subtitles:'
+        for (i, (url)) in enumerate(possible):
+            print i, "-", url
+
+    choice = 0
+    if interact:
+        choice = int(raw_input('enter your choice\n'))
+    urlsub = urlbase + possible[choice]    
+    if verbose:
+        print '\ndownloading from', choice, '-', possible[choice]
+ 
+
+    ##subtitle page
+    src = getPage(urlsub, '\n', urlsearch)
+    subfile = open(subname, 'wb')
+    subfile.write('\n'.join(src))
+    ##if windows encoding
+    ##subfile.write(zfile.read(name).replace('\15',''))
+    subfile.close()
+
+    return 0
+
+
+
 
 
 if __name__ == "__main__":
