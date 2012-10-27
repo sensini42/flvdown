@@ -11,8 +11,8 @@ def getFlv(link, verbose):
     src = getPage(link)
     zsharelink = ''
     for i in src:
-        if ("src='http://www.zshare.net/videoplayer" in i):
-            zsharelink = i.split("'")[3]
+        if ("src='http://www.zshare.net/videoplayer" in i.lower().replace('"',"'")):
+            zsharelink = i.replace('"',"'").split("'")[3]
 
     if not zsharelink:
         if verbose:      

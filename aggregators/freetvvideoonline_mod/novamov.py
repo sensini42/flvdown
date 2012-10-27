@@ -9,8 +9,8 @@ def getFlv(link, verbose):
     src = getPage(link)
     novamovlink = ''
     for i in src:
-        if ("src='http://www.novamov.com/embed" in i):
-            novamovlink = i.split("'")[13]
+        if ("src='http://www.novamov.com/embed" in i.lower().replace('"',"'")):
+            novamovlink = i.replace('"',"'").split("'")[13]
 
     if not novamovlink:
         if verbose:			
@@ -35,6 +35,7 @@ def getFlv(link, verbose):
         return None, None
     urlapi = 'http://www.novamov.com/api/player.api.php?pass=undefined&file=' \
              + urlfile + '&user=undefined&codes=1&key=' + urlfilekey
+    print "urlapi: " + urlapi
     src = getPage(urlapi)
     finalurl = src[0].split('&')[0].split('=')[1]
     return (finalurl, None)

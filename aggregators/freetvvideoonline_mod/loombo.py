@@ -6,8 +6,8 @@ def getFlv(link, verbose):
     src = getPage(link)
     loombolink = ''
     for i in src:
-        if ("src='http://loombo.com/embed" in i):
-            loombolink = i.split("'")[5]
+        if ("src='http://loombo.com/embed" in i.lower().replace('"',"'")):
+            loombolink = i.replace('"',"'").split("'")[5]
 
     if (not loombolink) or (loombolink == 'no'):
         if verbose:			

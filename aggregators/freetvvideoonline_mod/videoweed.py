@@ -9,8 +9,8 @@ def getFlv(link, verbose):
     src = getPage(link)
     videoweedlink = ''
     for i in src:
-        if ("src='http://embed.videoweed.com/embed" in i):
-            videoweedlink = i.split("'")[3]
+        if ("src='http://embed.videoweed.com/embed" in i.lower().replace('"',"'")):
+            videoweedlink = i.replace('"',"'").split("'")[3]
 
     if not videoweedlink:
         if verbose:      
