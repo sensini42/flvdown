@@ -6,22 +6,22 @@ def getFlv(link, verbose):
     """ return the url of the file from novamov"""
     
     ##episode page
-    src = getPage(link)
-    novamovlink = ''
-    for i in src:
-        if ("src='http://www.novamov.com/embed" in i):
-            novamovlink = i.split("'")[13]
+    ## src = getPage(link)
+    ## novamovlink = ''
+    ## for i in src:
+    ##     if ("src='http://www.novamov.com/embed" in i):
+    ##         novamovlink = i.split("'")[13]
 
-    if not novamovlink:
-        if verbose:			
-            print '\033[1;31mnovamov link not found\033[0m (url: ' + link + ')'
-        return None, None 
+    ## if not novamovlink:
+    ##     if verbose:			
+    ##         print '\033[1;31mnovamov link not found\033[0m (url: ' + link + ')'
+    ##     return None, None 
 
-    if verbose :    
-        print '\ndownloading ' + novamovlink
+    ## if verbose :    
+    ##     print '\ndownloading ' + novamovlink
 
     ##novamov page
-    src = getPage(novamovlink)
+    src = getPage(link)
     urlfile = ''
     for i in src:
         if ('flashvars.file=' in i):
@@ -31,7 +31,7 @@ def getFlv(link, verbose):
 
     if urlfile == '':
         if verbose:			
-            print '\033[1;31mfile not found\033[0m (url: ' + novamovlink + ')'
+            print '\033[1;31mfile not found\033[0m (url: ' + link + ')'
         return None, None
     urlapi = 'http://www.novamov.com/api/player.api.php?pass=undefined&file=' \
              + urlfile + '&user=undefined&codes=1&key=' + urlfilekey

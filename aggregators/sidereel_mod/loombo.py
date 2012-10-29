@@ -1,22 +1,22 @@
 """ get loombo links from sidereel"""
 from .. import getPage
-def getFlv(link, verbose):
+def getFlv(loombolink, verbose):
     """ return the url of the file from loombo"""
     ##episode page
-    src = getPage(link)
-    loombolink = ''
-    for i in src:
-        if ("src='http://loombo.com/embed" in i):
-            loombolink = i.split("'")[5]
+    ## src = getPage(link)
+    ## loombolink = ''
+    ## for i in src:
+    ##     if ("src='http://loombo.com/embed" in i):
+    ##         loombolink = i.split("'")[5]
 
-    if (not loombolink) or (loombolink == 'no'):
-        if verbose:			
-            print '\033[1;31mloombo link not found\033[0m \
-                   (url loombo:' + link + ')'
-        return None, None
+    ## if (not loombolink) or (loombolink == 'no'):
+    ##     if verbose:			
+    ##         print '\033[1;31mloombo link not found\033[0m \
+    ##                (url loombo:' + link + ')'
+    ##     return None, None
 
-    if verbose :    
-        print '\ndownloading ' + loombolink
+    ## if verbose :    
+    ##     print '\ndownloading ' + loombolink
 
     ##loombo page
     src = getPage(loombolink)
