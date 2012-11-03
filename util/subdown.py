@@ -247,9 +247,11 @@ def downSub(episode, options=""):
     if verbose:
         print '\ndownloading from', choice, '-', possible[choice]
  
-
     ##subtitle page
     src = getPage(urlsub, '\n', urlsearch)
+    if "DOCTYPE" in src[0]:
+        return downSubTVSubtitles(episode, options)
+    
     subfile = open(subname, 'wb')
     subfile.write('\n'.join(src))
     ##if windows encoding
