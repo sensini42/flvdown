@@ -1,4 +1,4 @@
-""" get videoweed links from free-tv-..."""
+""" get movshare links from free-tv-..."""
 
 from .. import getPage
 from urllib import unquote
@@ -27,26 +27,26 @@ def wise(w,i,s,e):
 
 
 def getFlv(link, verbose):
-    """ return the url of the file from videoweed"""
+    """ return the url of the file from movshare"""
     
     ##episode page
     src = getPage(link)
-    videoweedlink = ''
+    movsharelink = ''
     for i in src:
-        if ("src='http://embed.videoweed." in i.lower().replace('"',"'")):
-            videoweedlink = i.replace('"',"'").split("'")[3]
+        if ("src='http://www.movshare.net/embed" in i.lower().replace('"',"'")):
+            movsharelink = i.replace('"',"'").split("'")[3]
 
-    if not videoweedlink:
+    if not movsharelink:
         if verbose:      
-            print '\033[1;31mvideoweed link not found\033[0m (url: ' + \
+            print '\033[1;31mmovshare link not found\033[0m (url: ' + \
                 link + ')'
         return None, None
 
     if verbose :    
-        print '\ndownloading ' + videoweedlink
+        print '\ndownloading ' + movsharelink
 
-    ##videoweed page
-    src = getPage(videoweedlink)
+    ##movshare page
+    src = getPage(movsharelink)
     urlfile = ''
     for i in src:
         if (';eval(function(w,i,s,e)' in i):
@@ -68,7 +68,7 @@ def getFlv(link, verbose):
 
     if urlfile == '':
         if verbose:      
-            print '\033[1;31mfile not found\033[0m (url: ' + videoweedlink + ')'
+            print '\033[1;31mfile not found\033[0m (url: ' + movsharelink + ')'
         return None, None
 
     urlapi = urldomain + '/api/player.api.php?pass=undefined&file=' \
