@@ -31,8 +31,9 @@ class Options():
                 if tmp[0] == 'order':
                     list_order = tmp[1].replace('"', '').split(',')[:-1]
                     for (i, site) in enumerate(list_order):
-                        self.list_site.remove(site.strip())
-                        self.list_site.insert(i, site.strip())
+                        if site in self.list_site:
+                            self.list_site.remove(site.strip())
+                            self.list_site.insert(i, site.strip())
                 elif tmp[0] == 'dict_bug':
                     self.dict_bug = eval(tmp[1])
                 else:

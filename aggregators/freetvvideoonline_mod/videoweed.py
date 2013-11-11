@@ -1,5 +1,5 @@
 """ get videoweed links from free-tv-..."""
-
+import re
 from .. import getPage
 from urllib import unquote
 def wise(w,i,s,e):
@@ -48,23 +48,28 @@ def getFlv(link, verbose):
     ##videoweed page
     src = getPage(videoweedlink)
     urlfile = ''
+    wisePresent = False
     for i in src:
         if (';eval(function(w,i,s,e)' in i):
             p=i[:]
+            wisePresent = True
             while (';eval(function(w,i,s,e)' in p):
                 p=wise((''.join(p)).split("'")[-8],
                        (''.join(p)).split("'")[-6],
                        (''.join(p)).split("'")[-4],
                        (''.join(p)).split("'")[-2])
     urlfile = ''
+    if (not wisePresent):
+        p=''.join(src)
     for i in p.split(';'):
         if ('flashvars.domain=' in i):
             urldomain = i.split('"')[1]
         if ('flashvars.file=' in i):
             urlfile = i.split('"')[1]
-        if ('var ll=' in i):
+        if re.search("var .*=\"[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*-.*-\"", i):
+            print i
+            print i.split('"')
             urlfilekey = i.split('"')[1]
-
 
     if urlfile == '':
         if verbose:      
