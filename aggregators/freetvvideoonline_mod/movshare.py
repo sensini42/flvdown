@@ -48,6 +48,7 @@ def getFlv(link, verbose):
     ##movshare page
     src = getPage(movsharelink)
     urlfile = ''
+    p='/n'.join(src)
     for i in src:
         if (';eval(function(w,i,s,e)' in i):
             p=i[:]
@@ -63,6 +64,8 @@ def getFlv(link, verbose):
         if ('flashvars.file=' in i):
             urlfile = i.split('"')[1]
         if ('var ll=' in i):
+            urlfilekey = i.split('"')[1]
+        if ('var fkzd=' in i):
             urlfilekey = i.split('"')[1]
 
 
