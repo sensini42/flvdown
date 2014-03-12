@@ -231,7 +231,7 @@ def downSub(episode, options=""):
 
     possible = []
     for i in src:
-        if "original" in i:
+        if 'href="/original' in i:
             url =  i.split('"')[9]
             possible += [(url)]
 
