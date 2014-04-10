@@ -47,6 +47,7 @@ def getFlv(link, verbose):
 
     ##divxstage page
     src = getPage(divxstagelink)
+    p='/n'.join(src)
     urlfile = ''
     for i in src:
         if (';eval(function(w,i,s,e)' in i):
@@ -64,7 +65,8 @@ def getFlv(link, verbose):
             urlfile = i.split('"')[1]
         if ('var ll=' in i):
             urlfilekey = i.split('"')[1]
-
+        if ('var fkz' in i):
+            urlfilekey = i.split('"')[1]
 
     if urlfile == '':
         if verbose:      
