@@ -1,4 +1,4 @@
-#!/sw/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import sys, os, ftplib
@@ -30,6 +30,7 @@ ftp = ftplib.FTP(config['ftpurl'])
 ftp.login(config['login'], config['password'])
 
 def getFilesFTP(url=''):
+  print basedirftp+'/'+url
   ftp.cwd(basedirftp + '/' + url)
   lstfiles = []
   ftp.dir(lstfiles.append)

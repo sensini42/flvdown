@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """ download subtitles"""
 
+from requests import Session
 from urllib2 import Request, urlopen
 from zipfile import ZipFile
 import sys
@@ -14,14 +15,25 @@ except ImportError:
 
 def getPage(link, splitting = '\n', referer = None ):
     """ return the lines list of the page link """
+    s = Session()
+    if referer:
+        r=s.headers.update({'referer': referer})
+    r = s.get(link)
+    return r.content.split(splitting) 
     request = Request(link)
     if referer:
         request.add_header('Referer', referer)
     try:
         response = urlopen(request)
     except IOError:
-        #print '\033[1;31mlink not found\033[0m (url:' + link + ')'
-        return -1
+	try:
+            request.add_header('if-modified-since',request.headers.get('last-modified'))
+            response = urlopen(request)
+        except IOError:	
+            print '\033[1;31mlink not found\033[0m (url:' + link + ')'
+            return -1
+        else:
+            return response.read().split(splitting)
     else:
         the_page = response.read()
         return the_page.split(splitting)
@@ -218,11 +230,9 @@ def downSub(episode, options=""):
 
     ##episode page
     src = getPage(urlsearch)
-
     if verbose > 1:
         print "url subtitle:", urlsearch
-
-    if len(src) <= 1:
+    if src == -1:
         if verbose:
             print '\033[1;31m('+subname+" "+tvshow+') sub not found\033[0m'
             print 'trying tvsubtitles'
@@ -231,15 +241,13 @@ def downSub(episode, options=""):
 
     possible = []
     for i in src:
-        if "original" in i:
+        if 'href="/original' in i:
             url =  i.split('"')[9]
             possible += [(url)]
-
     if verbose:
         print 'possible subtitles:'
         for (i, (url)) in enumerate(possible):
             print i, "-", url
-
     choice = 0
     if interact:
         choice = int(raw_input('enter your choice\n'))
@@ -249,6 +257,7 @@ def downSub(episode, options=""):
  
     ##subtitle page
     src = getPage(urlsub, '\n', urlsearch)
+    print "url: ",urlsub, "ref: ",urlsearch
     if "DOCTYPE" in src[0]:
         return downSubTVSubtitles(episode, options)
     

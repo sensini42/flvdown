@@ -1,5 +1,6 @@
 """module for free-tv-video-online.me"""
 import freetvvideoonline_mod
+from urllib2 import unquote
 from . import getPage
 
 def getTvShowUrl(tvshow, season):
@@ -11,6 +12,7 @@ def getTvShowUrl(tvshow, season):
 def getLinks(tvshow, season, episode):
     """return all video links"""
     urltv = getTvShowUrl(tvshow, season)
+    urlbase = 'http://www.free-tv-video-online.me'
     src_urltv = (''.join(getPage(urltv))).split('</a>')
     possible_links = []
     if (src_urltv == -1):
@@ -20,6 +22,7 @@ def getLinks(tvshow, season, episode):
             if ((nameModule in line) and (('Episode '+episode + '<') in line)):
                 href = line.split('href=')
                 link = href[1].split('"')[1]
+                link = urlbase + unquote(link.split('=')[1].split('&')[0])
                 print link
                 possible_links.append([link, \
                     "freetvvideoonline_mod." + nameModule])

@@ -30,11 +30,13 @@ def getFlv(link, verbose):
     """ return the url of the file from divxstage"""
     
     ##episode page
+    print link
     src = getPage(link)
     divxstagelink = ''
     for i in src:
         if ("src='http://embed.divxstage.eu" in i.lower().replace('"',"'")):
-            divxstagelink = i.replace('"',"'").split("'")[3]
+            print i
+            divxstagelink = i.replace('"',"'").split("'")[11]
 
     if not divxstagelink:
         if verbose:      
@@ -46,8 +48,10 @@ def getFlv(link, verbose):
         print '\ndownloading ' + divxstagelink
 
     ##divxstage page
+    print divxstagelink, "--"
     src = getPage(divxstagelink)
     urlfile = ''
+    p='/n'.join(src) 
     for i in src:
         if (';eval(function(w,i,s,e)' in i):
             p=i[:]
@@ -64,7 +68,8 @@ def getFlv(link, verbose):
             urlfile = i.split('"')[1]
         if ('var ll=' in i):
             urlfilekey = i.split('"')[1]
-
+        if ('var fkz' in i):
+            urlfilekey = i.split('"')[1]
 
     if urlfile == '':
         if verbose:      

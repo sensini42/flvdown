@@ -137,6 +137,7 @@ class Downloading(Display):
         self.button_downall = None
         self.button_down = None
         self.button_all = None
+        self.button_mark = None
         self.stackedWidget = None
         self.nextbutton = None
 
@@ -175,6 +176,11 @@ class Downloading(Display):
         self.mainLayout.addWidget(self.button_all, 2, 4)
         self.button_all.clicked.connect(self.allClicked)
 
+        ## button mark
+        self.button_mark = QtGui.QPushButton("Mark as read")
+        self.mainLayout.addWidget(self.button_mark, 2, 5)
+        self.button_mark.clicked.connect(self.markClicked)
+
         ## checkbox interactive
 #        self.ed_checkbox = QtGui.QCheckBox('Interactive download', self)
 #        self.mainLayout.addWidget(self.ed_checkbox, 4, 1, 1, 2)
@@ -197,11 +203,17 @@ class Downloading(Display):
 
         super(Downloading, self).populate()
 
+    def markClicked(self):
+        """ when a button_mark is clicked """
+        episode = self.info[self.episode_cb.currentIndex()]
+        self.nextep.markAsRead(*(episode.ids))
+        self.removeEpisode(episode)
+
     def displayButtons(self, value):
         """ display or not buttons """
         self.button_down.setVisible(value)
         self.button_all.setVisible(value)
-        self.button_downall.setVisible(value)
+        self.button_mark.setVisible(value)
         super(Downloading, self).displayButtons(value)
 
     def nextstacked(self):

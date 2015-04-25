@@ -1,4 +1,4 @@
-""" get movshare links from free-tv-..."""
+""" get nowvideo links from free-tv-..."""
 
 from .. import getPage
 from urllib import unquote
@@ -27,27 +27,27 @@ def wise(w,i,s,e):
 
 
 def getFlv(link, verbose):
-    """ return the url of the file from movshare"""
+    """ return the url of the file from nowvideo"""
     
     ##episode page
     src = getPage(link)
-    movsharelink = ''
+    nowvideolink = ''
     for i in src:
-        if ("src='http://www.movshare.net/embed" in i.lower().replace('"',"'")):
+        if ("src='http://embed.nowvideo.eu/" in i.lower().replace('"',"'")):
             print i.replace('"',"'").split("'")
-            movsharelink = i.replace('"',"'").split("'")[7]
+            nowvideolink = i.replace('"',"'").split("'")[7]
 
-    if not movsharelink:
+    if not nowvideolink:
         if verbose:      
-            print '\033[1;31mmovshare link not found\033[0m (url: ' + \
+            print '\033[1;31mnowvideo link not found\033[0m (url: ' + \
                 link + ')'
         return None, None
 
     if verbose :    
-        print '\ndownloading ' + movsharelink
+        print '\ndownloading ' + nowvideolink
 
-    ##movshare page
-    src = getPage(movsharelink)
+    ##nowvideo page
+    src = getPage(nowvideolink)
     urlfile = ''
     p='/n'.join(src)
     for i in src:
@@ -69,10 +69,10 @@ def getFlv(link, verbose):
         if ('var fkzd=' in i):
             urlfilekey = i.split('"')[1]
 
-
+    print ">>", urldomain, urlfile, urlfilekey
     if urlfile == '':
         if verbose:      
-            print '\033[1;31mfile not found\033[0m (url: ' + movsharelink + ')'
+            print '\033[1;31mfile not found\033[0m (url: ' + nowvideolink + ')'
         return None, None
 
     urlapi = urldomain + '/api/player.api.php?pass=undefined&file=' \
