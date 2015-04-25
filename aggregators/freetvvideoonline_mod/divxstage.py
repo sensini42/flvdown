@@ -50,6 +50,7 @@ def getFlv(link, verbose):
     ##divxstage page
     print divxstagelink, "--"
     src = getPage(divxstagelink)
+    p='/n'.join(src)
     urlfile = ''
     p='/n'.join(src) 
     for i in src:
