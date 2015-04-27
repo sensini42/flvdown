@@ -1,4 +1,4 @@
-""" get royalvids links from free-tv-..."""
+""" get vodlocker links from free-tv-..."""
 from .. import getPage
 import re
 
@@ -29,12 +29,13 @@ def getFlv(link, verbose):
     src = getPage(link)
     divxlink = ''
     for i in src:
-        if ("src='http://www.royalvids.eu/" in i):
-            divxlink = i.split("'")[3]
+        if ("src='http://vodlocker.com/embed" in i.lower().replace('"',"'")):
+            print i
+            divxlink = i.replace('"',"'").split("'")[1]
 
     if not divxlink:
         if verbose:      
-            print '\033[1;31mroyalvids link not found\033[0m (url:' +\
+            print '\033[1;31mvodlocker link not found\033[0m (url:' +\
               link + ')'
         return None, None 
     
@@ -44,33 +45,16 @@ def getFlv(link, verbose):
 
     ##divxden page
     src = getPage(divxlink.replace(" ","%20"))
-    
-    packfunction = ''
+
     for i in src:
-        if ('eval(function(p,a,c,k,e,d)' in i):
-            packfunction = i.split('>')[1]
+        if ('file' in i) and not (('No such file') in i):
+            urlfile = i.split('"')[1]
+            break
 
-    if not packfunction:
-        for i in src:
-            if ('file' in i) and not (('No such file') in i):
-                urlfile = i.split('"')[1]
-                break
-        if urlfile == '':
-            if verbose:			
-                print '\033[1;31mfile not found\033[0m \
-                (url royalvids:' + divxlink + ')'
-            return None, None
+    if urlfile == '':
+        if verbose:			
+            print '\033[1;31mfile not found\033[0m \
+            (url vodlocker:' + divxlink + ')'
+        return None, None
+    else:
         return (urlfile, None)
-    
-    arguments = packfunction[115:-13].split(',')
-    pjs = ','.join(arguments[:-3])[1:-1]
-    ajs = int(arguments[-3])
-    cjs = int(arguments[-2])
-    kjs = arguments[-1][1:-1].split('|')
-    pjs = pjs.translate(None, '\\')
-    res = [i for i in trad(pjs, ajs, cjs, kjs).split(',') \
-         if i.startswith("jwplayer")][0]
-    urlfile = res.split("'")[3]
-    print res, urlfile    
-    return (urlfile, None)
-

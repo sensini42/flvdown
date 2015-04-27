@@ -81,6 +81,10 @@ def getFlv(link, verbose):
     print "urlapi: " + urlapi
     src = getPage(urlapi)
     finalurl = unquote(src[0].split('&')[0].split('=')[1])
+    print finalurl
+    if finalurl == "1":
+        print "not a file"
+        return None, None
     return (finalurl, None)
 
 
