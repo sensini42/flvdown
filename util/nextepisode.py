@@ -29,7 +29,7 @@ class NextEpisode():
         
         # misc
         self.__txheaders = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 5.5; WinNT)'}
-        self.__urlbase = 'http://next-episode.net/'
+        self.__urlbase = 'https://next-episode.net/'
         self.__list = None
         
         # take care of cookies
