@@ -10,6 +10,7 @@ from tempfile import NamedTemporaryFile
 
 import re
 from re import findall
+import requests
 
 from util.episodetv import episodeTV
 from operator import attrgetter
@@ -29,14 +30,9 @@ class NextEpisode():
         
         # misc
         self.__txheaders = {'User-agent': 'Mozilla/4.0 (compatible; MSIE 5.5; WinNT)'}
-        self.__urlbase = 'https://next-episode.net/'
+        self.__urlbase = 'http://next-episode.net/'
         self.__list = None
-        
-        # take care of cookies
-        self.__cookieFile = NamedTemporaryFile()
-        self.__cj = LWPCookieJar()
-        opener = build_opener(HTTPCookieProcessor(self.__cj))
-        install_opener(opener)
+        self.__s = requests.session()
         
         try:
             self.__connect()
@@ -48,16 +44,17 @@ class NextEpisode():
 
     def __getSrcPage(self, url, txdata=None):
         """ return the source page from next-episode """
-        req = Request(self.__urlbase + url, txdata, self.__txheaders)
-        src = urlopen(req).read()
-        self.__cj.save(self.__cookieFile.name)
-        return src
+        src = self.__s.post(self.__urlbase + url, data=txdata, headers=self.__txheaders)
+        return src.text
 
     def __connect(self):
         """ first connexion to next-episode : log in """
         txdata = urlencode({"username": self.__login, "password": self.__pwd})
         try:
-            self.__getSrcPage('userlogin', txdata)
+            a=self.__getSrcPage('userlogin', txdata)
+            for i in a.split('/n'):
+		if 'fffc' in i:
+	            print i	
         except:
             raise Exception('Connect Error')
         
