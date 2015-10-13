@@ -15,7 +15,10 @@ def getLinks(tvshow, season, episode):
     tvshow=tvshow.replace('_','-')
     urltv = getTvShowUrl(tvshow, season,episode)
     urlbase = 'https://www.watchepisode.co/'
-    src_urltv = (''.join(getPage(urltv))).split('</a>')
+    try:
+        src_urltv = (''.join(getPage(urltv))).split('</a>')
+    except:
+        return []
     possible_links = []
     if (src_urltv == -1):
         return possible_links

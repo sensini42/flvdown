@@ -54,7 +54,7 @@ def downSubVid(videoname, options=""):
         if ("v" in options):
             verbose = 1
 
-    query = videoname.split('/')[-1].split('.')[0].split('_')
+    query = '.'.join(videoname.split('/')[-1].split('.')[:-1]).split('_')
     tvshow = '_'.join(query[:-1])
     season = query[-1][:-2]
     episode = query[-1][-2:]
@@ -79,7 +79,7 @@ def downSubTVSubtitles(episode, options=""):
         tvshow = episode.dictTV['tvsubtitles']
     season = episode.strSeason
     numepi = episode.strEpisode
-    subname = episode.getVideoName().split('.')[0] + ".srt"
+    subname = '.'.join(episode.getVideoName().split('.')[:-1]) + ".srt"
     if verbose:
         print tvshow, "season", season, "episode", numepi
 
@@ -217,7 +217,7 @@ def downSub(episode, options=""):
         tvshow = episode.dictTV['addicted']
     season = episode.strSeason
     numepi = episode.strEpisode
-    subname = episode.getVideoName().split('.')[0] + ".srt"
+    subname = '.'.join(episode.getVideoName().split('.')[:-1]) + ".srt"
     if verbose:
         print tvshow, "season", season, "episode", numepi
 
